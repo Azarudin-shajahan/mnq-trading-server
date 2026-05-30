@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 import httpx
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
 
@@ -71,8 +71,34 @@ state = {
     "open_positions": {},
     "trade_log": [],
     "alerted_setups": {},  # {f"{direction}:{stop}": datetime} — dedup same FVG zone within 6h
+    "signal_log": [],     # [{ts, direction, grade, score, entry, stop, ny_ok, status}] — capped 100
 }
 
+
+
+
+# ─────────────────────────────────────────────────────────────
+# S3b — Signal log helper
+# ─────────────────────────────────────────────────────────────
+
+def _log_signal(body: dict, status: str):
+    now_ny = datetime.now(NY)
+    ny_ok = (
+        now_ny.weekday() < 5
+        and (7 * 60 + 30) <= (now_ny.hour * 60 + now_ny.minute) < 17 * 60
+    )
+    state["signal_log"].insert(0, {
+        "ts": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M"),
+        "direction": body.get("direction", ""),
+        "grade": body.get("grade", ""),
+        "score": float(body.get("score", 0)),
+        "entry": float(body.get("entry", 0)),
+        "stop": float(body.get("stop", 0)),
+        "ny_ok": ny_ok,
+        "status": status,
+    })
+    if len(state["signal_log"]) > 100:
+        state["signal_log"] = state["signal_log"][:100]
 
 # ─────────────────────────────────────────────────────────────
 # S4 — Tradovate authentication
@@ -351,6 +377,7 @@ async def receive_webhook(request: Request):
 
     # GATE 4 — Grade A or A+ only executes
     if grade not in ("A+", "A"):
+        _log_signal(body, "grade_B")
         await send_telegram(
             f"📊 <b>JUDGE SIGNAL — {grade}</b>\n"
             f"Score: {score:.1f} | Direction: {direction.upper()}\n"
@@ -362,6 +389,7 @@ async def receive_webhook(request: Request):
 
     # GATE 5 — Automation enabled
     if not AUTOMATION_ENABLED:
+        _log_signal(body, "automation_off")
         await send_telegram(
             f"🟡 <b>A/A+ SIGNAL — AUTOMATION OFF</b>\n"
             f"Grade: {grade} | Score: {score:.1f}\n"
@@ -378,6 +406,7 @@ async def receive_webhook(request: Request):
     # GATE 6 — Drawdown guard
     dd_ok, dd_reason = drawdown_ok()
     if not dd_ok:
+        _log_signal(body, "drawdown_block")
         await send_telegram(f"🚨 DRAWDOWN GUARD — No order\n{dd_reason}")
         return JSONResponse({"status": "drawdown_block", "reason": dd_reason})
 
@@ -387,6 +416,7 @@ async def receive_webhook(request: Request):
     # GATE 8 — Consistency ceiling
     estimated_profit = contracts * abs(t2 - entry) * MNQ_POINT_VALUE
     if not consistency_ok(estimated_profit):
+        _log_signal(body, "consistency_block")
         await send_telegram(
             f"⚠️ CONSISTENCY CEILING — No order\n"
             f"Daily P&L: ${state['daily_pnl']:.2f} | Ceiling: ${CONSISTENCY_CEILING}"
@@ -403,6 +433,7 @@ async def receive_webhook(request: Request):
             "direction": direction,
         }
         state["daily_trades"] += 1
+        _log_signal(body, "order_placed")
         await send_telegram(
             f"✅ <b>ORDER PLACED — Grade {grade}</b>\n"
             f"Score: {score:.1f} | Direction: {direction.upper()}\n"
@@ -607,6 +638,95 @@ async def status():
         "consistency_ceiling": CONSISTENCY_CEILING,
         "mll_floor": state["mll_floor"],
     }
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard():
+    mode_color = "#22c55e" if AUTOMATION_ENABLED else "#eab308"
+    mode_text = "LIVE — AUTOMATION ON" if AUTOMATION_ENABLED else "PAPER MODE — AUTOMATION OFF"
+    now_et = datetime.now(NY).strftime("%Y-%m-%d %H:%M ET")
+
+    rows = ""
+    for s in state["signal_log"]:
+        stat = s["status"]
+        if stat == "order_placed":
+            sc = "#22c55e"
+        elif stat == "automation_off":
+            sc = "#eab308"
+        elif stat in ("drawdown_block", "consistency_block", "order_failed"):
+            sc = "#ef4444"
+        else:
+            sc = "#94a3b8"
+        ts = s["ts"]
+        direction = s["direction"].upper()
+        grade = s["grade"]
+        score_val = s["score"]
+        entry_val = s["entry"]
+        ny_color = "#22c55e" if s["ny_ok"] else "#ef4444"
+        ny_text = "YES" if s["ny_ok"] else "NO"
+        rows += (
+            f'<tr>'
+            f'<td>{ts}</td>'
+            f'<td>{direction}</td>'
+            f'<td>{grade}</td>'
+            f'<td>{score_val:.1f}</td>'
+            f'<td>{entry_val}</td>'
+            f'<td><span style="color:{ny_color}">{ny_text}</span></td>'
+            f'<td style="color:{sc}">{stat}</td>'
+            f'</tr>'
+        )
+
+    if not rows:
+        rows = '<tr><td colspan="7" style="text-align:center;color:#64748b;padding:24px">No signals yet — waiting for JUDGE bar close alerts</td></tr>'
+
+    total = len(state["signal_log"])
+    a_grade = sum(1 for s in state["signal_log"] if s["grade"] in ("A", "A+"))
+    executed = sum(1 for s in state["signal_log"] if s["status"] == "order_placed")
+
+    return HTMLResponse(f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="30">
+<title>JUDGE Dashboard</title>
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e2e8f0;padding:16px;font-size:14px}}
+.banner{{background:{mode_color}22;border-left:4px solid {mode_color};padding:12px 16px;border-radius:6px;margin-bottom:16px}}
+.banner b{{color:{mode_color};font-size:13px;display:block;margin-bottom:4px;letter-spacing:.5px}}
+.banner span{{color:#94a3b8;font-size:12px}}
+h2{{font-size:15px;margin-bottom:4px;color:#f1f5f9;font-weight:600}}
+.sub{{color:#64748b;font-size:12px;margin-bottom:10px}}
+.stats{{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}}
+.stat{{background:#1e2330;border-radius:8px;padding:12px;text-align:center}}
+.stat-val{{font-size:24px;font-weight:700;color:#f1f5f9}}
+.stat-lbl{{font-size:11px;color:#64748b;margin-top:2px}}
+.card{{background:#1e2330;border-radius:8px;overflow:hidden;margin-bottom:16px;overflow-x:auto}}
+table{{width:100%;border-collapse:collapse;font-size:12px;min-width:460px}}
+th{{background:#252d3d;color:#94a3b8;font-weight:500;padding:8px 10px;text-align:left;white-space:nowrap}}
+td{{padding:8px 10px;border-top:1px solid #1a2236;vertical-align:middle;white-space:nowrap}}
+.footer{{color:#475569;font-size:11px;text-align:center;padding-top:8px}}
+</style>
+</head>
+<body>
+<div class="banner"><b>{mode_text}</b><span>entry_min=4.5 · MNQ1! 5m · TV alert 4791544276 · NY session only</span></div>
+<div class="stats">
+  <div class="stat"><div class="stat-val">{total}</div><div class="stat-lbl">Total</div></div>
+  <div class="stat"><div class="stat-val" style="color:#a78bfa">{a_grade}</div><div class="stat-lbl">A / A+</div></div>
+  <div class="stat"><div class="stat-val" style="color:#22c55e">{executed}</div><div class="stat-lbl">Executed</div></div>
+</div>
+<h2>Signal Log</h2>
+<div class="sub">Most recent first &middot; auto-refresh 30s</div>
+<div class="card">
+  <table>
+    <thead><tr><th>Time (UTC)</th><th>Dir</th><th>Grade</th><th>Score</th><th>Entry</th><th>NY?</th><th>Status</th></tr></thead>
+    <tbody>{rows}</tbody>
+  </table>
+</div>
+<div class="footer">Last loaded: {now_et}</div>
+</body>
+</html>""")
 
 
 @app.post("/test_telegram")
