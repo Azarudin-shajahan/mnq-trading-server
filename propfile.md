@@ -13,9 +13,9 @@
 | Eval steps | 1 (Combine) | 1 | 1 (most plans) | 1 ("Test") | 1, or **instant** (Lightning) |
 | $50K eval price | $49/mo (+$149 act) **or** $95/mo ($0 act) | ~$150–167/mo (heavy promos) | ~$80–165/mo (varies by plan) | ~$150/mo (flash sales) | one-time (Lightning $50K ~sale) |
 | $50K profit target | $3,000 | $3,000 | $3,000 (most plans) | $3,000 | varies by plan |
-| $50K drawdown | $2,000 **EOD trailing** | $2,500 **intraday trailing** (Tradovate trails forever; Rithmic locks at safety net) | $2,000 **EOD trailing** | $2,000 **intraday trailing** (PRO); **EOD** on PRO+ live | **EOD** |
+| $50K drawdown | $2,000 **EOD trailing** | **$2,000 EOD** (EOD acct) *or* $2,500 **intraday** (legacy/Tradovate) — **pick the EOD account** | $2,000 **EOD trailing** | $2,000 **intraday trailing** (PRO); **EOD** on PRO+ live | **EOD** |
 | Daily loss limit | Optional | **None** | **None** (most) | None | None |
-| Consistency (eval) | Best day ≤ 50% of profit | **None** | Best day ≤ 50% of target ($1,500) | None on Test | Growth: none / Select: 40% / Lightning: 20% |
+| Consistency (eval) | Best day ≤ 50% of profit | **None** (EOD acct: *Not Applied*) | Best day ≤ 50% of target ($1,500) | None on Test | Growth: none / Select: 40% / Lightning: 20% |
 | Consistency (funded) | Payout-path option (40%) | Payout rules (negative-day) | Plan-dependent (40% Starter) | **None** | **None once funded** |
 | Min trading days | Winning-day req (no hard min) | **0** | Low (Rapid: 2-day pass) | **5** | Growth: 1 / Select: 3 |
 | Profit split | 90% | 100% first $25K, then 90% | 80% (up to 90% Rapid) | 80% (PRO) / 90% (PRO+) | 90% (after $15K) |
@@ -36,7 +36,10 @@ This profile was cross-checked against the firms' official help-center pages ing
 - **TopStep — Daily Loss Limit amounts:** optional DLL = **$1,000 / $2,000 / $3,000** for $50K/$100K/$150K (a "Responsible Trading Discount" at checkout).
 - **TopStep — MLL $ amounts ($2,000/$3,000/$4,500):** from web search, **NOT confirmed** by the ingested official pages (the Combine-parameters page lists only contract sizes). Verify on TopStep before relying.
 - **Tradeify — split:** keep **100% of first $15,000, then 90%** (I wrote "90% after $15K" — same threshold, but 100% applies below it).
-- **Apex — UNVERIFIED:** every Apex official page is Cloudflare-walled (blocked WebFetch, NotebookLM ingest, *and* a real-browser load timed out). Apex figures here are from web search of official-domain results + well-established public parameters — **manually verify on apextraderfunding.com.**
+- **Apex — NOW VERIFIED (WebBridge, 2026-06-01):** the Cloudflare wall was bypassed via the logged-in real browser. **Key correction: Apex offers a distinct EOD account family** (EOD Evaluation + EOD Performance), not just the intraday/legacy accounts the earlier synthesis assumed. Verified from apextraderfunding.com help-center:
+  - **EOD Evaluation (50K):** target **$3,000**, Max Drawdown **$2,000 EOD** (calc'd once daily at close, then fixed/enforced next session), DLL **$1,000**, Max contracts **6**, 30-day access, **Consistency: Not Applied**, Scaling: Not Applied, **0 min trading days** (can pass in 1 day), 7 days to activate PA.
+  - **EOD Performance / funded (50K):** Max Drawdown **$2,000 EOD** (threshold fixed at prior close, unrealized PnL checked against it — does **not** trail intraday), Max contracts **4**, tier-based scaling + DLL, **100% payout split** "upon meeting payout eligibility requirements."
+  - **Still to confirm:** the specific payout-eligibility consistency threshold (Apex's historical "30%-largest-day" / safety-net rule) is no longer published on the EOD rules/PA pages — confirm in-dashboard at payout time. This matters because our models are NQ-concentrated (73–77%).
 
 **Verdict:** drawdown-TYPE and consistency are the error-prone fields (they shift by stage/account-tier) — that's where my synthesis missed. The rest of the table held up. The verified facts are encoded in the installed **`propfirm-selector`** skill.
 
@@ -56,8 +59,14 @@ This profile was cross-checked against the firms' official help-center pages ing
 - **Rules:** CME futures only; flat by session close; news allowed.
 
 ## 2. Apex Trader Funding — `apextraderfunding.com`
-**Positioning:** highest volume / most account sizes; aggressive promos; intraday trailing is the catch.
+**Positioning:** highest volume / most account sizes; aggressive promos. **Offers BOTH an EOD account family and an intraday/legacy family — choose EOD for hold-through strategies.**
 
+### EOD account family (VERIFIED via WebBridge 2026-06-01 — our recommended Apex path)
+- **EOD Evaluation (50K):** target **$3,000** · Max Drawdown **$2,000 EOD** (calc'd once daily at close, fixed & enforced next session — no intraday trail) · DLL **$1,000** · Max contracts **6** · 30-day access · **Consistency: Not Applied** · Scaling: Not Applied · **0 min trading days** · 7 days to activate PA after passing.
+- **EOD Performance / funded (50K):** Max Drawdown **$2,000 EOD** (threshold fixed at prior close; unrealized PnL checked against it, does **not** trail intraday) · Max contracts **4** · tier-based scaling + DLL · **100% payout split** upon meeting payout-eligibility requirements.
+- **Why this matters for us:** EOD drawdown + **no consistency rule on the eval** = structurally ideal for both the V-shape core and (uniquely) the lossy/NQ-concentrated Asia 1H FVG model. ⚠️ Confirm the payout-eligibility consistency threshold in-dashboard (the historical 30%-largest-day rule isn't published on the current rules pages).
+
+### Intraday / legacy family (the older default — avoid for hold-through entries)
 - **Account sizes & contracts:** 25K (4) · 50K (10) · 75K (12) · 100K (14) · 150K (17) · 250K (27) · 300K static (35). *(full-size minis)*
 - **Profit targets:** 25K **$1,500** · 50K **$3,000** · 75K **$4,250** · 100K **$6,000** · 150K **$9,000** · 250K **$15,000** · 300K **$20,000**.
 - **Trailing drawdown:** 25K **$1,500** · 50K **$2,500** · 75K **$2,750** · 100K **$3,000** · 150K **$5,000** · 250K **$6,500** · 300K **$7,500 (static)**. **Intraday trailing** — on **Tradovate it trails forever**; on **Rithmic it locks** at the "safety net" (`balance + drawdown + $100`, e.g. $50K → $52,600).
@@ -111,13 +120,13 @@ Our two locked configs drive the firm choice:
 **Two distinct requirements → possibly two different firms:**
 
 ### A. The evaluation/combine — what matters: drawdown TYPE + cost + consistency
-- **EOD (end-of-day) trailing >> intraday trailing** for us. Our V-shape entries sometimes sit through adverse excursion before resolving; an **intraday** trailing stop (Apex on Tradovate, TPT PRO) can clip a trade that the EOD model would survive. **TopStep, MFFU, and Tradeify use EOD** drawdown → structurally friendlier to the strategy.
+- **EOD (end-of-day) trailing >> intraday trailing** for us. Our V-shape entries sometimes sit through adverse excursion before resolving; an **intraday** trailing stop (Apex's *legacy/Tradovate* accounts, TPT PRO) can clip a trade that the EOD model would survive. **TopStep, MFFU (eval), Tradeify, and Apex's EOD account family all use EOD** drawdown → structurally friendlier. (Apex EOD verified 2026-06-01 — it is NOT intraday-only.)
 - **Consistency rule** is the real combine hazard, not DD (we're $0-DD). 62T PERFECT's P&L concentration (NQ alone ≈ 77% of profit) risks tripping a **best-day-≤50%** rule. **Apex (no consistency) and Tradeify Growth (no eval consistency)** sidestep this entirely; **TopStep/MFFU 50%** rules require spreading wins (the documented "big early win locks consistency for months" gotcha).
 - **Cost:** Apex (promo ~$17–147) and MFFU Starter (~$80–97) are cheapest; TopStep $49/mo Standard is competitive but adds $149 on pass.
 
 ### B. The funded stage — what matters: NO consistency + loss tolerance + payout speed
 - Our funded configs **lose trades**, so a funded stage with a **consistency rule is disqualifying** for steady withdrawals.
-- **Best funded fits:** **TopStep** (no consistency in funded/XFA per memory), **Take Profit Trader** (no consistency, **daily day-1 payouts, no windows**), and **Tradeify** (no consistency once funded, 1-hour payouts). **Apex** funded adds negative-day/"30%" rules that fight a lossy strategy.
+- **Best funded fits:** **TopStep** (no consistency in funded/XFA per memory), **Take Profit Trader** (no consistency, **daily day-1 payouts, no windows**), **Tradeify** (no consistency once funded, 1-hour payouts), and **Apex EOD PA** (EOD drawdown, no account-level consistency shown, **100% split**). ⚠️ Apex's *payout-eligibility* consistency threshold (historical 30%-largest-day rule) is unconfirmed on current pages — verify before relying for the NQ-concentrated models.
 - **Payout velocity:** TPT and Tradeify/MFFU-Rapid (daily/1-hour) > Apex (8-day gaps) for cash-flow.
 
 ### Ranking for this strategy (combine → funded)
@@ -125,15 +134,15 @@ Our two locked configs drive the firm choice:
 2. **MyFundedFutures** — EOD DD, cheap, daily payouts (Rapid), and **we already hold a Builder 50K**; consistency 50% on eval is the watch-item.
 3. **Take Profit Trader** — unbeatable payout policy + EOD on PRO+; **5-day min + intraday-trailing eval** are the cons.
 4. **Tradeify** — all-EOD + instant-funding + 1-hour payouts; newest/least track record → higher counterparty risk.
-5. **Apex** — cheapest + most sizes + no eval consistency, **but intraday trailing (Tradovate) and funded negative-day rules** fight our hold-through V-shape entries.
+5. **Apex** — cheapest + most sizes + **no eval consistency + a verified EOD account family (EOD DD, 100% funded split)**. Re-rated UP after WebBridge verification (2026-06-01): the old "intraday-only → last" placement was wrong. Using the **EOD account**, Apex is a legitimate fit for *both* models; the only open risk is the unconfirmed payout-eligibility consistency rule. (Still #5 mainly on track-record/payout-cadence, not structure.)
 
-**Net recommendation:** keep **TopStep** for the combine (decision already pending: Standard $49+$149 vs No-Activation $95/mo) and lean on **EOD-drawdown firms (TopStep/MFFU/Tradeify)** generally; avoid intraday-trailing evals (Apex-Tradovate, TPT PRO) for the V-shape model. Re-confirm live pricing/promos before purchase.
+**Net recommendation:** keep **TopStep** for the combine (decision pending: Standard $49+$149 vs No-Activation $95/mo) and lean on **EOD-drawdown firms** generally — which now explicitly **includes Apex's EOD account family** (TopStep / MFFU-eval / Tradeify / **Apex-EOD**). Avoid intraday-trailing accounts (Apex *legacy/Tradovate*, TPT PRO, MFFU *funded*) for hold-through entries — especially the positional **Asia 1H FVG** model, which is **only safe on an EOD funded account**. Re-confirm live pricing/promos before purchase.
 
 ---
 
 ## Sources (official, pulled 2026-05-31)
 - TopStep: [Trading Combine Parameters](https://help.topstep.com/en/articles/8284197-trading-combine-parameters), [Pricing](https://help.topstep.com/en/articles/9208217-topstep-pricing), [No Activation Fee](https://www.topstep.com/no-activation-fee), [Consistency Target](https://help.topstep.com/en/articles/8284208-what-is-the-consistency-target), [Express Funded Parameters](https://help.topstep.com/en/articles/8284215-express-funded-account-parameters)
-- Apex: [Intraday Trailing Drawdown Evaluations](https://apextraderfunding.com/help-center/evaluation-accounts-ea/intraday-trailing-drawdown-evaluations/), [Legacy Evaluation Rules](https://support.apextraderfunding.com/hc/en-us/articles/31519769997083-Legacy-Evaluation-Rules), [Trailing Threshold (Master Course)](https://support.apextraderfunding.com/hc/en-us/articles/4408610260507-How-Does-the-Trailing-Threshold-Work-Master-Course), [Legacy PA Payout Parameters](https://support.apextraderfunding.com/hc/en-us/articles/40507212951451-Legacy-PA-Payout-Parameters)
+- Apex (EOD family verified via WebBridge 2026-06-01): [All Apex Trading Account Rules](https://apextraderfunding.com/help-center/legacy-helpful-items/all-apex-trading-account-rules/), [EOD Evaluation Rules](https://apextraderfunding.com/help-center/eod-trailing-drawdown-accounts/eod-evaluations), [EOD Performance (PA) Rules](https://apextraderfunding.com/help-center/eod-trailing-drawdown-accounts/eod-performance-accounts-pa), [Intraday Evaluations](https://apextraderfunding.com/help-center/intraday-trailing-drawdown-accounts/intraday-trailing-drawdown-evaluations), [Payout Method Information](https://apextraderfunding.com/help-center/additional-helpful-items/payout-method-information/)
 - MyFundedFutures: [Understanding Evaluation Parameters](https://help.myfundedfutures.com/en/articles/8528339-understanding-evaluation-parameters-at-myfunded-futures), [Builder Plan](https://help.myfundedfutures.com/en/articles/14290805-builder-plan-a-comprehensive-guide), [Rapid Plan](https://myfundedfutures.com/plans/rapid), [Flex Plan](https://myfundedfutures.com/plans/flex), [Payout Policy](https://help.myfundedfutures.com/en/articles/13745661-payout-policy-overview-best-and-fastest-prop-firm-payouts)
 - Take Profit Trader: [FAQs](https://try.takeprofittrader.com/TPT-FAQs-nf50-0526), [Playbook](https://takeprofittrader.com/playbook), [Terms](https://takeprofittrader.com/terms)
 - Tradeify: [tradeify.co](https://tradeify.co/)

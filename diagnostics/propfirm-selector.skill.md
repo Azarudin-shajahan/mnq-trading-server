@@ -51,9 +51,15 @@ $150+.
 (Standard path) or $6,000 (Consistency path).
 
 ### Apex Trader Funding
-*   **Official pages for Apex Trader Funding were Cloudflare-blocked and could 
-not be verified here. Figures must be checked manually on 
-apextraderfunding.com.**
+*Verified via WebBridge (logged-in browser) 2026-06-01 — the Cloudflare wall was bypassed. **Apex offers TWO families: an EOD account family AND an intraday/legacy family.** For hold-through strategies, choose the EOD account.*
+*   **$50K Target:** $3,000 (both families).
+*   **Drawdown Amount & Type:** **EOD family = $2,000 EOD** (threshold calc'd once daily at close, then fixed — does NOT trail intraday). Legacy/Tradovate family = ~$2,500 **intraday trailing**. **Pick the EOD account.**
+*   **Daily Loss Limit:** $1,000 (EOD Eval, 50K); tier-based DLL on the funded PA.
+*   **Eval Consistency %:** **EOD Evaluation = Not Applied** (no consistency rule). This is what makes Apex EOD uniquely viable for lossy / profit-concentrated strategies.
+*   **Min Days:** **0** — may pass in a single day; 30-day access; 7 days to activate the PA after passing.
+*   **Max Contracts (50K):** 6 (EOD Eval) / 4 (EOD PA funded).
+*   **Split:** **100%** payout split on the funded EOD PA (upon meeting payout-eligibility requirements).
+*   **Payout — OPEN ITEM:** the specific payout-eligibility consistency threshold (Apex's historical "30%-largest-day" / safety-net rule) is no longer published on the EOD rules/PA pages — **confirm in-dashboard at payout time** before relying on it for an NQ-concentrated account.
 
 ### MyFundedFutures (MFFU)
 *   **$50K Target:** $3,000 (Rapid Plan).
