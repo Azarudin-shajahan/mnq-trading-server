@@ -15,6 +15,33 @@ liquidity.
 *   Timing intraday continuations and reversals following 8:30 AM or 9:30 AM 
 macroeconomic drivers.
 
+## Stage 0 — Top-Down Bias (start here, before any entry work)
+GxT does NOT start at the entry. He builds bias top-down, Weekly -> Daily ->
+intraday. Do this first:
+*   **Map the Universal Sequence on Weekly then Daily:** classify the current
+market cycle as one of the three models below (Internal->External,
+External->Internal, or Order Pairing Ranges) on the HTF before dropping down.
+The intraday setup must agree with this HTF narrative.
+*   **Read the previous Weekly/Daily candle profile:** if the prior candle was an
+expansion candle, anticipate a new phase (retracement or reversal) early in the
+new week/day.
+*   **Anticipate the open (fluid motion):** form the daily bias by predicting how
+the candle opens. A bullish expansion day opens and immediately forms its low
+with a small wick ("fluid motion"), leaving an unestablished high as the target.
+
+## Stage 0.5 — Liquidity Mapping (where the trade is going)
+Before selecting a level, classify all liquidity so you know what to target vs
+what to reverse from:
+*   **Relevant swings vs Failure swings:** *Relevant swings* are spaced-out,
+significant structural extremes -> these are levels to REVERSE FROM. *Failure
+swings* are clusters of close-proximity highs/lows -> these are the
+"low-resistance" Draw on Liquidity (DOL) to TARGET.
+*   **The trade runs from a relevant swing into a failure-swing DOL.** The
+failure-swing cluster is the objective; the relevant swing (often holding a Fair
+Value Gap) is where you enter the reversal.
+*   Only after the DOL and the reversal level are mapped do you apply gap
+selection (below) and the SMT filter.
+
 ## The Universal Sequence
 The GxT Universal Sequence uses three rigid models to map price moving 
 mechanically from Point A to Point B:
