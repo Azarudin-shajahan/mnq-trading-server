@@ -130,3 +130,13 @@ current range). These are low-probability "fake" SMTs that will likely break.
 *   **DO NOT** trade a 10:00 AM reversal unless the 8:30/9:30 AM drivers hit a 
 key level late and failed to reverse. 10:00 AM is structurally meant for 
 continuation or trading counter-trend back into a capped daily range.
+
+---
+*Provenance & verification: generated from the GxT NotebookLM notebook
+(`1a62aa84-ba79-495b-9aa6-eefb27cef761`) and fact-checked against it on
+2026-05-31 - all Stage 0 / 0.5 / Universal Sequence / SMT / entry / invalidation
+claims returned CONFIRMED (7/7 on the top-down + liquidity-mapping stages), each
+backed by a direct source quote. Instrument weighting (GC as a primary) and the
+C2/C3 + order-block entry vocabulary were cross-checked against GxT's live X
+executions (`~/mnq_trading/data/gxt_execution_posts.csv`). Covers all 7 of GxT's
+trade-discovery stages, top-down bias through progressive invalidation.*
