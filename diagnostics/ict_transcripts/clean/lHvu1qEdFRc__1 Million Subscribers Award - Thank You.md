@@ -1,0 +1,51 @@
+---
+title: "1 Million Subscribers Award - Thank You"
+video_id: lHvu1qEdFRc
+url: https://www.youtube.com/watch?v=lHvu1qEdFRc
+source: InnerCircleTrader
+---
+
+# 1 Million Subscribers Award - Thank You
+
+oo what could that
+be oh would you look at
+that that like
+something
+SC what you doing
+here
+you really put some tape on this don't
+they there we
+go
+says you did it one mission one channel
+and one more thing 1 million subscribers
+congratulations you may have started
+with just a few viewers but your voice
+passion and
+creativity have now touched the lives of
+people all around the world and the
+community you've built is
+enriched by the stories you've
+shared as you bring people together to
+honor this Milestone we're proud to
+present you with the gold Creator award
+we hope this special recognition will we
+mind you how much
+you me so
+many every day you are redefining how
+content is
+created
+and watch one voice and one video at a
+time it's a privilege to be part of your
+journey we can't wait to see what you do
+next yours
+sincerely thank you
+Neil
+that that right there is a
+Bonafide 1 million
+verification so I guess it's not
+Bots
+I guess it's not fake subscribers so
+thank you so very much for that folks uh
+you know what that means uh we're off to
+the Publishers for book
+one

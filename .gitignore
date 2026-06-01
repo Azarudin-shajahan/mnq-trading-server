@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 .DS_Store
 venv/
+# ICT engine factory: raw yt-dlp captions are bulky (1028 files); commit only cleaned markdown
+diagnostics/ict_transcripts/*.vtt
+diagnostics/ict_transcripts/_pull.log
+diagnostics/ict_transcripts/_embed.log
