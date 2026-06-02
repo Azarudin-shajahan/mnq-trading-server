@@ -45,7 +45,7 @@ Silver Bullet · Unicorn · Venom · Gauntlet · Sons model · NWOG/NDOG · 1st 
 
 ## Proposed build order (prioritised, opinionated)
 **Tier 1 — build first (explicit algorithm + data + low overlap):**
-1. **Charter Model 9 — One Shot One Kill** (indices) — single daily high-prob setup; clean to falsify.
+1. **Charter Model 9 — One Shot One Kill** (indices) — single daily high-prob setup; clean to falsify. ✅ **VALIDATED (Session 36)**: OTE entry on NQ = PF 1.34 / WR 42% / +650pt, robust 2020-23, regime-soft 2024-25. FVG-CE entry falsified. First validated non-GxT factory engine. See [[ICT_Model9_OneShotOneKill_Spec]] BACKTEST RESULT.
 2. **Charter Model 5 — Intraday Volatility Expansion** (indices) — explicit expansion trigger.
 3. **Charter Model 6/7 — Universal Model** (indices) — ICT's "universal" claim, directly testable.
 

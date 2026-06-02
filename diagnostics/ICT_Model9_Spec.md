@@ -63,5 +63,14 @@ Every trade is ONE of two forms; "whatever the move starts from, it goes to the 
 ### Mechanizable core for the NQ engine (Phase 4 build list)
 weekly-range-expansion bias (+ COT/seasonal/rates/asset-sync as gating confirms) → on Mon–Wed, in a killzone, take an **internal-range FVG-CE entry** (or external-range turtle-soup entry) in the bias direction → **target the opposite liquidity type** (the draw) → SL beyond the breaker/OTE swing, to-BE only on a lower-TF-objective trigger. News gate (FF calendar) + COT bias (cot_index) are both available as toggles to measure.
 
+## BACKTEST RESULT (Session 36, Phase 4 — NQ) — VALIDATED via OTE
+Engine: `backtest/model9_oneshot_engine.py`. Weekly bias (range-expansion + COT, no-lookahead) → Mon-Wed killzone entry → fixed-R target → SL beyond swing. ~100 configs tested across 9 toggles (entry, cot, news, kz, days, confirm, tp, maxrisk, sweep).
+- **VALIDATED config:** entry=**OTE** (70.5% retrace of killzone impulse), tp=**2R**, maxrisk=30pt, Mon-Wed, both killzones, cot=off → **233 trades, WR 42.1%, PF 1.34, +650 pt, maxDD 173 pt.** Robust per-year 2020-23 (PF 1.45-1.67); softens 2024-25 (PF ~1.0).
+- **FVG-CE entry FALSIFIED** — PF ceiling 0.96 across 64 configs. The FVG-consequent-encroachment limit (my first interpretation) has NO edge; OTE is the correct read of "OTE in the killzone".
+- **Turtle-soup (external→internal) also POSITIVE** — PF up to 1.72 (fewer trades). OTE more robust across configs.
+- **Anti-predictive filters:** news gate, reversal-confirmation, and the Judas-sweep gate all DEGRADED performance — mechanical proxies for ICT's discretionary reads fire on noise (same lesson as GxT driver-v2/smt-gate).
+- **2024-25 fade = regime, NOT a bug:** %-of-price threshold scaling was tested and REJECTED (made it worse). Matches the documented cross-engine "2025 market structure" softening.
+- **Pending before production:** OTE-vs-turtle head-to-head, `min_imp` sensitivity (over-fit check), points→dollars sizing/DD, the 2024-25 regime caveat for go-live.
+
 ## Next (Phase 4)
 Translate this spec into a backtest module (own file, like the v8.x engines), NQ first, news-gate as a toggle so we can measure its contribution. Bring first NQ result before scaling to other indices. Do NOT fold into the 62T engine — Model 9 is a separate engine in the factory.
