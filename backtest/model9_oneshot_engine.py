@@ -55,7 +55,14 @@ def _load(path, inst="nq"):
 def load_daily(inst="nq"):
     df = pd.read_csv(DAILY, parse_dates=["timestamp"])
     cols = {f"{inst}_{k}": k for k in ("open", "high", "low", "close")}
-    return df[["timestamp", *cols]].rename(columns=cols).dropna().set_index("timestamp").sort_index()
+    if all(c in df.columns for c in cols):
+        return df[["timestamp", *cols]].rename(columns=cols).dropna().set_index("timestamp").sort_index()
+    # fallback: instrument absent from the 1d file (e.g. RTY) -> resample from 4h
+    h4 = _load(H4, inst)
+    d = h4.groupby("date").agg(open=("open", "first"), high=("high", "max"),
+                               low=("low", "min"), close=("close", "last"))
+    d.index.name = "timestamp"
+    return d.sort_index()
 
 
 def resample_weekly(daily):
@@ -175,8 +182,10 @@ def find_alt_entry(cfg, bias, mins, hi, lo, cl, pdl, pdh, min_imp=20.0):
     ote: 70.5% retrace of the killzone impulse leg (displacement then sweet-spot).
     turtle: external->internal — failed sweep of prior-day pool, reclaim, enter.
     NOTE: fixed-point thresholds (min_imp, SL_BUF) validated better than %-of-price
-    scaling (see 2024-25 fade investigation: scaling widened risk -> worse)."""
+    scaling WITHIN an instrument (see 2024-25 fade investigation). ACROSS instruments
+    they are scaled once to each instrument's price level (min_imp, buf via cfg)."""
     n = len(mins)
+    buf = cfg.get("sl_buf", SL_BUF)
     if cfg["entry"] == "ote":
         if bias == "bull":
             lo_px = None; hi_px = None; hi_i = -1
@@ -190,7 +199,7 @@ def find_alt_entry(cfg, bias, mins, hi, lo, cl, pdl, pdh, min_imp=20.0):
                 if hi_px is not None and hi_px - lo_px >= min_imp and k > hi_i:
                     ote = hi_px - 0.705 * (hi_px - lo_px)
                     if lo[k] <= ote:
-                        return k, ote, lo_px - SL_BUF
+                        return k, ote, lo_px - buf
         else:
             hi_px = None; lo_px = None; lo_i = -1
             for k in range(n):
@@ -203,7 +212,7 @@ def find_alt_entry(cfg, bias, mins, hi, lo, cl, pdl, pdh, min_imp=20.0):
                 if lo_px is not None and hi_px - lo_px >= min_imp and k > lo_i:
                     ote = lo_px + 0.705 * (hi_px - lo_px)
                     if hi[k] >= ote:
-                        return k, ote, hi_px + SL_BUF
+                        return k, ote, hi_px + buf
         return None
     if cfg["entry"] == "turtle":
         if pdl is None or pdh is None:
@@ -216,7 +225,7 @@ def find_alt_entry(cfg, bias, mins, hi, lo, cl, pdl, pdh, min_imp=20.0):
                 if lo[k] < pdl:
                     swept = True; sweep_lo = lo[k] if sweep_lo is None else min(sweep_lo, lo[k])
                 if swept and cl[k] > pdl:                 # reclaim
-                    return k, cl[k], sweep_lo - SL_BUF
+                    return k, cl[k], sweep_lo - buf
         else:
             swept = False; sweep_hi = None
             for k in range(n):
@@ -225,7 +234,7 @@ def find_alt_entry(cfg, bias, mins, hi, lo, cl, pdl, pdh, min_imp=20.0):
                 if hi[k] > pdh:
                     swept = True; sweep_hi = hi[k] if sweep_hi is None else max(sweep_hi, hi[k])
                 if swept and cl[k] < pdh:
-                    return k, cl[k], sweep_hi + SL_BUF
+                    return k, cl[k], sweep_hi + buf
         return None
     return None
 
@@ -374,8 +383,8 @@ def load_all():
     return df5m, fvgs, news
 
 
-def make_data(cot_mode, df5m, fvgs, news):
-    weekly, bias_map = build_weekly_bias(cot_mode)
+def make_data(cot_mode, df5m, fvgs, news, inst="nq"):
+    weekly, bias_map = build_weekly_bias(cot_mode, inst)
     return (weekly, bias_map, df5m, fvgs, news)
 
 
@@ -414,7 +423,38 @@ def main():
     ap.add_argument("--min-imp", dest="min_imp", type=float, default=20.0)
     ap.add_argument("--validate", action="store_true")
     ap.add_argument("--combo", action="store_true")
+    ap.add_argument("--multi", action="store_true")
     args = ap.parse_args()
+
+    if args.multi:
+        # COMBINED engine across indices. Thresholds (min_imp/buf/maxrisk) scaled to
+        # each instrument's price level (NQ-validated ratios x median-price ratio).
+        news = load_news_days()
+        insts = ["nq", "es", "ym", "rty"]
+        PT = {"nq": 20.0, "es": 50.0, "ym": 5.0, "rty": 50.0}
+        refs = {i: float(load_daily(i)["close"].median()) for i in insts}
+        nqmed = refs["nq"]
+        print(f"news High-USD days: {len(news)} | median px: "
+              + " ".join(f"{i}={refs[i]:.0f}" for i in insts))
+        print("\n=== MODEL 9 COMBINED (OTE r2 + Turtle r3) ACROSS INDICES ===")
+        print(f"{'inst':4} {'minImp':6} | {'n':>3} {'wr':>4} {'pf':>5} {'pnl(pt)':>8} {'maxDD':>7} {'$(1x)':>9}")
+        print("-" * 62)
+        for inst in insts:
+            scale = refs[inst] / nqmed
+            base = dict(DEFAULTS, maxrisk=30 * scale, min_imp=20 * scale, sl_buf=2 * scale)
+            df5 = _load(M5, inst); fv = detect_4h_fvgs(_load(H4, inst))
+            data = make_data("off", df5, fv, news, inst)
+            o = backtest(dict(base, entry="ote", tp="r2"), data)
+            t = backtest(dict(base, entry="turtle", tp="r3"), data)
+            c = pd.concat([o, t]).sort_values("date").reset_index(drop=True)
+            s = stats(c)
+            eq = c.pnl.cumsum() if len(c) else pd.Series([0])
+            dd = (eq - eq.cummax()).min()
+            print(f"{inst:4} {20*scale:6.1f} | {s['n']:>3} {s['wr']:>4} {s['pf']:>5} "
+                  f"{s['pnl']:>8.0f} {dd:>7.0f} {s['pnl']*PT[inst]:>9,.0f}")
+            py = peryear(c)
+            print("     yr pf: " + " ".join(f"{y}:{v[3]}" for y, v in py.items()))
+        return
 
     print("loading data...", flush=True)
     df5m, fvgs, news = load_all()
