@@ -70,7 +70,8 @@ Engine: `backtest/model9_oneshot_engine.py`. Weekly bias (range-expansion + COT,
 - **Turtle-soup (external→internal) also POSITIVE** — PF up to 1.72 (fewer trades). OTE more robust across configs.
 - **Anti-predictive filters:** news gate, reversal-confirmation, and the Judas-sweep gate all DEGRADED performance — mechanical proxies for ICT's discretionary reads fire on noise (same lesson as GxT driver-v2/smt-gate).
 - **2024-25 fade = regime, NOT a bug:** %-of-price threshold scaling was tested and REJECTED (made it worse). Matches the documented cross-engine "2025 market structure" softening.
-- **Pending before production:** OTE-vs-turtle head-to-head, `min_imp` sensitivity (over-fit check), points→dollars sizing/DD, the 2024-25 regime caveat for go-live.
+- **PRODUCTION config = COMBINED (OTE r2 + Turtle r3, `--combo`):** 333 trades, WR 41%, PF **1.47**, **+1380 pt**, maxDD **-174 pt** (= OTE-alone DD while DOUBLE the PnL → return/DD ~**7.9**). **EVERY YEAR POSITIVE** (PF 1.05-1.97) — complementary weak years cancel (OTE soft 2024-25 lifted by turtle 2.33/1.34; turtle soft 2023 lifted by OTE 1.53). **$27.6k/6yr per NQ** (DD $3.5k) / $2.76k per MNQ.
+- **Validation DONE:** `min_imp` robust (PF 1.07-1.43 across 8→50pt — NOT curve-fit); OTE = steadier/more samples (233T), turtle = higher PF/thinner (100T). **Concentration caveat:** 99 of 100 turtle weeks overlap an OTE trade SAME direction → the books diversify by EXECUTION (different fills/exits), not direction; on overlap weeks you hold 2 same-dir positions = 2x concentration → size each book at half budget.
 
 ## Next (Phase 4)
 Translate this spec into a backtest module (own file, like the v8.x engines), NQ first, news-gate as a toggle so we can measure its contribution. Bring first NQ result before scaling to other indices. Do NOT fold into the 62T engine — Model 9 is a separate engine in the factory.

@@ -276,7 +276,8 @@ def backtest(cfg, data):
             cum_lo = np.minimum.accumulate(lo); cum_hi = np.maximum.accumulate(hi)
             pdl = prevlo.get(d); pdh = prevhi.get(d)
             if cfg["entry"] != "fvgce":                    # OTE / turtle entry modes
-                res = find_alt_entry(cfg, bias, mins, hi, lo, cl, pdl, pdh)
+                res = find_alt_entry(cfg, bias, mins, hi, lo, cl, pdl, pdh,
+                                     min_imp=cfg.get("min_imp", 20.0))
                 if res:
                     k, entry, sl = res
                     risk = abs(entry - sl)
@@ -379,7 +380,24 @@ def make_data(cot_mode, df5m, fvgs, news):
 
 
 DEFAULTS = dict(cot="off", news=False, kz="both", days="monwed",
-                confirm=False, tp="weekly", maxrisk=0, sweep=False, entry="fvgce")
+                confirm=False, tp="weekly", maxrisk=0, sweep=False, entry="fvgce",
+                min_imp=20.0)
+
+NQ_PT = 20.0    # full NQ $/point
+MNQ_PT = 2.0    # MNQ micro $/point
+
+
+def peryear(tr):
+    import collections
+    out = collections.OrderedDict()
+    if len(tr) == 0:
+        return out
+    t = tr.copy(); t["yr"] = t["date"].dt.year
+    for yr, g in t.groupby("yr"):
+        gp = g[g.pnl > 0].pnl.sum(); gl = -g[g.pnl < 0].pnl.sum()
+        out[int(yr)] = (len(g), round(100 * (g.out == "win").mean()),
+                        round(g.pnl.sum(), 1), round(gp / gl, 2) if gl > 0 else 9.99)
+    return out
 
 
 def main():
@@ -393,11 +411,65 @@ def main():
     ap.add_argument("--tp", default="weekly", choices=["weekly", "r2", "r3"])
     ap.add_argument("--maxrisk", type=float, default=0)
     ap.add_argument("--entry", default="fvgce", choices=["fvgce", "ote", "turtle"])
+    ap.add_argument("--min-imp", dest="min_imp", type=float, default=20.0)
+    ap.add_argument("--validate", action="store_true")
+    ap.add_argument("--combo", action="store_true")
     args = ap.parse_args()
 
     print("loading data...", flush=True)
     df5m, fvgs, news = load_all()
     print(f"5m bars: {len(df5m):,} | 4h FVGs: {len(fvgs)} | news High-USD days: {len(news)}", flush=True)
+
+    if args.combo:
+        # COMBINED ENGINE — OTE r2 + turtle r3 as two diversified books (one trade
+        # per week per book). Their weak years are complementary -> smoother curve.
+        data = make_data("off", df5m, fvgs, news)
+        o = backtest(dict(DEFAULTS, entry="ote", tp="r2", maxrisk=30), data); o["mode"] = "ote"
+        t = backtest(dict(DEFAULTS, entry="turtle", tp="r3", maxrisk=30), data); t["mode"] = "turtle"
+        c = pd.concat([o, t]).sort_values("date").reset_index(drop=True)
+        print("\n=== MODEL 9 COMBINED ENGINE (OTE r2 + Turtle r3) ===")
+        for nm, tr in [("OTE     ", o), ("TURTLE  ", t), ("COMBINED", c)]:
+            s = stats(tr)
+            print(f"{nm}: n={s['n']:3d} wr={s['wr']:4} pf={s['pf']:5} pnl={s['pnl']:8}pt")
+        print("\nper-year (pf | combined pnl):")
+        po, pt, pc = peryear(o), peryear(t), peryear(c)
+        for yr in sorted(pc):
+            a = po.get(yr, (0, 0, 0, 0))[3]; b = pt.get(yr, (0, 0, 0, 0))[3]; d = pc[yr]
+            print(f"  {yr}: ote {a:>4}  turtle {b:>4}  ->  COMBINED pf {d[3]:>4}  pnl {d[2]:>+7}")
+        eq = c.pnl.cumsum(); dd = (eq - eq.cummax()).min()
+        # overlap: weeks where both books traded the same direction (concentration risk)
+        ok = set(zip(o["week"], o["dir"])); tk = set(zip(t["week"], t["dir"]))
+        overlap = len(ok & tk)
+        print(f"\ncombined: total {c.pnl.sum():+.1f}pt | maxDD {dd:.1f}pt | trades {len(c)}")
+        print(f"  $ @1NQ ${c.pnl.sum()*NQ_PT:,.0f} (DD ${abs(dd)*NQ_PT:,.0f}) | @1MNQ ${c.pnl.sum()*MNQ_PT:,.0f} (DD ${abs(dd)*MNQ_PT:,.0f})")
+        print(f"  same-week+dir overlaps (2x concentration): {overlap} of {len(ok)+len(tk)} book-weeks")
+        c.to_csv("/tmp/model9_combo_trades.csv", index=False)
+        return
+
+    if args.validate:
+        data = make_data("off", df5m, fvgs, news)
+        def run(**kw):
+            return backtest(dict(DEFAULTS, **kw), data)
+        print("\n=== OTE vs TURTLE (maxrisk=30) per-year ===")
+        for name, kw in [("OTE r2", dict(entry="ote", tp="r2", maxrisk=30)),
+                         ("OTE r3", dict(entry="ote", tp="r3", maxrisk=30)),
+                         ("TURTLE r3", dict(entry="turtle", tp="r3", maxrisk=30)),
+                         ("TURTLE wk", dict(entry="turtle", tp="weekly", maxrisk=0))]:
+            tr = run(**kw); s = stats(tr); py = peryear(tr)
+            print(f"\n{name}: {s}")
+            print("  yr:  " + "  ".join(f"{y}:pf{v[3]}" for y, v in py.items()))
+        print("\n=== min_imp SENSITIVITY (OTE r2 maxrisk30) ===")
+        print(f"{'min_imp':>7} | {'n':>4} {'wr':>5} {'pnl':>8} {'pf':>5}")
+        for mi in [8, 12, 16, 20, 24, 30, 40, 50]:
+            s = stats(run(entry="ote", tp="r2", maxrisk=30, min_imp=mi))
+            print(f"{mi:>7} | {s['n']:>4} {s['wr']:>5} {s['pnl']:>8} {s['pf']:>5}")
+        print("\n=== $ SIZING (OTE r2 maxrisk30, +650pt baseline) ===")
+        s = stats(run(entry="ote", tp="r2", maxrisk=30))
+        pnl = s["pnl"]
+        print(f"  1 MNQ (${MNQ_PT}/pt):  P&L ${pnl*MNQ_PT:,.0f}  | maxrisk/trade ~30pt = ${30*MNQ_PT:.0f}")
+        print(f"  1 NQ  (${NQ_PT}/pt):  P&L ${pnl*NQ_PT:,.0f}  | maxrisk/trade ~30pt = ${30*NQ_PT:.0f}")
+        print("  (sizing to a fixed $-risk budget scales these linearly)")
+        return
 
     if args.single:
         cfg = dict(DEFAULTS, cot=args.cot, news=args.news, kz=args.kz, days=args.days,
