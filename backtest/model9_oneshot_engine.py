@@ -424,6 +424,8 @@ def main():
     ap.add_argument("--validate", action="store_true")
     ap.add_argument("--combo", action="store_true")
     ap.add_argument("--multi", action="store_true")
+    ap.add_argument("--portfolio", action="store_true")
+    ap.add_argument("--port-insts", dest="port_insts", default="nq,rty")
     args = ap.parse_args()
 
     if args.multi:
@@ -454,6 +456,88 @@ def main():
                   f"{s['pnl']:>8.0f} {dd:>7.0f} {s['pnl']*PT[inst]:>9,.0f}")
             py = peryear(c)
             print("     yr pf: " + " ".join(f"{y}:{v[3]}" for y, v in py.items()))
+        return
+
+    if args.portfolio:
+        # CROSS-INDEX PORTFOLIO - merge each instrument's combo (OTE r2 + Turtle r3)
+        # trades into ONE time-ordered book. Two sizings:
+        #   equal-RISK     = each trade normalized to a fixed $-risk via realized R-mult
+        #                    (pnl/|entry-sl|); scale-free, matches our fixed-$-risk live sizing.
+        #   equal-CONTRACT = 1 full lot each via point values; tangible $.
+        insts = [s.strip().lower() for s in args.port_insts.split(",") if s.strip()]
+        PT = {"nq": 20.0, "es": 50.0, "ym": 5.0, "rty": 50.0}
+        R_USD = 100.0  # $ risked per trade in the equal-risk book (linear scaling constant)
+        news = load_news_days()
+        nqmed = float(load_daily("nq")["close"].median())
+        refs = {i: float(load_daily(i)["close"].median()) for i in insts}
+        books, standalone = [], {}
+        for inst in insts:
+            scale = refs[inst] / nqmed
+            base = dict(DEFAULTS, maxrisk=30 * scale, min_imp=20 * scale, sl_buf=2 * scale)
+            df5 = _load(M5, inst); fv = detect_4h_fvgs(_load(H4, inst))
+            data = make_data("off", df5, fv, news, inst)
+            o = backtest(dict(base, entry="ote", tp="r2"), data)
+            t = backtest(dict(base, entry="turtle", tp="r3"), data)
+            c = pd.concat([o, t]).sort_values("date").reset_index(drop=True)
+            if not len(c):
+                continue
+            c["inst"] = inst
+            c["risk"] = (c.entry - c.sl).abs()
+            c["rmult"] = c.pnl / c.risk            # realized R per trade (scale-free)
+            c["usd_rp"] = c.rmult * R_USD          # equal-risk $ ($100 risked/trade)
+            c["usd_1x"] = c.pnl * PT[inst]         # equal-contract $ (1 lot)
+            books.append(c)
+            er = c.usd_rp.cumsum(); e1 = c.usd_1x.cumsum()
+            standalone[inst] = dict(rp=c.usd_rp.sum(), ddr=(er - er.cummax()).min(),
+                                    u1=c.usd_1x.sum(), dd1=(e1 - e1.cummax()).min())
+        book = pd.concat(books).sort_values("date").reset_index(drop=True)
+        book["yr"] = book["date"].dt.year
+
+        def pf_col(b, col):
+            gp = b[b[col] > 0][col].sum(); gl = -b[b[col] < 0][col].sum()
+            return round(gp / gl, 2) if gl > 0 else float("inf")
+
+        def maxdd(col):
+            eq = book[col].cumsum(); return (eq - eq.cummax()).min()
+
+        def pf_year(col, y):
+            return pf_col(book[book.yr == y], col)
+
+        wr = round(100 * (book.out == "win").mean(), 1)
+        years = sorted(book.yr.unique())
+        print(f"\n=== MODEL 9 CROSS-INDEX PORTFOLIO: {'+'.join(i.upper() for i in insts)} ===")
+        print(f"merged {len(book)} trades (one book) | bias=range-expansion (cot=off) | median px: "
+              + " ".join(f"{i}={refs[i]:.0f}" for i in insts))
+
+        trp = book.usd_rp.sum(); ddr = maxdd("usd_rp")
+        print(f"\n[EQUAL-RISK] ${R_USD:.0f} risked/trade (scale-free; $ & DD scale linearly):")
+        print(f"  n={len(book)} wr={wr}% PF={pf_col(book,'usd_rp')} total=${trp:,.0f} "
+              f"maxDD=${ddr:,.0f} return/DD={trp/abs(ddr):.1f}  "
+              f"(= {trp/R_USD:.0f}R / {abs(ddr)/R_USD:.1f}R DD)")
+        print("  per-yr PF: " + " ".join(
+            f"{y}:{pf_year('usd_rp', y)}{'(part)' if y == years[-1] else ''}" for y in years))
+
+        t1 = book.usd_1x.sum(); dd1 = maxdd("usd_1x")
+        print(f"\n[EQUAL-CONTRACT] 1 full lot each (NQ $20 / RTY,ES $50 / YM $5 per pt):")
+        print(f"  PF={pf_col(book,'usd_1x')} total=${t1:,.0f} maxDD=${dd1:,.0f} "
+              f"return/DD={t1/abs(dd1):.1f}")
+        print("  per-yr $:  " + " ".join(
+            f"{y}:${book[book.yr==y].usd_1x.sum():,.0f}{'(part)' if y == years[-1] else ''}" for y in years))
+        print("  (1-lot mixes risk: RTY/ES $50/pt weight > NQ $20/pt; equal-risk above is the production sizing)")
+
+        sdr = sum(s["ddr"] for s in standalone.values())
+        sd1 = sum(s["dd1"] for s in standalone.values())
+        print(f"\n[DIVERSIFICATION] (does staggering weak years reduce drawdown?)")
+        for i, s in standalone.items():
+            print(f"  {i:4} standalone: equal-risk ${s['rp']:,.0f} DD ${s['ddr']:,.0f} | "
+                  f"1-lot ${s['u1']:,.0f} DD ${s['dd1']:,.0f}")
+        print(f"  additive (sum) DD:  equal-risk ${sdr:,.0f} | 1-lot ${sd1:,.0f}")
+        print(f"  PORTFOLIO combo DD: equal-risk ${ddr:,.0f} | 1-lot ${dd1:,.0f}")
+        if sdr:
+            print(f"  -> equal-risk DD cut {100*(1-abs(ddr)/abs(sdr)):.0f}% vs additive "
+                  f"(caveat: correlated underlyings)")
+        book.to_csv("/tmp/model9_portfolio_trades.csv", index=False)
+        print("\n  trades -> /tmp/model9_portfolio_trades.csv")
         return
 
     print("loading data...", flush=True)
