@@ -426,6 +426,7 @@ def main():
     ap.add_argument("--multi", action="store_true")
     ap.add_argument("--portfolio", action="store_true")
     ap.add_argument("--port-insts", dest="port_insts", default="nq,rty")
+    ap.add_argument("--half-budget", dest="half_budget", action="store_true")
     args = ap.parse_args()
 
     if args.multi:
@@ -492,6 +493,12 @@ def main():
                                     u1=c.usd_1x.sum(), dd1=(e1 - e1.cummax()).min())
         book = pd.concat(books).sort_values("date").reset_index(drop=True)
         book["yr"] = book["date"].dt.year
+        # concurrency = # of OTE+turtle same-(week,dir) positions WITHIN an instrument.
+        # 2 = OTE+turtle overlap (execution diversification, NOT 2x takeable risk) -> half each;
+        # 1 = solo week -> full. Caps each instrument's per-week directional risk at 1 unit.
+        book["concurrency"] = book.groupby(["inst", "week", "dir"])["pnl"].transform("size")
+        book["weight"] = 1.0 / book["concurrency"]
+        book["usd_rp_hb"] = book.usd_rp * book.weight   # half-budget (constant 1-unit/wk/inst)
 
         def pf_col(b, col):
             gp = b[b[col] > 0][col].sum(); gl = -b[b[col] < 0][col].sum()
@@ -536,6 +543,34 @@ def main():
         if sdr:
             print(f"  -> equal-risk DD cut {100*(1-abs(ddr)/abs(sdr)):.0f}% vs additive "
                   f"(caveat: correlated underlyings)")
+        if args.half_budget:
+            ov = int((book.concurrency == 2).sum()); solo = int((book.concurrency == 1).sum())
+            rdn = trp / abs(ddr)                                   # naive return/DD
+            wk_naive = book.groupby("week").usd_rp.sum().min()     # worst realized week (all insts)
+            # ALWAYS-HALF (LIVE, no lookahead): every book at 0.5 budget = uniform scale of naive.
+            ah_tot, ah_dd, ah_wk = trp * 0.5, ddr * 0.5, wk_naive * 0.5
+            # CONCURRENCY-AWARE (full on solo wks): needs intra-week foresight (don't know at OTE
+            # entry whether turtle fires later same week) = backtest UPPER BOUND, not deployable.
+            thb = book.usd_rp_hb.sum(); ddhb = maxdd("usd_rp_hb")
+            wk_hb = book.groupby("week").usd_rp_hb.sum().min()
+            print(f"\n[HALF-BUDGET SIZING] cap each instrument's per-week directional risk at 1 unit")
+            print(f"  trades on overlap weeks (OTE+turtle same wk/dir): {ov} | solo weeks: {solo}")
+            print(f"  NAIVE (hidden 2x on overlap): total=${trp:,.0f} maxDD=${ddr:,.0f} "
+                  f"return/DD={rdn:.1f} | worst week ${wk_naive:,.0f} (~4 units: 2 inst x 2 books)")
+            print(f"  ALWAYS-HALF (LIVE rule, no lookahead): total=${ah_tot:,.0f} maxDD=${ah_dd:,.0f} "
+                  f"return/DD={rdn:.1f} | worst week ${ah_wk:,.0f} (HALVED)  <- DEPLOY THIS")
+            print(f"  CONCURRENCY-AWARE (full on solo wks, needs intra-week foresight = backtest upper bound): "
+                  f"total=${thb:,.0f} maxDD=${ddhb:,.0f} return/DD={thb/abs(ddhb):.1f} | worst week ${wk_hb:,.0f}")
+            print(f"  RULE: size EACH book (OTE, turtle) at HALF the per-trade $-risk budget. The 99/100 overlap "
+                  f"is execution diversification, NOT 2x takeable risk -> halving caps worst week at ~2 units, "
+                  f"keeps return/DD {rdn:.1f}.")
+            wd = book.groupby("date").usd_rp.sum().min() * 0.5    # worst single ENTRY-day (always-half)
+            ceil = len(insts) * R_USD                             # each inst's OTE+turtle capped at 1 unit
+            print(f"  funded fit (DAILY, not weekly): each inst's OTE+turtle is capped at 1 unit, so max "
+                  f"concurrent open risk = {len(insts)} units = ${ceil:,.0f}/$100-unit. worst entry-day "
+                  f"${wd:,.0f}; worst week ${ah_wk:,.0f}.")
+            print(f"  -> at unit=$300 the DAILY loss ceiling = ${ceil*3:,.0f} (clears a $1,000+ daily limit). "
+                  f"NB backtest holds weekly (no daily MTM); the {len(insts)}-unit ceiling bounds any single day.")
         book.to_csv("/tmp/model9_portfolio_trades.csv", index=False)
         print("\n  trades -> /tmp/model9_portfolio_trades.csv")
         return
