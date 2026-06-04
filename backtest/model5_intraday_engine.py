@@ -109,15 +109,19 @@ def backtest(cfg, inst="nq"):
     _weekly, bias_map = M9.build_weekly_bias("off", inst)
     pdh_map, pdl_map = prior_day_levels(df5)
     by_date = {d: g.reset_index(drop=True) for d, g in df5.groupby("date")}
-    days_ok = {1, 2, 3} if cfg["days"] == "tuethu" else {0, 1, 2, 3, 4}
+    days_ok = {"tuethu": {1, 2, 3}, "monwed": {0, 1, 2}, "all": {0, 1, 2, 3, 4}}[cfg["days"]]
     mi = cfg["min_imp"]
     trades = []
+    traded_weeks = set()
     for d in sorted(by_date):
         if d.dayofweek not in days_ok:
             continue
-        bias = bias_map.get(week_start(d), "neutral")
+        ws = week_start(d)
+        bias = bias_map.get(ws, "neutral")
         if bias == "neutral":
             continue
+        if cfg["one_per_week"] and ws in traded_weeks:
+            continue                                # Model 8: one selective setup per week
         pdh = pdh_map.get(d)
         pdl = pdl_map.get(d)
         if pdh is None or pdl is None or np.isnan(pdh) or np.isnan(pdl):
@@ -150,7 +154,9 @@ def backtest(cfg, inst="nq"):
             tp = pdl if bias == "bear" else pdh
             if not ((bias == "bear" and tp < entry) or (bias == "bull" and tp > entry)):
                 continue                            # target already swept / wrong side
-        else:                                       # fixed R multiple (r2/r3) - modest target
+        elif cfg["tp"] == "fixed":                  # Model 8: fixed point target (25 handles)
+            tp = entry - cfg["tp_pts"] if bias == "bear" else entry + cfg["tp_pts"]
+        else:                                       # fixed R multiple (r1/r1.5/r2/r3) - modest target
             mult = float(cfg["tp"][1:])
             tp = entry - mult * risk if bias == "bear" else entry + mult * risk
         if cfg["maxrisk"] and risk > cfg["maxrisk"]:
@@ -167,11 +173,13 @@ def backtest(cfg, inst="nq"):
         trades.append({"date": d, "dir": bias, "entry": round(entry, 2),
                        "sl": round(sl, 2), "tp": round(tp, 2), "R": round(R, 2),
                        "out": out, "pnl": round(pnl, 2), "dow": int(d.dayofweek)})
+        traded_weeks.add(ws)
     return pd.DataFrame(trades)
 
 
 DEFAULTS = dict(entry="fvg", days="tuethu", session="both",
-                half_filter=True, maxrisk=0, min_imp=20.0, tp="prevday", exit="session")
+                half_filter=True, maxrisk=0, min_imp=20.0, tp="prevday", exit="session",
+                tp_pts=25.0, one_per_week=False)
 
 
 def show(name, tr):
@@ -188,15 +196,18 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--entry", choices=["fvg", "ote"], default=None)
     ap.add_argument("--inst", default="nq")
-    ap.add_argument("--days", default="tuethu", choices=["tuethu", "all"])
+    ap.add_argument("--days", default="tuethu", choices=["tuethu", "monwed", "all"])
     ap.add_argument("--session", default="both", choices=["both", "ny"])
     ap.add_argument("--no-half-filter", dest="half_filter", action="store_false")
     ap.add_argument("--maxrisk", type=float, default=0)
     ap.add_argument("--min-imp", dest="min_imp", type=float, default=20.0)
-    ap.add_argument("--tp", default="prevday", choices=["prevday", "r1", "r1.5", "r2", "r3"])
+    ap.add_argument("--tp", default="prevday", choices=["prevday", "r1", "r1.5", "r2", "r3", "fixed"])
+    ap.add_argument("--tp-pts", dest="tp_pts", type=float, default=25.0)
     ap.add_argument("--exit", dest="exit_mode", default="session", choices=["session", "kz"])
+    ap.add_argument("--one-per-week", dest="one_per_week", action="store_true")
     args = ap.parse_args()
     base = dict(DEFAULTS, days=args.days, session=args.session, tp=args.tp, exit=args.exit_mode,
+                tp_pts=args.tp_pts, one_per_week=args.one_per_week,
                 half_filter=args.half_filter, maxrisk=args.maxrisk, min_imp=args.min_imp)
     print(f"MODEL 5 Intraday Vol Expansion | inst={args.inst} days={args.days} "
           f"session={args.session} half_filter={args.half_filter} maxrisk={args.maxrisk}")
