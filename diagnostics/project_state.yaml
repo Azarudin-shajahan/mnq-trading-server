@@ -1,0 +1,65 @@
+# Hand-edited project state for the dashboard generator (build_dashboard.py).
+# Keep this small. Everything else (commits, validated-engine results) is auto-pulled.
+project: "MNQ / ICT Engine Factory"
+updated: "2026-06-04"
+focus: "Models 9 & 5 VALIDATED + in production book; reversal engine = refine candidate; OTE-core saturated for adding edge."
+
+production_book:
+  - name: "Model 9 (One Shot One Kill)"
+    role: "swing core"
+    status: "PRODUCTION"
+    metric: "NQ combo OTE+turtle: PF 1.47, +1380pt, maxDD -174pt, every year positive"
+  - name: "Model 5 (Intraday Vol Expansion)"
+    role: "NY scalp diversifier"
+    status: "PRODUCTION"
+    metric: "NQ OTE scalp: PF 3.84, every yr 2.75-5.98, uncorrelated w/ M9 (corr 0.06)"
+  - name: "Book = M9 + M5-scalp"
+    role: "combined"
+    status: "PRODUCTION"
+    metric: "return/DD 77.5; combined DD cut $1100 -> $600"
+
+engines:
+  - id: "Model 9"
+    type: "OTE swing"
+    verdict: "VALIDATED"
+    note: "combo OTE+turtle; COT built+ablated+OFF (no edge)"
+  - id: "Model 5"
+    type: "OTE scalp"
+    verdict: "VALIDATED"
+    note: "NY-killzone exit is the edge; FVG-continuation falsified"
+  - id: "Model 8 (Bread & Butter)"
+    type: "B&B / M5 variant"
+    verdict: "SHELVED"
+    note: "uncorrelated but low-quality; dilutes book (77.5 -> 73.2)"
+  - id: "Reversal (failed-raid fade)"
+    type: "independent-direction"
+    verdict: "REFINE"
+    note: "PF 1.20, every-yr+, uncorrelated; merge flat (77.5 -> 76.8)"
+  - id: "v8.18 (GxT V-shape)"
+    type: "FVG reversal"
+    verdict: "LOCKED"
+    note: "62T PERFECT combine config; core IRREDUCIBLE (5 filters failed)"
+  - id: "Asia 1H FVG"
+    type: "positional"
+    verdict: "FUNDED-STAGE"
+    note: "209T, EOD-funded only (51 losses kill combine consistency)"
+
+next_action:
+  - "Pick one: (1) refine reversal engine (tighten SL/target; if return/DD -> ~10+, re-test merge)"
+  - "(2) cross-index Model 5 (es/ym/rty) + half-budget portfolio of M9+M5"
+  - "(3) Model 6/7 Universal (low priority - OTE core saturated)"
+  - "RULE: gate every engine through /research-critiquer before marking 'validated'"
+
+key_numbers:
+  - "Model 9 combo (NQ): PF 1.47, +1380pt, maxDD -174pt, ~$27.6k/6yr/1NQ"
+  - "Model 5 scalp (NQ): PF 3.84, every yr 2.75-5.98, maxDD -100pt (~$2k/1NQ)"
+  - "Book M9+M5: equal-risk PF 1.57, portfolio return/DD 15.4; scalp-merge return/DD 77.5"
+  - "v8.18 PERFECT: 62T, WR 100%, DD $0, Net $289 (TopStep combine)"
+  - "Asia 1H FVG: 209T, Net $735 backtest; live $114,490/5yr; TopStep 90% $103,041/5yr"
+  - "entry_min=4.5 LOCKED; MNQ $2/pt live, $0.50/pt backtest (never change)"
+
+open_items:
+  - "TopStep combine decision: Standard ($49/mo + $149) vs No-Activation ($95/mo)"
+  - "Go-live: verify Telegram on phone; bookmark Railway /dashboard; set live account + AUTOMATION_ENABLED"
+  - "Completeness: SD-'Grail' not ablated; B&B-Sell transcript unread"
+  - "SECURITY: GEMINI_API_KEY committed in ~/.claude/settings.json -> rotate + untrack"
