@@ -98,6 +98,66 @@ def walk_intraday(day_df, k, entry, sl, tp, bias):
     return "be", (entry - last) if bias == "bear" else (last - entry)
 
 
+# --- 1m-resolved limit-entry execution (ENTRY-TIMING FIX 2026-06-05) ----------
+# M5 entries (OTE / FVG-extreme) are LIMIT fills - filled when price TOUCHES the
+# level intrabar. Resolving them on the 5m entry bar let that bar's PRE-fill range
+# trigger exits that were not executable (a lookahead that inflated M5 PF 3.84 ->
+# true 1.78). Fix: resolve the entry 5m bar on 1m (find the fill, walk SL-first
+# from there); if filled-but-unresolved continue on 5m from k+1. Falls back to a
+# conservative k+1 5m walk when 1m data is missing for the day (e.g. 2026).
+_M1_FILES = ["MULTI_1min_IST_2020_2024.csv", "MULTI_1min_IST_2025.csv"]
+_M1_CACHE = {}
+
+
+def _load_1m(inst):
+    if inst not in _M1_CACHE:
+        cols = ["timestamp", f"{inst}_high", f"{inst}_low"]
+        try:
+            df = pd.concat([pd.read_csv(f"/Users/azarudin/mnq_trading/data/{f}",
+                                        usecols=cols, parse_dates=["timestamp"])
+                            for f in _M1_FILES], ignore_index=True)
+            df["date"] = df["timestamp"].dt.normalize()
+            df["mins"] = df["timestamp"].dt.hour * 60 + df["timestamp"].dt.minute
+            df = df.sort_values("mins")
+            _M1_CACHE[inst] = {d: (g[f"{inst}_high"].values, g[f"{inst}_low"].values, g["mins"].values)
+                               for d, g in df.groupby("date")}
+        except Exception:
+            _M1_CACHE[inst] = None
+    return _M1_CACHE[inst]
+
+
+def walk_limit_1m(inst, d, exit_df, k, mins_arr, entry, sl, tp, bias):
+    """Limit-entry execution: 1m fill-forward on the entry bar, then 5m from k+1."""
+    cache = _load_1m(inst)
+    day = cache.get(d) if cache else None
+    if day is not None:
+        H1, L1, M1 = day
+        emins = int(mins_arr[k])
+        sel = (M1 >= emins) & (M1 < emins + 5)
+        Hh, Ll = H1[sel], L1[sel]
+        fill = -1
+        for i in range(len(Hh)):
+            if (bias == "bull" and Ll[i] <= entry) or (bias == "bear" and Hh[i] >= entry):
+                fill = i
+                break
+        if fill >= 0:
+            for i in range(fill, len(Hh)):              # SL-first from the true fill
+                if bias == "bull":
+                    if Ll[i] <= sl:
+                        return "loss", sl - entry
+                    if Hh[i] >= tp:
+                        return "win", tp - entry
+                else:
+                    if Hh[i] >= sl:
+                        return "loss", entry - sl
+                    if Ll[i] <= tp:
+                        return "win", entry - tp
+            # filled but not resolved within the entry bar -> continue on 5m from k+1
+    if k + 1 >= len(exit_df):
+        return "be", 0.0
+    return walk_intraday(exit_df, k + 1, entry, sl, tp, bias)
+
+
 def week_start(d):
     return (d - pd.Timedelta(days=int(d.dayofweek))).normalize()
 
@@ -168,11 +228,12 @@ def backtest(cfg, inst="nq"):
             while j + 1 < len(mins) and mins[j + 1] < kze:
                 j += 1
             exit_df = g.iloc[:j + 1]
-        out, pnl = walk_intraday(exit_df, k, entry, sl, tp, bias)
+        out, pnl = walk_limit_1m(inst, d, exit_df, k, mins, entry, sl, tp, bias)
         R = (abs(entry - tp)) / risk
         trades.append({"date": d, "dir": bias, "entry": round(entry, 2),
                        "sl": round(sl, 2), "tp": round(tp, 2), "R": round(R, 2),
-                       "out": out, "pnl": round(pnl, 2), "dow": int(d.dayofweek)})
+                       "out": out, "pnl": round(pnl, 2), "dow": int(d.dayofweek),
+                       "emins": int(mins[k])})
         traded_weeks.add(ws)
     return pd.DataFrame(trades)
 

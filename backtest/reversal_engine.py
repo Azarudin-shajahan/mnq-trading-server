@@ -89,7 +89,8 @@ def backtest(cfg, inst="nq"):
         out, pnl = M5.walk_intraday(exit_df, k, entry, sl, tp, bias)
         R = abs(entry - tp) / risk
         trades.append({"date": d, "dir": bias, "entry": round(entry, 2), "sl": round(sl, 2),
-                       "tp": round(tp, 2), "R": round(R, 2), "out": out, "pnl": round(pnl, 2)})
+                       "tp": round(tp, 2), "R": round(R, 2), "out": out, "pnl": round(pnl, 2),
+                       "emins": int(g["mins"].values[k])})
     return pd.DataFrame(trades)
 
 

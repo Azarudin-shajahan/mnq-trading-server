@@ -41,7 +41,7 @@ def main():
     m9 = eq_risk(pd.concat([o, t]).reset_index(drop=True))
     w9 = m9.groupby("week").usd.sum()                # M9 trades already carry a 'week' column
     m5 = eq_risk(M5.backtest(dict(M5.DEFAULTS, entry="ote", tp="r1", exit="kz", session="ny"), "nq"))
-    rev = eq_risk(REV.backtest(dict(REV.DEFAULTS, tp="r1", exit="session", bias="off", session="ny"), "nq"))
+    rev = eq_risk(REV.backtest(dict(REV.DEFAULTS, tp="r1", exit="session", bias="off", session="ny", maxrisk=30), "nq"))  # refined: wide-raid filter (robust every-year band 28-32)
     w5 = weekly_date(m5); wr = weekly_date(rev)
 
     idx = w9.index.union(w5.index).union(wr.index)

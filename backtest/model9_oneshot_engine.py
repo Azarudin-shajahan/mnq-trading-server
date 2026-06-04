@@ -295,13 +295,19 @@ def backtest(cfg, data):
                         ok = tp is not None and ((bias == "bull" and tp > entry) or
                                                  (bias == "bear" and tp < entry))
                         if ok:
-                            fut = [day5m.iloc[k:]] + [by_date[x] for x in dates if x > d and x.dayofweek <= 4]
+                            # ENTRY-TIMING FIX (2026-06-05): signal is bar k's close (turtle) or a
+                            # within-bar-k limit touch (OTE) -> execution is the NEXT bar. Walk from
+                            # k+1 to remove the entry-bar lookahead. OTE unaffected (far r2 target is
+                            # never reached on bar k: regression PF 1.34 unchanged); turtle 1.72->1.38.
+                            # (A tight-target OTE config would need 1m entry-bar resolution like M5.)
+                            fut = [day5m.iloc[k + 1:]] + [by_date[x] for x in dates if x > d and x.dayofweek <= 4]
                             out, pnl = walk_to_friday(fut, entry, sl, tp, bias)
                             R = (tp - entry) / risk if bias == "bull" else (entry - tp) / risk
                             trades.append({"week": ws, "date": d, "dir": bias,
                                            "entry": round(entry, 2), "sl": round(sl, 2),
                                            "tp": round(tp, 2), "R": round(R, 2),
-                                           "out": out, "pnl": round(pnl, 2)})
+                                           "out": out, "pnl": round(pnl, 2),
+                                           "emins": int(mins[k])})
                             took = True
                 continue
             armed = {}  # fvg id -> touched CE (awaiting close-back)
