@@ -86,7 +86,13 @@ def backtest(cfg, inst="nq"):
             while j + 1 < len(g) and g["mins"].values[j + 1] < kze:
                 j += 1
             exit_df = g.iloc[:j + 1]
-        out, pnl = M5.walk_intraday(exit_df, k, entry, sl, tp, bias)
+        # ENTRY-TIMING FIX (2026-06-08): entry = reclaim CLOSE of bar k -> execution is the NEXT
+        # bar; walk from k+1 to remove the entry-bar lookahead (mirrors M9 turtle / M5.walk_limit_1m).
+        # Guard the edge case where k is the last bar of the (killzone-sliced) exit_df.
+        if k + 1 >= len(exit_df):
+            out, pnl = "be", 0.0
+        else:
+            out, pnl = M5.walk_intraday(exit_df, k + 1, entry, sl, tp, bias)
         R = abs(entry - tp) / risk
         trades.append({"date": d, "dir": bias, "entry": round(entry, 2), "sl": round(sl, 2),
                        "tp": round(tp, 2), "R": round(R, 2), "out": out, "pnl": round(pnl, 2),
