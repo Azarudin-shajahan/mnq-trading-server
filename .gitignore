@@ -7,3 +7,37 @@ venv/
 diagnostics/ict_transcripts/*.vtt
 diagnostics/ict_transcripts/_pull.log
 diagnostics/ict_transcripts/_embed.log
+
+# --- secrets / credentials (NEVER commit) ---
+api_keys.json
+.env.*
+*.key
+*.pem
+
+# --- large market data (regenerable via scripts/databento_*.py) ---
+data/
+
+# --- logs & debug dumps ---
+*.log
+logs/
+debug_*.json
+debug_*.txt
+indicator_debug.json
+scan_results*.json
+
+# --- ML models / checkpoints ---
+models/
+checkpoints/
+mnq_checkpoints/
+data/checkpoints/
+backtest/kronos_finetune/
+
+# --- generated artifacts ---
+diagnostics/project_dashboard.html
+
+# --- bulk grid/result CSV dumps (regenerable) ---
+GRID_RESULTS*.csv
+TIMEFRAME_COMPARE.csv
+grid_search_*.csv
+backtest/mnq_trade_log*.csv
+backtest/*_results*.csv
