@@ -158,6 +158,56 @@ def walk_limit_1m(inst, d, exit_df, k, mins_arr, entry, sl, tp, bias):
     return walk_intraday(exit_df, k + 1, entry, sl, tp, bias)
 
 
+# --- SD-confluence ("the Grail") - OFF by default (research-critiquer blocker) -------
+# ICT's standard-deviation confluence: an overnight DEALING RANGE (CBDR 16:00-20:00 NY,
+# else Asian 20:00-00:00 NY, else flout 16:00-00:00 NY) projected in 1-3 "standard
+# deviations" (= dealing-range multiples) from the range high/low. The "Grail" claim is
+# that entries/targets confluent with an SD line are higher-probability. ICT is emphatically
+# DISCRETIONARY about it -> the same fingerprint that did NOT mechanize for Model 9 COT /
+# GxT drivers. Built here to FALSIFY via an off/confirm/veto ablation, NOT for production.
+# Windows in IST (approx, DST not adjusted, same convention as the killzones); all precede
+# the 17:30-20:30 IST NY killzone entry -> no lookahead. The forex-pip size gates do not
+# translate to NQ points (CBDR present ~90% of days, median ~55pt), so the cascade just
+# uses the first window that has bars (CBDR primary).
+_SD_WINDOWS = {"cbdr": (150, 390), "asian": (390, 630), "flout": (150, 630)}  # IST minutes
+
+
+def _range_in(mins, hi, lo, win):
+    a, b = win
+    sel = (mins >= a) & (mins < b)
+    if not sel.any():
+        return None
+    return float(hi[sel].max()), float(lo[sel].min())
+
+
+def overnight_sd_levels(mins, hi, lo, ref="auto"):
+    """Dealing range per the CBDR->Asian->flout cascade; project 1-3 SD (dealing-range
+    multiples) from the range high and low. Returns (levels, use_range) or (None, None)."""
+    order = {"auto": ["cbdr", "asian", "flout"], "cbdr": ["cbdr"],
+             "asian": ["asian"], "flout": ["flout"]}[ref]
+    for w in order:
+        r = _range_in(mins, hi, lo, _SD_WINDOWS[w])
+        if r is None:
+            continue
+        rh, rl = r
+        rng = rh - rl
+        if rng <= 0:
+            continue
+        use = rng * 0.5 if w == "flout" else rng
+        levels = [rh, rl]
+        for k in (1, 2, 3):
+            levels += [rh + k * use, rl - k * use]
+        return levels, use
+    return None, None
+
+
+def sd_confluent(entry, tp, levels, band):
+    """True if the entry OR the target sits within `band` of any SD projection line."""
+    if not levels:
+        return False
+    return any(abs(px - lv) <= band for px in (entry, tp) for lv in levels)
+
+
 def week_start(d):
     return (d - pd.Timedelta(days=int(d.dayofweek))).normalize()
 
@@ -221,6 +271,12 @@ def backtest(cfg, inst="nq"):
             tp = entry - mult * risk if bias == "bear" else entry + mult * risk
         if cfg["maxrisk"] and risk > cfg["maxrisk"]:
             continue
+        if cfg.get("sd", "off") != "off":                 # SD-confluence ablation (OFF in production)
+            levels, use = overnight_sd_levels(mins, hi, lo, cfg.get("sd_ref", "auto"))
+            band = cfg.get("sd_band_frac", 0.15) * use if use else 0.0
+            conf = sd_confluent(entry, tp, levels, band)
+            if (cfg["sd"] == "confirm" and not conf) or (cfg["sd"] == "veto" and conf):
+                continue
         exit_df = g
         if cfg["exit"] == "kz":                      # scalp: exit by killzone end, not session close
             kze = kz_end_of(mins[k])
@@ -240,7 +296,7 @@ def backtest(cfg, inst="nq"):
 
 DEFAULTS = dict(entry="fvg", days="tuethu", session="both",
                 half_filter=True, maxrisk=0, min_imp=20.0, tp="prevday", exit="session",
-                tp_pts=25.0, one_per_week=False)
+                tp_pts=25.0, one_per_week=False, sd="off", sd_ref="auto", sd_band_frac=0.15)
 
 
 def show(name, tr):
@@ -266,10 +322,14 @@ def main():
     ap.add_argument("--tp-pts", dest="tp_pts", type=float, default=25.0)
     ap.add_argument("--exit", dest="exit_mode", default="session", choices=["session", "kz"])
     ap.add_argument("--one-per-week", dest="one_per_week", action="store_true")
+    ap.add_argument("--sd", default="off", choices=["off", "confirm", "veto"])
+    ap.add_argument("--sd-ref", dest="sd_ref", default="auto", choices=["auto", "cbdr", "asian", "flout"])
+    ap.add_argument("--sd-band-frac", dest="sd_band_frac", type=float, default=0.15)
     args = ap.parse_args()
     base = dict(DEFAULTS, days=args.days, session=args.session, tp=args.tp, exit=args.exit_mode,
                 tp_pts=args.tp_pts, one_per_week=args.one_per_week,
-                half_filter=args.half_filter, maxrisk=args.maxrisk, min_imp=args.min_imp)
+                half_filter=args.half_filter, maxrisk=args.maxrisk, min_imp=args.min_imp,
+                sd=args.sd, sd_ref=args.sd_ref, sd_band_frac=args.sd_band_frac)
     print(f"MODEL 5 Intraday Vol Expansion | inst={args.inst} days={args.days} "
           f"session={args.session} half_filter={args.half_filter} maxrisk={args.maxrisk}")
     if args.entry:
