@@ -2,7 +2,7 @@
 # Keep this small. Everything else (commits, validated-engine results) is auto-pulled.
 project: "MNQ / ICT Engine Factory"
 updated: "2026-06-09"
-focus: "Models 9 & 5 in production (lookahead-CORRECTED). YM cross-index = PASS (EMPIRICAL). Half-budget M9+M5+YM book return/DD 31.7. ES/RTY dead; reversal dead; OTE-core saturated for new edge."
+focus: "PRODUCTION = Book C: M9 swing + half-budget(M5-NQ + M5-YM) scalp, return/DD 31.7 (adopted 2026-06-09 after YM re-gate PASS, independently reproduced). Book A (M9+M5-NQ, 26.1) retained as grounded-only fallback. ES/RTY dead; reversal dead; OTE-core saturated for new edge."
 
 production_book:
   - name: "Model 9 (One Shot One Kill)"
@@ -13,14 +13,14 @@ production_book:
     role: "NY scalp diversifier"
     status: "PRODUCTION"
     metric: "NQ OTE scalp PF 1.71 (corrected from 3.84), every yr 1.39-2.26, uncorrelated w/ M9"
-  - name: "Book A = M9 + M5-NQ scalp"
-    role: "combined (current production)"
-    status: "PRODUCTION"
-    metric: "return/DD 26.1 (corrected from 77.5), ~$7k/yr per $50K, max-safe ~$190/1R"
   - name: "Book C = M9 + half-budget(M5-NQ + M5-YM)"
-    role: "EMPIRICAL upgrade candidate"
-    status: "CANDIDATE"
-    metric: "return/DD 31.7 (+21%), maxDD -15%, every year better, max-safe $222/1R"
+    role: "combined (PRODUCTION, adopted 2026-06-09)"
+    status: "PRODUCTION"
+    metric: "return/DD 31.7 (+21% vs A), maxDD -$769 (-15%), every year better, max-safe $222/1R; rests on EMPIRICAL YM (re-gate PASS, reproduced)"
+  - name: "Book A = M9 + M5-NQ scalp"
+    role: "grounded-only fallback (was production thru 2026-06-09)"
+    status: "FALLBACK"
+    metric: "return/DD 26.1 (corrected from 77.5), ~$7k/yr per $50K, max-safe ~$190/1R; fully ICT-grounded, no empirical YM leg"
 
 engines:
   - id: "Model 9"
@@ -33,8 +33,8 @@ engines:
     note: "PF 1.71 lookahead-corrected; SD-confluence built+ablated+OFF; NY-exit is the edge"
   - id: "Model 5 cross-index YM"
     type: "OTE scalp on YM"
-    verdict: "PASS (EMPIRICAL)"
-    note: "PF 1.64 every-yr+; diversifier (corr -0.02); ES+RTY DEAD; not ICT-grounded"
+    verdict: "PASS (EMPIRICAL, re-gate reproduced)"
+    note: "PF 1.64 every-yr+; diversifier (corr -0.02); now in Book C production; ES+RTY DEAD; not ICT-grounded (~15-20% below NQ quality)"
   - id: "Reversal (failed-raid fade)"
     type: "independent-direction"
     verdict: "DEAD / SHELVED"
@@ -49,27 +49,28 @@ engines:
     note: "62T PERFECT combine config; core IRREDUCIBLE (5 filters failed)"
   - id: "Asia 1H FVG"
     type: "positional"
-    verdict: "FUNDED-STAGE"
-    note: "209T, EOD-funded only (kills combine consistency)"
+    verdict: "DEAD (lookahead)"
+    note: "2026-06-09: $114k/5yr was a lookahead artifact (entry bar skipped under 1-tick SL); 1m-resolved = 0 wins, net ~$0. Numbers INVALID."
 
 next_action:
-  - "DECIDE: adopt Book C (M9 + half-budget NQ+YM scalp, return/DD 31.7) as production, OR keep Book A (M9+M5-NQ, 26.1) - Book C rests on the EMPIRICAL YM edge"
-  - "Commit this session's work (M5 SD filter + cross-index + half-budget portfolio diagnostics + spec/memory) - currently UNCOMMITTED"
+  - "DONE 2026-06-09: Book C ADOPTED as production after independent YM re-gate PASS (reproduced bit-for-bit). Book A kept as grounded-only fallback."
+  - "Commit this session's re-gate + Book-C-adoption edits (critique verdict, result memory, project_state, session_state)"
+  - "SECURITY (still open): rotate Databento key (pasted in chat 06-09); rotate + untrack GEMINI_API_KEY from ~/.claude/settings.json"
   - "Optional: push M5-scalp cross-index further, or funded-stage Asia 1H FVG"
   - "RULE: gate every engine through /research-critiquer before marking 'validated'"
 
 key_numbers:
   - "Model 9 combo (NQ): OTE 1.34 + turtle 1.38, lookahead-corrected, every year positive"
   - "Model 5 scalp (NQ): PF 1.71 (was 3.84 inflated), every yr 1.39-2.26"
-  - "Book A M9+M5-NQ: return/DD 26.1 (was 77.5 inflated), ~$7k/yr per $50K"
-  - "Book C M9+half-budget(NQ+YM): return/DD 31.7, maxDD -$769, max-safe $222/1R"
-  - "YM cross-index: PF 1.64 every-yr+ (EMPIRICAL, PASS); ES + RTY DEAD"
+  - "Book C M9+half-budget(NQ+YM) = PRODUCTION: return/DD 31.7, maxDD -$769, max-safe $222/1R (~7.4 MNQ/15pt SL)"
+  - "Book A M9+M5-NQ = grounded fallback: return/DD 26.1 (was 77.5 inflated), ~$7k/yr per $50K"
+  - "YM cross-index: PF 1.64 every-yr+ (EMPIRICAL, re-gate PASS reproduced); ~15-20% below NQ quality; maxDD spike -552pt at min_imp=64.5 (avoid); ES + RTY DEAD"
   - "v8.18 PERFECT: 62T, WR 100%, DD $0, Net $289 (TopStep combine)"
   - "Asia 1H FVG: 209T, Net $735 backtest; TopStep 90% $103,041/5yr (funded only)"
   - "entry_min=4.5 LOCKED; MNQ $2/pt live, $0.50/pt backtest (never change)"
 
 open_items:
-  - "UNCOMMITTED: today's M5 SD filter + cross-index + portfolio + spec/memory edits"
+  - "UNCOMMITTED: 2026-06-09 re-gate verdict + Book-C-adoption edits (critique, result memory, project_state, session_state)"
   - "SECURITY: Databento API key was pasted in chat 2026-06-09 -> ROTATE it"
   - "SECURITY: GEMINI_API_KEY committed in ~/.claude/settings.json -> rotate + untrack"
   - "TopStep combine decision: Standard ($49/mo + $149) vs No-Activation ($95/mo)"
