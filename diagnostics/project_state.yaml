@@ -2,7 +2,7 @@
 # Keep this small. Everything else (commits, validated-engine results) is auto-pulled.
 project: "MNQ / ICT Engine Factory"
 updated: "2026-06-09"
-focus: "PRODUCTION = Book C: M9 swing + half-budget(M5-NQ + M5-YM) scalp, return/DD 31.7 (adopted 2026-06-09 after YM re-gate PASS, independently reproduced). Book A (M9+M5-NQ, 26.1) retained as grounded-only fallback. ES/RTY dead; reversal dead; OTE-core saturated for new edge."
+focus: "Book C (M9 swing + half-budget M5-NQ+M5-YM) = best book BUT reframed 2026-06-10 to IN-SAMPLE-ONLY: a Fable consult + leakage audit found engines default to data through 2026-05-26, so 31.7 was NEVER held out. Salvage shows the config generalizes clean-2020-24 -> 2025-26 (necessary-not-sufficient). REAL next lever = LIVE DEMO at min size (the only pristine OOS; never started). ES/RTY/reversal dead; OTE-core saturated."
 
 production_book:
   - name: "Model 9 (One Shot One Kill)"
@@ -14,9 +14,9 @@ production_book:
     status: "PRODUCTION"
     metric: "NQ OTE scalp PF 1.71 (corrected from 3.84), every yr 1.39-2.26, uncorrelated w/ M9"
   - name: "Book C = M9 + half-budget(M5-NQ + M5-YM)"
-    role: "combined (PRODUCTION, adopted 2026-06-09)"
-    status: "PRODUCTION"
-    metric: "return/DD 31.7 (+21% vs A), maxDD -$769 (-15%), every year better, max-safe $222/1R; rests on EMPIRICAL YM (re-gate PASS, reproduced)"
+    role: "best book — but IN-SAMPLE ONLY (reframed 2026-06-10)"
+    status: "IN-SAMPLE / PENDING LIVE-DEMO OOS"
+    metric: "31.7 was NEVER held out (engines saw data to 2026-05-26). Clean-2020-24 PF 2.83/annRetDD 5.39 = 2025-26 holdout PF 2.47/5.2 (generalizes, necessary-not-sufficient). Validate via LIVE DEMO, not backtest."
   - name: "Book A = M9 + M5-NQ scalp"
     role: "grounded-only fallback (was production thru 2026-06-09)"
     status: "FALLBACK"
