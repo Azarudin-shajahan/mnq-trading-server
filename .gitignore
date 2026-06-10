@@ -41,3 +41,6 @@ TIMEFRAME_COMPARE.csv
 grid_search_*.csv
 backtest/mnq_trade_log*.csv
 backtest/*_results*.csv
+
+# Fable bridge generated artifact (regenerate via tools/fable_bridge/build_brief.py)
+FABLE_PROJECT_BRIEF.md
