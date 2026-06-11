@@ -60,13 +60,16 @@ def post_question(question, new_chat):
 
 
 def read_last_assistant():
-    # Assistant content lives in .standard-markdown / .font-claude-response.
-    # Pick the LONGEST such block (the actual answer), not the last DOM node --
-    # the trailing node can be an 18-char artifact (e.g. the project title).
+    # Robust read: anchor on the last completion action-bar (copy button) and walk up
+    # to the response container. This also captures search/tool-grounded replies whose
+    # prose renders OUTSIDE .standard-markdown. Fall back to the longest markdown block.
     return ev(
-        "(function(){var s=document.querySelectorAll("
-        "'.standard-markdown,.font-claude-response');"
-        "var best='';for(var i=0;i<s.length;i++){var t=s[i].innerText||'';"
+        "(function(){var bars=document.querySelectorAll('[data-testid=action-bar-copy]');"
+        "if(bars.length){var node=bars[bars.length-1];"
+        "for(var i=0;i<8&&node;i++){node=node.parentElement;"
+        "if(node&&(node.innerText||'').length>200)return node.innerText;}}"
+        "var s=document.querySelectorAll('.standard-markdown,.font-claude-response');"
+        "var best='';for(var j=0;j<s.length;j++){var t=s[j].innerText||'';"
         "if(t.length>best.length)best=t;}return best;})()")
 
 
