@@ -74,9 +74,12 @@ def read_last_assistant():
 
 
 def complete():
-    # The action bar (copy/retry) renders only when the response has finished.
+    # Done == the Stop button is gone (generation finished). The action bar is NOT a
+    # reliable signal in a multi-turn chat: prior turns already have action bars, so it
+    # is always present and would misfire as "complete" while a new reply still streams.
     return ev(
-        "(function(){return !!document.querySelector('[data-testid=action-bar-copy]');})()")
+        "(function(){return !Array.from(document.querySelectorAll('button')).find("
+        "function(x){return /stop/i.test(x.getAttribute('aria-label')||'')});})()")
 
 
 def wait_for_reply(max_wait=300):
