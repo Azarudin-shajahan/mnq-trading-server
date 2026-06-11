@@ -41,6 +41,16 @@ blocked by Chrome's trusted-gesture rule):
 5. Optionally delete the prior brief version (stale `gotchas.md` / `session_state.md`
    knowledge files predate the current state and can mislead -- consider removing).
 
+### 1b. (When the ICT corpus changed) regenerate + re-upload the ICT pack
+```bash
+python3 ~/mnq_trading/tools/fable_bridge/build_ict_pack.py  # -> ~/mnq_trading/FABLE_ICT_PACK.md
+```
+Upload the SAME way as the brief ("Add text content"; >800K so set the body in chunks
+via the native value setter, then one input/change). It carries the Research specs +
+classified extraction + a title index of all ~509 concept notes + ~493 transcripts.
+Raw bodies stay ON-DEMAND: when Fable asks for a note/transcript by title, run
+`~/.bun/bin/qmd search "<q>" -c {ict_transcripts|Trading} -n 5` and paste the hit.
+
 ### 2. Ask
 ```bash
 python3 ~/mnq_trading/tools/fable_bridge/consult.py --new "your skeptical question"

@@ -44,3 +44,4 @@ backtest/*_results*.csv
 
 # Fable bridge generated artifact (regenerate via tools/fable_bridge/build_brief.py)
 FABLE_PROJECT_BRIEF.md
+FABLE_ICT_PACK.md

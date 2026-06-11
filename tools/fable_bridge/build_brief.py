@@ -42,6 +42,11 @@ You (Fable, on claude.ai) cannot read the local filesystem. This brief IS your
 knowledge base. When you need a specific source not included here, ask for it by
 path/ID and the operator (Claude Code, working alongside you) will paste it in.
 
+**Companion knowledge file `FABLE_ICT_PACK (corpus)`** is also in this project: the
+Research specs verbatim + the (unvalidated) classified ICT extraction + a TITLE INDEX
+of all ~509 concept notes and ~493 transcripts. Their bodies are retrieved on demand
+(qmd) when you ask by title. Regenerate it with tools/fable_bridge/build_ict_pack.py.
+
 ### Source code -- `~/mnq_trading/`
 - `backtest/model9_oneshot_engine.py` -- Model 9 OTE weekly swing engine (shared
   loaders / bias / OTE / stats reused by all engines).
