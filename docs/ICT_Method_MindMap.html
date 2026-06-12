@@ -108,8 +108,19 @@
 
 <section>
   <p class="stitle">ICT Teaching Chain — why the concepts connect (the connective tissue)</p>
-  <p class="ssub">ICT's institutional-order-flow logic, read top to bottom. This is the "how they relate from the teaching" that the toggle draws on the map. Our engine mechanises the bolded spine; the rest is filter/refinement (mostly tested-dead or untested).</p>
+  <p class="ssub">ICT's institutional-order-flow logic, read left to right. The toggle draws these on the map. Each concept node now cites its <b style="color:var(--teach)">source ICT lecture</b> (grounded via qmd over the 493-transcript corpus — open a node to see it). Our engine mechanises the spine; the rest is filter/refinement (mostly tested-dead or untested).</p>
   <div class="pipe" id="teachchain"></div>
+</section>
+
+<section>
+  <p class="stitle">Provenance — where this dashboard's information comes from</p>
+  <p class="ssub">Honest sourcing, by layer:</p>
+  <table id="prov"><tbody>
+   <tr><td style="width:200px"><b>Mechanisation, verdicts, configs, numbers</b></td><td>Project memory (<code>session_state.md</code>, <code>gotchas.md</code>, <code>ict_engine_factory.md</code>, <code>model5/9_*_result.md</code>) + this session's verified runs (ORG falsifier, execution stress, NWOG, kill-criteria, Tradovate recon). <span style="color:var(--production)">Grounded in the repo.</span></td></tr>
+   <tr><td><b>ICT teaching descriptions + concept links</b></td><td>Grounded via <code>qmd</code> over the <code>ict_transcripts</code> collection (493 ICT lectures), 2026-06-12. Each node cites its best-match lecture (87–96%). Snippets verified to match for OTE/FVG/PO3/SMT. <span style="color:var(--validated)">Corpus-sourced.</span> NotebookLM rule-confirmation + GxT X-corpus cross-check still pending (the deeper grounding tier).</td></tr>
+   <tr><td><b>Status colours &amp; priorities</b></td><td>The dead-ends graveyard in <code>gotchas.md</code> + the Fable (claude.ai) consults this session.</td></tr>
+   <tr><td><b>"Additional features"</b></td><td>My proposals — clearly flagged, prioritised low given research is converged.</td></tr>
+  </tbody></table>
 </section>
 
 <section>
@@ -212,6 +223,42 @@ const LINKS = [
  ['Order block / breaker','OTE zone (62–79%)','ICT: the OB/breaker often sits at the OTE — an alternate entry refinement (untested).'],
  ['ORG / NWOG / NDOG gaps','FVG (fair value gap)','ICT treats session/weekend gaps as repricing magnets like FVGs (driver falsified for us).'],
 ];
+
+// Corpus citation per node — grounded via qmd over the 493-transcript `ict_transcripts`
+// collection (2026-06-12). Snippets verified to match the descriptions for OTE/FVG/PO3/SMT.
+const SRC = {
+ 'OTE direction':'ICT Mentorship Core Content M1 — Equilibrium vs. Premium (qmd 95%)',
+ 'OTE zone (62–79%)':'ICT Mentorship Core Content M1 — Equilibrium vs. Premium (qmd 95%)',
+ 'OTE 70.5% limit':'ICT Mentorship Core Content M1 — Equilibrium vs. Premium (qmd 95%)',
+ 'SMT / NQ-leads':'ICT Forex — Market Maker Series Vol. 3 of 5 (qmd 95%)',
+ 'FVG (fair value gap)':'2022 ICT Mentorship Market Review — Jul 25 2022 (qmd 91%)',
+ 'FVG-CE / continuation':'2022 ICT Mentorship Market Review — Jul 25 2022 (qmd 91%)',
+ 'Gap-fill (V-shape)':'2022 ICT Mentorship Market Review — Jul 25 2022 (qmd 91%)',
+ 'Liquidity sweep / raid':'ICT Charter Price Action Model 13 (qmd 87%)',
+ 'Failed-raid reversal':'ICT Charter Model 13 + 2022 Mentorship Ep.3 (CSD)',
+ 'V-shape CSD reversal':'2022 ICT Mentorship Episode 3 — change in state of delivery (qmd 89%)',
+ 'NY-AM killzone':'ICT Mentorship Core Content M8 — Defining the Daily Range (qmd 93%)',
+ 'London':'ICT Mentorship Core Content M8 — Defining the Daily Range (qmd 93%)',
+ 'KZ / session exit':'ICT Mentorship Core Content M8 — Defining the Daily Range (qmd 93%)',
+ 'Asia session':'ICT Mentorship Core Content M8 — Central Bank Dealers Range (qmd 96%)',
+ 'SD confluence (“the Grail”)':'ICT Mentorship Core Content M8 — Central Bank Dealers Range (qmd 96%)',
+ 'Order block / breaker':'ICT Mentorship Core Content M4 — ICT Breaker Block (qmd 90%)',
+ 'ORG / NWOG / NDOG gaps':'ICT 2025 Lecture Series — EurUsd & NQ, Jun 11 2025 (qmd 85%)',
+ 'ICT Macros (time windows)':'ICT Mentorship 2023 — Algorithmic Price Delivery & Time Macros (qmd 90%)',
+ 'COT':'ICT Mentorship Core Content M10 — Commitment of Traders (qmd 95%)',
+ 'Tight R1 (scalp)':'ICT ES AM Session Review 09/06/22 — draw on liquidity (qmd 71%)',
+ 'R2 / R3 (swing)':'ICT ES AM Session Review — draw on liquidity + M8 Daily Range',
+ 'SSMT / strength-switch':'GxT / Lathyrus (ICT follower) — NOT ICT core',
+ 'Drivers 9:30/10:00':'GxT (ICT follower) — NOT ICT core',
+ 'C2/C3 candle entry':'GxT candle profiling — NOT ICT core',
+ 'Runner / 2R+ (GxT payoff)':'GxT payoff geometry — NOT ICT core',
+ 'First-touch limit (no V-shape)':'naive baseline — not an ICT teaching',
+ 'Equal-risk + half-budget':'portfolio discipline — not ICT teaching',
+ 'Frozen kill-criteria':'statistical discipline — not ICT teaching',
+ 'Execution stress':'execution realism — not ICT teaching',
+ 'Reconciliation logger':'execution attribution — not ICT teaching',
+ 'Live demo OOS':'OOS validation — not ICT teaching',
+};
 
 const SPINE = [
  {n:'01 Bias',t:'Weekly / daily bias',c:'Direction = OTE into discount (buy) or premium (sell).'},
@@ -336,6 +383,7 @@ function showDetail(nd,role){
     '<span class="badge" style="background:'+c+'">'+STATUS_LABEL[nd.s]+'</span>'+
     '<div class="d-title">'+nd.l+'</div><div class="d-role">'+role.label+'</div>'+
     '<div class="row teach"><div class="k">ICT teaching &amp; how it links</div><div class="v">'+nd.teach+'</div></div>'+
+    '<div class="row"><div class="k">Source · qmd corpus</div><div class="v" style="font-size:12px;color:#9fb0c9">'+(SRC[nd.l]||'—')+'</div></div>'+
     '<div class="row"><div class="k">How we mechanised it</div><div class="v">'+nd.mech+'</div></div>'+
     '<div class="row"><div class="k">Test verdict</div><div class="v">'+nd.v+'</div></div>'+
     '<div class="row"><div class="k">How it could improve</div><div class="v">'+nd.imp+'</div></div>'+
