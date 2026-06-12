@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ICT Method Mind Map — MNQ (Book C)</title>
+<style>
+  :root{
+    --bg:#0c1018; --panel:#141a26; --panel2:#1b2330; --line:#2a3547; --txt:#dfe7f2;
+    --mut:#8595ad; --acc:#6aa9ff;
+    --production:#33d6a6; --validated:#2bb673; --empirical:#5b9dff;
+    --dead:#ff5d6c; --weak:#f5b942; --candidate:#7c8aa0; --built:#b48bff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#16203200,#0c1018),var(--bg);
+    color:var(--txt);font:14px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;
+    gap:14px;align-items:center;justify-content:space-between}
+  h1{font-size:18px;margin:0;letter-spacing:.2px}
+  h1 small{color:var(--mut);font-weight:400;font-size:12px;display:block;margin-top:2px}
+  .legend{display:flex;flex-wrap:wrap;gap:8px}
+  .lg{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--mut);
+    background:var(--panel);border:1px solid var(--line);padding:4px 9px;border-radius:20px;cursor:pointer;user-select:none}
+  .lg .d{width:9px;height:9px;border-radius:50%}
+  .lg.off{opacity:.35}
+  .wrap{display:grid;grid-template-columns:1fr 360px;gap:0;height:calc(100vh - 71px)}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr;height:auto}}
+  #stage{position:relative;overflow:hidden;background:
+    radial-gradient(900px 700px at 50% 45%,#101726,#0c1018)}
+  svg{width:100%;height:100%;display:block;cursor:grab}
+  svg:active{cursor:grabbing}
+  .edge{fill:none;stroke:var(--line);stroke-width:1.4;opacity:.7}
+  .edge.role{stroke:#33415a;stroke-width:1.8}
+  .node{cursor:pointer}
+  .node circle{stroke:#0c1018;stroke-width:1.5;transition:r .12s,filter .12s}
+  .node:hover circle{filter:drop-shadow(0 0 7px currentColor)}
+  .node text{fill:var(--txt);font-size:10.5px;paint-order:stroke;stroke:#0c1018;stroke-width:3px}
+  .center text{font-size:13px;font-weight:700}
+  .role text{font-size:11.5px;font-weight:600;fill:#cdd8e8}
+  .hint{position:absolute;left:14px;bottom:12px;color:var(--mut);font-size:11px;
+    background:#0c1018aa;padding:5px 9px;border-radius:8px;border:1px solid var(--line)}
+  aside{background:var(--panel);border-left:1px solid var(--line);overflow:auto;padding:18px}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.4px;
+    padding:3px 9px;border-radius:6px;color:#0c1018;text-transform:uppercase}
+  .d-title{font-size:16px;font-weight:700;margin:10px 0 2px}
+  .d-role{color:var(--mut);font-size:12px;margin-bottom:12px}
+  .row{margin:11px 0;padding-top:11px;border-top:1px solid var(--line)}
+  .row .k{font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--mut);margin-bottom:3px}
+  .row .v{font-size:13.2px}
+  code{background:var(--panel2);border:1px solid var(--line);border-radius:5px;
+    padding:1px 6px;font-size:12px;color:#cfe3ff;word-break:break-word}
+  .pri{display:inline-block;font-weight:700;border-radius:5px;padding:2px 7px;font-size:11px}
+  .p1{background:#ff5d6c22;color:#ff8a94;border:1px solid #ff5d6c55}
+  .p2{background:#f5b94222;color:#ffd27a;border:1px solid #f5b94255}
+  .p3{background:#7c8aa022;color:#aeb9cc;border:1px solid #7c8aa055}
+  .pc{background:#2bb67322;color:#7fe0b4;border:1px solid #2bb67355}
+  .placeholder{color:var(--mut);margin-top:40px;text-align:center}
+  section{padding:26px 22px;border-top:1px solid var(--line)}
+  .grid-wrap{grid-column:1/-1}
+  .stitle{font-size:13px;letter-spacing:.6px;text-transform:uppercase;color:var(--acc);margin:0 0 16px}
+  .spine{display:flex;gap:0;overflow-x:auto;padding-bottom:6px}
+  .step{min-width:172px;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:12px 13px;margin-right:22px;position:relative;flex:0 0 auto}
+  .step:not(:last-child)::after{content:"";position:absolute;right:-22px;top:50%;width:22px;height:2px;background:linear-gradient(90deg,var(--acc),transparent)}
+  .step .n{font-size:10.5px;color:var(--acc);font-weight:700}
+  .step .t{font-weight:700;margin:3px 0 4px;font-size:13.5px}
+  .step .c{color:var(--mut);font-size:11.8px}
+  .pipe{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .pstage{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 13px;font-size:12.5px}
+  .pstage b{display:block;font-size:11px;color:var(--acc);letter-spacing:.4px}
+  .arrow{color:var(--mut)}
+  table{width:100%;border-collapse:collapse;font-size:12.8px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-weight:600;font-size:11px;letter-spacing:.4px;text-transform:uppercase}
+  tr:hover td{background:#ffffff06}
+</style>
+</head>
+<body>
+<header>
+  <h1>ICT Trading Method — Interactive Mind Map
+    <small>MNQ · Book C (M9 swing + M5 scalp) · taught → mechanised → tested → gated → production/graveyard · click any node</small></h1>
+  <div class="legend" id="legend"></div>
+</header>
+
+<div class="wrap">
+  <div id="stage">
+    <svg id="svg" viewBox="-420 -380 840 760" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="hint">drag to pan · scroll to zoom · click a node for mechanisation + verdict + improvement</div>
+  </div>
+  <aside id="detail">
+    <div class="placeholder">Click a concept node to see its<br>mechanisation, test verdict,<br>and how it could improve.</div>
+  </aside>
+</div>
+
+  <section class="grid-wrap">
+    <p class="stitle">The Followable Method — one trade, start to finish</p>
+    <div class="spine" id="spine"></div>
+  </section>
+
+  <section class="grid-wrap">
+    <p class="stitle">How it Evolved — the factory pipeline</p>
+    <div class="pipe" id="pipe"></div>
+  </section>
+
+  <section class="grid-wrap">
+    <p class="stitle">What's Left / Improvable — priority ranked</p>
+    <table id="pritable">
+      <thead><tr><th style="width:70px">Priority</th><th style="width:200px">Item</th><th>What & why</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+<script>
+const C = {production:'#33d6a6',validated:'#2bb673',empirical:'#5b9dff',built:'#b48bff',
+           weak:'#f5b942',candidate:'#7c8aa0',dead:'#ff5d6c'};
+const STATUS_LABEL = {production:'In Production',validated:'Validated edge',empirical:'Empirical (ungrounded)',
+  built:'Built (this phase)',weak:'Tested · neutral/weak',candidate:'Untested · low prior',dead:'Tested · DEAD'};
+
+const ROLES = [
+ {id:'bias', label:'Bias & Direction', nodes:[
+   {l:'OTE direction',s:'production',mech:'M9/M5 trade WITH weekly/daily bias; OTE retrace into discount(buy)/premium(sell). The project’s only real direction-driver.',v:'Validated CORE edge — every profitable engine is OTE-bias-aligned.',imp:'Saturated; re-wrapping it (target/hold/freq) decorrelates but adds no new edge.',pri:'—'},
+   {l:'SMT / NQ-leads',s:'production',mech:'check_nq_leads Option A+ (only NQ/ES may lead; session-level cross-asset divergence).',v:'Validated session GATE. Bar-level --smt-gate dropped 95% of trades = dead.',imp:'Locked. Oil triad (RB/HO) correct but CL has no structure.',pri:'—'},
+   {l:'COT',s:'dead',mech:'--cot off/confirm/veto ablated on the production combo.',v:'Adds NO edge (off 1.47 ≥ confirm/veto). Stays off.',imp:'Do not re-add as a bias filter.',pri:'closed'},
+   {l:'SSMT / strength-switch',s:'dead',mech:'Lathyrus Algorithm-1; ss_trigger + ss_continuation engines.',v:'Tail-noise: 3 of 370 trades = 100% of profit; gate worsens PF.',imp:'Only Algo 2-12 + a tail/drop-top gate FIRST, if ever. Low prior.',pri:'closed'},
+   {l:'Failed-raid reversal',s:'dead',mech:'reversal_engine: sweep prior-day pool + reclaim → fade. Independent of weekly bias.',v:'DEAD after the entry-bar lookahead fix (NQ 0.94 / YM 0.76, neg P&L).',imp:'The one axis the book lacks (independent direction) — but no edge survived.',pri:'closed'},
+ ]},
+ {id:'time', label:'Timing & Sessions', nodes:[
+   {l:'NY-AM killzone',s:'production',mech:'--session ny, exit kz; NY 7:30–17:00 EST gate.',v:'Validated — ~57% of P&L; already NY-AM-dominant.',imp:'Optimal as-is; copying more GxT avoidances is net-negative.',pri:'—'},
+   {l:'London',s:'weak',mech:'--no-london / london-gate skip-expand.',v:'Net-negative (expired losses) → dropped. Correct.',imp:'Keep OFF.',pri:'closed'},
+   {l:'Asia session',s:'weak',mech:'--include-asia adds 25T but 2 unfilterable NQ losses; Asia 1H FVG separately DEAD.',v:'Excluded from the combine; 87T MAX-PNL is funded-stage only.',imp:'Asia 1H FVG was a lookahead artifact ($114k figure invalid).',pri:'closed'},
+   {l:'Drivers 9:30/10:00',s:'dead',mech:'--driver-v2 / --driver-news / check_psp (GxT driver windows).',v:'Net-negative or zero across every window. Discretionary, non-mechanizable (3+ confirmations).',imp:'No driver levers remain — permanently closed.',pri:'closed'},
+   {l:'ICT Macros (time windows)',s:'candidate',mech:'In Concepts/ICT notes (2:50/3:50 AM, 9:50–10:10) — not built.',v:'Untested.',imp:'Likely a session-filter wrapper (low prior); FX-heavy.',pri:'P3'},
+ ]},
+ {id:'setup', label:'Setup & Structure', nodes:[
+   {l:'OTE zone (62–79%)',s:'production',mech:'70.5% retracement zone of the impulse leg.',v:'THE edge — entry concentrated here.',imp:'Saturated.',pri:'—'},
+   {l:'FVG (fair value gap)',s:'production',mech:'Active 4H FVG → V-shape reversal entry (62T combine).',v:'Validated combine core (62T).',imp:'Filling the gap beats failure-swing DOL targeting.',pri:'—'},
+   {l:'Liquidity sweep / raid',s:'weak',mech:'Prior-day pool sweep (reversal) + the V-shape’s CSD.',v:'Reversal use dead; V-shape use is in production.',imp:'No standalone edge.',pri:'closed'},
+   {l:'Order block / breaker',s:'candidate',mech:'GxT live vocabulary (lower-TF OB entries) — not built.',v:'Untested.',imp:'Continuation-style entry; every continuation entry built has failed. Low prior.',pri:'P3'},
+   {l:'ORG / NWOG / NDOG gaps',s:'dead',mech:'org_driver_falsifier.py: gap = 9:30 ET open − prior 16:00 close; driver-only test.',v:'DRIVER FALSIFIED (this session): fill PF ~1.00, worse than inverted + at 16th pct of a random-direction null. Band-robust.',imp:'NWOG range-week flag = measure-only (does not differentiate Book C weeks).',pri:'P3'},
+   {l:'SD confluence (“the Grail”)',s:'dead',mech:'--sd off/confirm/veto (CBDR/Asian/flout dealing range × 1-3 SD).',v:'Non-additive (confirm<off<veto = opposite of the claim). Off.',imp:'Do not re-add.',pri:'closed'},
+ ]},
+ {id:'entry', label:'Entry Trigger', nodes:[
+   {l:'OTE 70.5% limit',s:'production',mech:'--entry ote; M9 far r2 target, M5 tight r1 (1m fill resolver walk_limit_1m).',v:'THE validated trigger (M9 1.34 swing / M5 1.71 scalp, lookahead-clean).',imp:'Saturated.',pri:'—'},
+   {l:'V-shape CSD reversal',s:'production',mech:'62T combine: V-shape reversal at active FVG with structural SL.',v:'Validated combine (62T; 1m-audited ~96% WR, tiny DD).',imp:'Wins not separable from BE/EXP by any filter (5 filters failed).',pri:'—'},
+   {l:'FVG-CE / continuation',s:'dead',mech:'--entry fvg (FVG consequent-encroachment / continuation).',v:'LOSES to the OTE retrace every time (PF ≤ 0.96). Falsified ×3.',imp:'Do not use; OTE retrace dominates.',pri:'closed'},
+   {l:'First-touch limit (no V-shape)',s:'dead',mech:'first-touch limit entry without the V-shape filter.',v:'WR collapses 100%→26%; no edge. The V-shape IS the edge.',imp:'—',pri:'closed'},
+   {l:'C2/C3 candle entry',s:'dead',mech:'--c2-continuation (trade the manipulation candle direction).',v:'Conceptually backwards / 0 trades. Retired. (h4-direction-gate IS the C2 gate.)',imp:'—',pri:'closed'},
+ ]},
+ {id:'target', label:'Target & Exit (DOL)', nodes:[
+   {l:'Tight R1 (scalp)',s:'production',mech:'M5 --tp r1.',v:'THE scalp edge — the tight target IS the edge (r2/r3/runner degrade it).',imp:'Saturated.',pri:'—'},
+   {l:'R2 / R3 (swing)',s:'production',mech:'M9 ote r2 + turtle r3 combo.',v:'Validated swing (combo PF 1.47 NQ every-yr+).',imp:'Saturated.',pri:'—'},
+   {l:'Gap-fill (V-shape)',s:'production',mech:'--tp full (gap_top/gap_bot).',v:'Validated combine target.',imp:'Failure-swing DOL not robustly better → keep gap-fill.',pri:'closed'},
+   {l:'KZ / session exit',s:'production',mech:'--exit kz.',v:'Validated (== session exit; trades resolve at TP/SL first).',imp:'—',pri:'—'},
+   {l:'Runner / 2R+ (GxT payoff)',s:'dead',mech:'target sweep r1→r2→r3→prevday runner.',v:'DEGRADES our entries — our archetype is mean-reversion scalp, not trend runner.',imp:'Non-convertible; stop trying to make our engine GxT.',pri:'closed'},
+ ]},
+ {id:'risk', label:'Risk, Sizing & Validation', nodes:[
+   {l:'Equal-risk + half-budget',s:'production',mech:'$100/1R; Book C = M9 + 0.5·(M5-NQ + M5-YM) at same total scalp budget.',v:'Book C return/DD 31.7 (IN-SAMPLE) — YM half-budget diversifies (corr ~0).',imp:'In-sample only; needs live-demo OOS.',pri:'—'},
+   {l:'Frozen kill-criteria',s:'built',mech:'book_c_kill_criteria.py — block-bootstrap 12wk dist; KILL if PF<0.90 OR R-sum<−2.',v:'BUILT + frozen (sha256). The pre-registered go-live gate.',imp:'Run on live demo; no re-tuning on demo data.',pri:'P1'},
+   {l:'Execution stress',s:'built',mech:'execution_stress.py — adverse fills + commission vs the kill line.',v:'62T combine robust; Book C drag ~⅓ of R-sum at 2tk but no MEDIAN breach → a demo kill = real edge decay.',imp:'Re-run with real demo fills.',pri:'P2'},
+   {l:'Reconciliation logger',s:'built',mech:'demo_reconciliation.py — live-vs-engine parity + slippage(ticks) + latency → emits --score CSV.',v:'BUILT; chain live→reconcile→kill-criteria verified (self-test).',imp:'Wire mnq-server API relay fills into it.',pri:'P1'},
+   {l:'Live demo OOS',s:'candidate',mech:'Book C at min size on MNQM6; score vs frozen kill-criteria.',v:'The ONLY clean OOS left (2020-2026 is burned/in-sample).',imp:'Start it — this is the whole remaining lever.',pri:'P1'},
+ ]},
+];
+
+const SPINE = [
+ {n:'01 Bias',t:'Weekly / daily bias',c:'Direction = OTE into discount (buy) or premium (sell).'},
+ {n:'02 When',t:'NY-AM killzone',c:'London off. Pre-market + NY AM/PM only.'},
+ {n:'03 Setup',t:'OTE zone / active 4H FVG',c:'Retracement zone (swing/scalp) or FVG (combine V-shape).'},
+ {n:'04 Confirm',t:'NQ-leads SMT',c:'Session-level cross-asset divergence (NQ/ES primary).'},
+ {n:'05 Entry',t:'OTE 70.5% limit / V-shape',c:'1m-resolved true fill (no entry-bar lookahead).'},
+ {n:'06 Target',t:'R1 scalp · R2/R3 swing · gap-fill',c:'Tight target IS the scalp edge.'},
+ {n:'07 Exit',t:'Killzone / session close',c:'Resolve at TP/SL; flat by session end.'},
+ {n:'08 Risk',t:'Equal-risk half-budget',c:'Book C = M9 + 0.5·(M5-NQ + M5-YM).'},
+ {n:'09 Validate',t:'Frozen kill-criteria → LIVE DEMO',c:'The only clean OOS. No re-tuning on demo data.'},
+];
+
+const PIPE = ['Teaching·ICT 493 transcripts','Discover·qmd','Ground rules·NotebookLM',
+ 'Mechanise·backtest engine','Test·edge backtest','Gate-logic·/research-critiquer',
+ 'Gate-stats·Fable (external)','Production·Book C | Graveyard·dead-ends'];
+
+const PRI = [
+ {p:'P1',i:'Live demo (Book C, min size)',d:'The only pristine OOS left — 2020-2026 is burned/in-sample. Seed demo_reconciliation.py with real MNQM6 fills, score vs the frozen kill-criteria.'},
+ {p:'P1',i:'Wire API relay → reconciliation',d:'Route mnq-server (Tradovate API) fills into demo_reconciliation.py — the production path, not the web UI. Resolves symbol (MNQM6→MNQU6 roll) + $0.50/$2.00 pt-value in one place.'},
+ {p:'P2',i:'Re-run execution stress on real fills',d:'Replace the analytic adverse-fill estimate with measured demo slippage; confirm the kill line stays unreachable by costs.'},
+ {p:'P3',i:'NWOG range-week flag (log only)',d:'Measured: does NOT differentiate Book C weeks (corr ~+0.05). Log alongside demo trades; do NOT merge into the frozen book.'},
+ {p:'P3',i:'Untested Charter models',d:'Model 6/7 Universal, Silver Bullet, Venom/Order-block. Fable: bias-importing wrappers, prior ≤ ORG’s 15%, FX/BTC data-blocked. Only if the demo proves the core.'},
+ {p:'closed',i:'Dead-ends (do not re-run)',d:'drivers/PSP/SMT-bar/SSMT/COT/SD/reversal/ORG/Asia-1H/order-flow-delta/first-touch/C2/runner/failure-swing — tested & dead or neutral.'},
+];
+
+const cx=0, cy=0, R1=150, R2=300, deg=Math.PI/180;
+const svg=document.getElementById('svg');
+const NS='http://www.w3.org/2000/svg';
+function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+const filterOff={};
+
+function layout(){
+  const N=ROLES.length;
+  ROLES.forEach((role,i)=>{
+    const a=(-90 + i*(360/N))*deg;
+    role.x=cx+R1*Math.cos(a); role.y=cy+R1*Math.sin(a); role.a=a;
+    const k=role.nodes.length;
+    const spread=Math.min(54, k*10)*deg;
+    role.nodes.forEach((nd,j)=>{
+      const t = k===1?0:(j/(k-1)-0.5);
+      const na=a + t*spread;
+      nd.x=cx+R2*Math.cos(na); nd.y=cy+R2*Math.sin(na); nd.na=na;
+    });
+  });
+}
+
+function render(){
+  svg.innerHTML='';
+  const g=el('g',{id:'root'}); svg.appendChild(g);
+  ROLES.forEach(role=>{
+    g.appendChild(el('path',{class:'edge role',d:`M${cx},${cy} L${role.x},${role.y}`}));
+    role.nodes.forEach(nd=>{
+      if(filterOff[nd.s])return;
+      g.appendChild(el('path',{class:'edge',d:`M${role.x},${role.y} L${nd.x},${nd.y}`}));
+    });
+  });
+  const cg=el('g',{class:'node center'});
+  cg.appendChild(el('circle',{cx,cy,r:34,fill:'#1b2330',stroke:'#6aa9ff','stroke-width':2}));
+  const ct=el('text',{x:cx,y:cy-2,'text-anchor':'middle'});ct.textContent='Book C';
+  const ct2=el('text',{x:cx,y:cy+12,'text-anchor':'middle','font-size':'9'});ct2.textContent='ICT Method';
+  cg.appendChild(ct);cg.appendChild(ct2);g.appendChild(cg);
+  ROLES.forEach(role=>{
+    const rg=el('g',{class:'node role'});
+    rg.appendChild(el('circle',{cx:role.x,cy:role.y,r:9,fill:'#273346',stroke:'#4a5d7a'}));
+    const right=Math.cos(role.a)>=0;
+    const tx=el('text',{x:role.x+(right?13:-13),y:role.y+4,'text-anchor':right?'start':'end'});
+    tx.textContent=role.label; rg.appendChild(tx); g.appendChild(rg);
+    role.nodes.forEach(nd=>{
+      if(filterOff[nd.s])return;
+      const ng=el('g',{class:'node',style:`color:${C[nd.s]}`});
+      ng.appendChild(el('circle',{cx:nd.x,cy:nd.y,r:7.5,fill:C[nd.s]}));
+      const r2=Math.cos(nd.na)>=0;
+      const tx2=el('text',{x:nd.x+(r2?11:-11),y:nd.y+3.5,'text-anchor':r2?'start':'end'});
+      tx2.textContent=nd.l; ng.appendChild(tx2);
+      ng.addEventListener('click',()=>showDetail(nd,role));
+      g.appendChild(ng);
+    });
+  });
+  applyTransform();
+}
+
+function showDetail(nd,role){
+  const c=C[nd.s];
+  document.getElementById('detail').innerHTML=
+    '<span class="badge" style="background:'+c+'">'+STATUS_LABEL[nd.s]+'</span>'+
+    '<div class="d-title">'+nd.l+'</div>'+
+    '<div class="d-role">'+role.label+'</div>'+
+    '<div class="row"><div class="k">Mechanisation</div><div class="v">'+nd.mech+'</div></div>'+
+    '<div class="row"><div class="k">Test verdict</div><div class="v">'+nd.v+'</div></div>'+
+    '<div class="row"><div class="k">How it could improve</div><div class="v">'+nd.imp+'</div></div>'+
+    '<div class="row"><div class="k">Priority</div><div class="v">'+priChip(nd.pri)+'</div></div>';
+}
+function priChip(p){
+  if(p==='P1')return '<span class="pri p1">P1 · do now</span>';
+  if(p==='P2')return '<span class="pri p2">P2</span>';
+  if(p==='P3')return '<span class="pri p3">P3 · low prior</span>';
+  if(p==='closed')return '<span class="pri pc">closed</span>';
+  return '<span class="pri p3" style="opacity:.6">— production</span>';
+}
+
+let tx=0,ty=0,scale=1;
+function applyTransform(){const r=document.getElementById('root');if(r)r.setAttribute('transform','translate('+tx+','+ty+') scale('+scale+')');}
+svg.addEventListener('wheel',e=>{e.preventDefault();const f=e.deltaY<0?1.1:0.9;scale=Math.max(.45,Math.min(2.6,scale*f));applyTransform();},{passive:false});
+let drag=false,sx,sy;
+svg.addEventListener('mousedown',e=>{drag=true;sx=e.clientX;sy=e.clientY;});
+window.addEventListener('mousemove',e=>{if(!drag)return;tx+=(e.clientX-sx);ty+=(e.clientY-sy);sx=e.clientX;sy=e.clientY;applyTransform();});
+window.addEventListener('mouseup',()=>drag=false);
+
+function buildLegend(){
+  const L=document.getElementById('legend');
+  Object.keys(C).forEach(s=>{
+    const d=document.createElement('div');d.className='lg';d.dataset.s=s;
+    d.innerHTML='<span class="d" style="background:'+C[s]+'"></span>'+STATUS_LABEL[s];
+    d.onclick=()=>{filterOff[s]=!filterOff[s];d.classList.toggle('off');render();};
+    L.appendChild(d);
+  });
+}
+function buildSpine(){document.getElementById('spine').innerHTML=SPINE.map(s=>
+  '<div class="step"><div class="n">'+s.n+'</div><div class="t">'+s.t+'</div><div class="c">'+s.c+'</div></div>').join('');}
+function buildPipe(){document.getElementById('pipe').innerHTML=PIPE.map((p,i)=>{
+  const parts=p.split('·');
+  return '<div class="pstage"><b>'+parts[0]+'</b>'+(parts[1]||'')+'</div>'+(i<PIPE.length-1?'<span class="arrow">→</span>':'');
+}).join('');}
+function buildPri(){document.querySelector('#pritable tbody').innerHTML=PRI.map(r=>
+  '<tr><td>'+priChip(r.p)+'</td><td><b>'+r.i+'</b></td><td>'+r.d+'</td></tr>').join('');}
+
+layout();render();buildLegend();buildSpine();buildPipe();buildPri();
+</script>
+</body>
+</html>
