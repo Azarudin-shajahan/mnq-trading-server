@@ -7,7 +7,7 @@
 <style>
   :root{
     --bg:#0c1018; --panel:#141a26; --panel2:#1b2330; --line:#2a3547; --txt:#dfe7f2;
-    --mut:#8595ad; --acc:#6aa9ff;
+    --mut:#8595ad; --acc:#6aa9ff; --teach:#ffd27a;
     --production:#33d6a6; --validated:#2bb673; --empirical:#5b9dff;
     --dead:#ff5d6c; --weak:#f5b942; --candidate:#7c8aa0; --built:#b48bff;
   }
@@ -18,19 +18,24 @@
     gap:14px;align-items:center;justify-content:space-between}
   h1{font-size:18px;margin:0;letter-spacing:.2px}
   h1 small{color:var(--mut);font-weight:400;font-size:12px;display:block;margin-top:2px}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
   .legend{display:flex;flex-wrap:wrap;gap:8px}
   .lg{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--mut);
     background:var(--panel);border:1px solid var(--line);padding:4px 9px;border-radius:20px;cursor:pointer;user-select:none}
   .lg .d{width:9px;height:9px;border-radius:50%}
   .lg.off{opacity:.35}
-  .wrap{display:grid;grid-template-columns:1fr 360px;gap:0;height:calc(100vh - 71px)}
+  .toggle{font-size:12px;font-weight:600;color:#0c1018;background:var(--teach);
+    border:none;padding:6px 12px;border-radius:8px;cursor:pointer}
+  .toggle.off{background:var(--panel);color:var(--teach);border:1px solid var(--teach)}
+  .wrap{display:grid;grid-template-columns:1fr 380px;gap:0;height:calc(100vh - 71px)}
   @media(max-width:900px){.wrap{grid-template-columns:1fr;height:auto}}
-  #stage{position:relative;overflow:hidden;background:
-    radial-gradient(900px 700px at 50% 45%,#101726,#0c1018)}
+  #stage{position:relative;overflow:hidden;background:radial-gradient(900px 700px at 50% 45%,#101726,#0c1018)}
   svg{width:100%;height:100%;display:block;cursor:grab}
   svg:active{cursor:grabbing}
-  .edge{fill:none;stroke:var(--line);stroke-width:1.4;opacity:.7}
-  .edge.role{stroke:#33415a;stroke-width:1.8}
+  .edge{fill:none;stroke:var(--line);stroke-width:1.4;opacity:.6}
+  .edge.role{stroke:#33415a;stroke-width:1.7}
+  .tedge{fill:none;stroke:var(--teach);stroke-width:1.5;opacity:.55;stroke-dasharray:5 4}
+  .tedge:hover{opacity:1;stroke-width:2.4}
   .node{cursor:pointer}
   .node circle{stroke:#0c1018;stroke-width:1.5;transition:r .12s,filter .12s}
   .node:hover circle{filter:drop-shadow(0 0 7px currentColor)}
@@ -46,9 +51,8 @@
   .d-role{color:var(--mut);font-size:12px;margin-bottom:12px}
   .row{margin:11px 0;padding-top:11px;border-top:1px solid var(--line)}
   .row .k{font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--mut);margin-bottom:3px}
+  .row.teach .k{color:var(--teach)}
   .row .v{font-size:13.2px}
-  code{background:var(--panel2);border:1px solid var(--line);border-radius:5px;
-    padding:1px 6px;font-size:12px;color:#cfe3ff;word-break:break-word}
   .pri{display:inline-block;font-weight:700;border-radius:5px;padding:2px 7px;font-size:11px}
   .p1{background:#ff5d6c22;color:#ff8a94;border:1px solid #ff5d6c55}
   .p2{background:#f5b94222;color:#ffd27a;border:1px solid #f5b94255}
@@ -56,8 +60,8 @@
   .pc{background:#2bb67322;color:#7fe0b4;border:1px solid #2bb67355}
   .placeholder{color:var(--mut);margin-top:40px;text-align:center}
   section{padding:26px 22px;border-top:1px solid var(--line)}
-  .grid-wrap{grid-column:1/-1}
-  .stitle{font-size:13px;letter-spacing:.6px;text-transform:uppercase;color:var(--acc);margin:0 0 16px}
+  .stitle{font-size:13px;letter-spacing:.6px;text-transform:uppercase;color:var(--acc);margin:0 0 6px}
+  .ssub{color:var(--mut);font-size:12px;margin:0 0 16px;max-width:900px}
   .spine{display:flex;gap:0;overflow-x:auto;padding-bottom:6px}
   .step{min-width:172px;background:var(--panel);border:1px solid var(--line);border-radius:12px;
     padding:12px 13px;margin-right:22px;position:relative;flex:0 0 auto}
@@ -69,46 +73,75 @@
   .pstage{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 13px;font-size:12.5px}
   .pstage b{display:block;font-size:11px;color:var(--acc);letter-spacing:.4px}
   .arrow{color:var(--mut)}
-  table{width:100%;border-collapse:collapse;font-size:12.8px}
+  table{width:100%;border-collapse:collapse;font-size:12.6px}
   th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
   th{color:var(--mut);font-weight:600;font-size:11px;letter-spacing:.4px;text-transform:uppercase}
   tr:hover td{background:#ffffff06}
+  td .tag{font-size:10.5px;color:var(--teach)}
 </style>
 </head>
 <body>
 <header>
   <h1>ICT Trading Method — Interactive Mind Map
-    <small>MNQ · Book C (M9 swing + M5 scalp) · taught → mechanised → tested → gated → production/graveyard · click any node</small></h1>
-  <div class="legend" id="legend"></div>
+    <small>MNQ · Book C · ICT teaching → mechanised → tested → gated → production/graveyard · click any node</small></h1>
+  <div class="controls">
+    <button class="toggle off" id="tbtn">⚡ Show ICT teaching links</button>
+    <div class="legend" id="legend"></div>
+  </div>
 </header>
 
 <div class="wrap">
   <div id="stage">
-    <svg id="svg" viewBox="-420 -380 840 760" preserveAspectRatio="xMidYMid meet"></svg>
-    <div class="hint">drag to pan · scroll to zoom · click a node for mechanisation + verdict + improvement</div>
+    <svg id="svg" viewBox="-440 -390 880 780" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="hint">drag to pan · scroll to zoom · click a node · toggle <b style="color:var(--teach)">teaching links</b> for the ICT logic chain</div>
   </div>
   <aside id="detail">
-    <div class="placeholder">Click a concept node to see its<br>mechanisation, test verdict,<br>and how it could improve.</div>
+    <div class="placeholder">Click a concept node for: what <b>ICT teaches</b> &amp; how it links,<br>how we <b>mechanised</b> it, the <b>test verdict</b>,<br>and how it could <b>improve</b>.</div>
   </aside>
 </div>
 
-  <section class="grid-wrap">
-    <p class="stitle">The Followable Method — one trade, start to finish</p>
-    <div class="spine" id="spine"></div>
-  </section>
+<section>
+  <p class="stitle">The Followable Method — one trade, start to finish</p>
+  <p class="ssub">The production sequence (Book C). Each step is governed by the ICT concept named under it.</p>
+  <div class="spine" id="spine"></div>
+</section>
 
-  <section class="grid-wrap">
-    <p class="stitle">How it Evolved — the factory pipeline</p>
-    <div class="pipe" id="pipe"></div>
-  </section>
+<section>
+  <p class="stitle">ICT Teaching Chain — why the concepts connect (the connective tissue)</p>
+  <p class="ssub">ICT's institutional-order-flow logic, read top to bottom. This is the "how they relate from the teaching" that the toggle draws on the map. Our engine mechanises the bolded spine; the rest is filter/refinement (mostly tested-dead or untested).</p>
+  <div class="pipe" id="teachchain"></div>
+</section>
 
-  <section class="grid-wrap">
-    <p class="stitle">What's Left / Improvable — priority ranked</p>
-    <table id="pritable">
-      <thead><tr><th style="width:70px">Priority</th><th style="width:200px">Item</th><th>What & why</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </section>
+<section>
+  <p class="stitle">Teaching → Mechanisation → Improvement (the improvement finder)</p>
+  <p class="ssub">For each ICT principle: how we encoded it, what the test said, and where the next improvement / feature lives. Sorted so open improvements surface first.</p>
+  <table id="matrix">
+    <thead><tr><th style="width:180px">ICT principle (teaching)</th><th style="width:230px">How we mechanised it</th><th style="width:110px">Result</th><th>Improvement / feature idea</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<section>
+  <p class="stitle">Additional features worth building — honestly prioritised</p>
+  <p class="ssub">Research is converged (every direction-driver tested is dead), so new <i>edge</i> ideas are low-prior. The high-value features are about trusting the live demo and visibility, not new signals.</p>
+  <table id="features">
+    <thead><tr><th style="width:70px">Priority</th><th style="width:230px">Feature</th><th>What it does & why it helps</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<section>
+  <p class="stitle">How it Evolved — the factory pipeline</p>
+  <div class="pipe" id="pipe"></div>
+</section>
+
+<section>
+  <p class="stitle">What's Left / Improvable — priority ranked</p>
+  <table id="pritable">
+    <thead><tr><th style="width:70px">Priority</th><th style="width:200px">Item</th><th>What &amp; why</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
 
 <script>
 const C = {production:'#33d6a6',validated:'#2bb673',empirical:'#5b9dff',built:'#b48bff',
@@ -118,80 +151,126 @@ const STATUS_LABEL = {production:'In Production',validated:'Validated edge',empi
 
 const ROLES = [
  {id:'bias', label:'Bias & Direction', nodes:[
-   {l:'OTE direction',s:'production',mech:'M9/M5 trade WITH weekly/daily bias; OTE retrace into discount(buy)/premium(sell). The project’s only real direction-driver.',v:'Validated CORE edge — every profitable engine is OTE-bias-aligned.',imp:'Saturated; re-wrapping it (target/hold/freq) decorrelates but adds no new edge.',pri:'—'},
-   {l:'SMT / NQ-leads',s:'production',mech:'check_nq_leads Option A+ (only NQ/ES may lead; session-level cross-asset divergence).',v:'Validated session GATE. Bar-level --smt-gate dropped 95% of trades = dead.',imp:'Locked. Oil triad (RB/HO) correct but CL has no structure.',pri:'—'},
-   {l:'COT',s:'dead',mech:'--cot off/confirm/veto ablated on the production combo.',v:'Adds NO edge (off 1.47 ≥ confirm/veto). Stays off.',imp:'Do not re-add as a bias filter.',pri:'closed'},
-   {l:'SSMT / strength-switch',s:'dead',mech:'Lathyrus Algorithm-1; ss_trigger + ss_continuation engines.',v:'Tail-noise: 3 of 370 trades = 100% of profit; gate worsens PF.',imp:'Only Algo 2-12 + a tail/drop-top gate FIRST, if ever. Low prior.',pri:'closed'},
-   {l:'Failed-raid reversal',s:'dead',mech:'reversal_engine: sweep prior-day pool + reclaim → fade. Independent of weekly bias.',v:'DEAD after the entry-bar lookahead fix (NQ 0.94 / YM 0.76, neg P&L).',imp:'The one axis the book lacks (independent direction) — but no edge survived.',pri:'closed'},
+   {l:'OTE direction',s:'production',teach:'ICT: HTF (weekly/daily) bias sets the side — price is drawn to liquidity (buy-side above highs / sell-side below lows). You only trade WITH that draw.',mech:'M9/M5 trade with weekly/daily bias; OTE retrace into discount(buy)/premium(sell).',v:'Validated CORE edge — every profitable engine is OTE-bias-aligned.',imp:'Saturated; re-wrapping it (target/hold/freq) decorrelates but adds no new edge.',pri:'—'},
+   {l:'SMT / NQ-leads',s:'production',teach:'ICT SMT: correlated assets (NQ/ES/YM) should move together; a divergence (one fails to make the new high/low) reveals smart-money intent and confirms the side.',mech:'check_nq_leads Option A+ (only NQ/ES may lead; session-level divergence).',v:'Validated session GATE. Bar-level --smt-gate dropped 95% of trades = dead.',imp:'Locked. Oil triad (RB/HO) correct but CL has no structure.',pri:'—'},
+   {l:'COT',s:'dead',teach:'ICT: Commitment-of-Traders / commercial positioning gives a HTF bias backdrop (slow, weekly).',mech:'--cot off/confirm/veto ablated on the production combo.',v:'Adds NO edge (off 1.47 ≥ confirm/veto). Stays off.',imp:'Do not re-add as a bias filter.',pri:'closed'},
+   {l:'SSMT / strength-switch',s:'dead',teach:'GxT/Lathyrus: a cross-asset "strength switch" (role flip between leader/laggard) supposedly times the turn.',mech:'Algorithm-1; ss_trigger + ss_continuation engines.',v:'Tail-noise: 3 of 370 trades = 100% of profit; gate worsens PF.',imp:'Only Algo 2-12 + a tail/drop-top gate FIRST, if ever. Low prior.',pri:'closed'},
+   {l:'Failed-raid reversal',s:'dead',teach:'ICT: a liquidity raid that fails (sweep then immediate reclaim) signals reversal — direction independent of HTF bias.',mech:'reversal_engine: sweep prior-day pool + reclaim → fade.',v:'DEAD after the entry-bar lookahead fix (NQ 0.94 / YM 0.76, neg P&L).',imp:'The one axis the book lacks (independent direction) — but no edge survived.',pri:'closed'},
  ]},
  {id:'time', label:'Timing & Sessions', nodes:[
-   {l:'NY-AM killzone',s:'production',mech:'--session ny, exit kz; NY 7:30–17:00 EST gate.',v:'Validated — ~57% of P&L; already NY-AM-dominant.',imp:'Optimal as-is; copying more GxT avoidances is net-negative.',pri:'—'},
-   {l:'London',s:'weak',mech:'--no-london / london-gate skip-expand.',v:'Net-negative (expired losses) → dropped. Correct.',imp:'Keep OFF.',pri:'closed'},
-   {l:'Asia session',s:'weak',mech:'--include-asia adds 25T but 2 unfilterable NQ losses; Asia 1H FVG separately DEAD.',v:'Excluded from the combine; 87T MAX-PNL is funded-stage only.',imp:'Asia 1H FVG was a lookahead artifact ($114k figure invalid).',pri:'closed'},
-   {l:'Drivers 9:30/10:00',s:'dead',mech:'--driver-v2 / --driver-news / check_psp (GxT driver windows).',v:'Net-negative or zero across every window. Discretionary, non-mechanizable (3+ confirmations).',imp:'No driver levers remain — permanently closed.',pri:'closed'},
-   {l:'ICT Macros (time windows)',s:'candidate',mech:'In Concepts/ICT notes (2:50/3:50 AM, 9:50–10:10) — not built.',v:'Untested.',imp:'Likely a session-filter wrapper (low prior); FX-heavy.',pri:'P3'},
+   {l:'NY-AM killzone',s:'production',teach:'ICT killzones: the algorithm delivers price in specific windows (London / NY-AM 8:30-11). The killzone is WHEN the bias gets expressed.',mech:'--session ny, exit kz; NY 7:30–17:00 EST gate.',v:'Validated — ~57% of P&L; already NY-AM-dominant.',imp:'Optimal as-is; copying more GxT avoidances is net-negative.',pri:'—'},
+   {l:'London',s:'weak',teach:'ICT: London open often sets the day’s manipulation low/high before NY.',mech:'--no-london / london-gate skip-expand.',v:'Net-negative (expired losses) → dropped.',imp:'Keep OFF.',pri:'closed'},
+   {l:'Asia session',s:'weak',teach:'ICT: Asian range = consolidation/accumulation that NY later raids.',mech:'--include-asia (2 unfilterable NQ losses); Asia 1H FVG separately DEAD (lookahead).',v:'Excluded from combine; 87T MAX-PNL funded-stage only.',imp:'Asia 1H FVG $114k figure was invalid.',pri:'closed'},
+   {l:'Drivers 9:30/10:00',s:'dead',teach:'GxT: the 9:30 cash open + 10:00 4H open are "drivers" that kick off the delivery leg.',mech:'--driver-v2 / --driver-news / check_psp.',v:'Net-negative or zero across every window. Discretionary, non-mechanizable.',imp:'No driver levers remain — permanently closed.',pri:'closed'},
+   {l:'ICT Macros (time windows)',s:'candidate',teach:'ICT macros: ~20-min algorithmic windows (e.g. 9:50-10:10) where price runs to a level.',mech:'In Concepts/ICT notes — not built.',v:'Untested.',imp:'Likely a session-filter wrapper (low prior); FX-heavy.',pri:'P3'},
  ]},
  {id:'setup', label:'Setup & Structure', nodes:[
-   {l:'OTE zone (62–79%)',s:'production',mech:'70.5% retracement zone of the impulse leg.',v:'THE edge — entry concentrated here.',imp:'Saturated.',pri:'—'},
-   {l:'FVG (fair value gap)',s:'production',mech:'Active 4H FVG → V-shape reversal entry (62T combine).',v:'Validated combine core (62T).',imp:'Filling the gap beats failure-swing DOL targeting.',pri:'—'},
-   {l:'Liquidity sweep / raid',s:'weak',mech:'Prior-day pool sweep (reversal) + the V-shape’s CSD.',v:'Reversal use dead; V-shape use is in production.',imp:'No standalone edge.',pri:'closed'},
-   {l:'Order block / breaker',s:'candidate',mech:'GxT live vocabulary (lower-TF OB entries) — not built.',v:'Untested.',imp:'Continuation-style entry; every continuation entry built has failed. Low prior.',pri:'P3'},
-   {l:'ORG / NWOG / NDOG gaps',s:'dead',mech:'org_driver_falsifier.py: gap = 9:30 ET open − prior 16:00 close; driver-only test.',v:'DRIVER FALSIFIED (this session): fill PF ~1.00, worse than inverted + at 16th pct of a random-direction null. Band-robust.',imp:'NWOG range-week flag = measure-only (does not differentiate Book C weeks).',pri:'P3'},
-   {l:'SD confluence (“the Grail”)',s:'dead',mech:'--sd off/confirm/veto (CBDR/Asian/flout dealing range × 1-3 SD).',v:'Non-additive (confirm<off<veto = opposite of the claim). Off.',imp:'Do not re-add.',pri:'closed'},
+   {l:'OTE zone (62–79%)',s:'production',teach:'ICT OTE: after displacement, price retraces 62-79% of the leg (Fibonacci) — the discount/premium "optimal trade entry" zone.',mech:'70.5% retracement zone of the impulse leg.',v:'THE edge — entry concentrated here.',imp:'Saturated.',pri:'—'},
+   {l:'FVG (fair value gap)',s:'production',teach:'ICT FVG: a 3-candle imbalance left by displacement; price returns to "rebalance" it — a precise retracement target.',mech:'Active 4H FVG → V-shape reversal entry (62T combine).',v:'Validated combine core (62T).',imp:'Filling the gap beats failure-swing DOL targeting.',pri:'—'},
+   {l:'Liquidity sweep / raid',s:'weak',teach:'ICT: the algorithm first RAIDS resting liquidity (stops beyond a high/low) — the "manipulation" leg of PO3 — before the real move.',mech:'Prior-day pool sweep (reversal) + the V-shape’s CSD.',v:'Reversal use dead; V-shape use is in production.',imp:'No standalone edge; it is the SETUP condition for the reversal/OTE.',pri:'closed'},
+   {l:'Order block / breaker',s:'candidate',teach:'ICT: the last down/up candle before displacement (order block); a violated OB becomes a breaker — alternate entry refinement, often at the OTE.',mech:'GxT live vocabulary (lower-TF OB entries) — not built.',v:'Untested.',imp:'Continuation-style entry; every continuation entry built has failed. Low prior.',pri:'P3'},
+   {l:'ORG / NWOG / NDOG gaps',s:'dead',teach:'ICT: weekend (NWOG) / overnight (NDOG) / RTH opening gaps act as repricing magnets like FVGs.',mech:'org_driver_falsifier.py: gap = 9:30 ET open − prior 16:00 close; driver-only test.',v:'DRIVER FALSIFIED: fill PF ~1.00, worse than inverted + at 16th pct of a random-direction null. Band-robust.',imp:'NWOG range-week flag = measure-only (does not differentiate Book C weeks).',pri:'P3'},
+   {l:'SD confluence (“the Grail”)',s:'dead',teach:'ICT: overnight dealing range (CBDR/Asian) projected in standard deviations; entries near an SD line = high-probability ("the Grail").',mech:'--sd off/confirm/veto.',v:'Non-additive (confirm<off<veto = opposite of the claim). Off.',imp:'Do not re-add.',pri:'closed'},
  ]},
  {id:'entry', label:'Entry Trigger', nodes:[
-   {l:'OTE 70.5% limit',s:'production',mech:'--entry ote; M9 far r2 target, M5 tight r1 (1m fill resolver walk_limit_1m).',v:'THE validated trigger (M9 1.34 swing / M5 1.71 scalp, lookahead-clean).',imp:'Saturated.',pri:'—'},
-   {l:'V-shape CSD reversal',s:'production',mech:'62T combine: V-shape reversal at active FVG with structural SL.',v:'Validated combine (62T; 1m-audited ~96% WR, tiny DD).',imp:'Wins not separable from BE/EXP by any filter (5 filters failed).',pri:'—'},
-   {l:'FVG-CE / continuation',s:'dead',mech:'--entry fvg (FVG consequent-encroachment / continuation).',v:'LOSES to the OTE retrace every time (PF ≤ 0.96). Falsified ×3.',imp:'Do not use; OTE retrace dominates.',pri:'closed'},
-   {l:'First-touch limit (no V-shape)',s:'dead',mech:'first-touch limit entry without the V-shape filter.',v:'WR collapses 100%→26%; no edge. The V-shape IS the edge.',imp:'—',pri:'closed'},
-   {l:'C2/C3 candle entry',s:'dead',mech:'--c2-continuation (trade the manipulation candle direction).',v:'Conceptually backwards / 0 trades. Retired. (h4-direction-gate IS the C2 gate.)',imp:'—',pri:'closed'},
+   {l:'OTE 70.5% limit',s:'production',teach:'ICT: enter on a limit at the 70.5% sweet spot of the OTE, inside the FVG, in the bias direction.',mech:'--entry ote; M9 far r2, M5 tight r1 (1m fill resolver walk_limit_1m).',v:'THE validated trigger (M9 1.34 swing / M5 1.71 scalp, lookahead-clean).',imp:'Saturated.',pri:'—'},
+   {l:'V-shape CSD reversal',s:'production',teach:'ICT: after the raid, a sharp reclaim = change in state of delivery (CSD) — the reversal confirmation.',mech:'62T combine: V-shape reversal at active FVG with structural SL.',v:'Validated combine (62T; 1m-audited ~96% WR, tiny DD).',imp:'Wins not separable from BE/EXP by any filter (5 filters failed).',pri:'—'},
+   {l:'FVG-CE / continuation',s:'dead',teach:'ICT: enter at the FVG consequent-encroachment (50%) on a continuation, not a reversal.',mech:'--entry fvg.',v:'LOSES to the OTE retrace every time (PF ≤ 0.96). Falsified ×3.',imp:'Do not use; OTE retrace dominates.',pri:'closed'},
+   {l:'First-touch limit (no V-shape)',s:'dead',teach:'Naive: just buy the first touch of the level (no reversal confirmation).',mech:'first-touch limit without the V-shape filter.',v:'WR collapses 100%→26%; no edge. The V-shape IS the edge.',imp:'—',pri:'closed'},
+   {l:'C2/C3 candle entry',s:'dead',teach:'GxT candle profiling: C2 = manipulation candle, C3 = expansion; enter on the C3.',mech:'--c2-continuation (traded the manipulation direction — backwards).',v:'Conceptually backwards / 0 trades. (h4-direction-gate IS the C2 gate.)',imp:'—',pri:'closed'},
  ]},
  {id:'target', label:'Target & Exit (DOL)', nodes:[
-   {l:'Tight R1 (scalp)',s:'production',mech:'M5 --tp r1.',v:'THE scalp edge — the tight target IS the edge (r2/r3/runner degrade it).',imp:'Saturated.',pri:'—'},
-   {l:'R2 / R3 (swing)',s:'production',mech:'M9 ote r2 + turtle r3 combo.',v:'Validated swing (combo PF 1.47 NQ every-yr+).',imp:'Saturated.',pri:'—'},
-   {l:'Gap-fill (V-shape)',s:'production',mech:'--tp full (gap_top/gap_bot).',v:'Validated combine target.',imp:'Failure-swing DOL not robustly better → keep gap-fill.',pri:'closed'},
-   {l:'KZ / session exit',s:'production',mech:'--exit kz.',v:'Validated (== session exit; trades resolve at TP/SL first).',imp:'—',pri:'—'},
-   {l:'Runner / 2R+ (GxT payoff)',s:'dead',mech:'target sweep r1→r2→r3→prevday runner.',v:'DEGRADES our entries — our archetype is mean-reversion scalp, not trend runner.',imp:'Non-convertible; stop trying to make our engine GxT.',pri:'closed'},
+   {l:'Tight R1 (scalp)',s:'production',teach:'ICT: target the nearest internal liquidity / draw-on-liquidity for a quick scalp.',mech:'M5 --tp r1.',v:'THE scalp edge — the tight target IS the edge (r2/r3/runner degrade it).',imp:'Saturated.',pri:'—'},
+   {l:'R2 / R3 (swing)',s:'production',teach:'ICT: target the next EXTERNAL draw on liquidity (PDH/PDL, prior week high/low).',mech:'M9 ote r2 + turtle r3 combo.',v:'Validated swing (combo PF 1.47 NQ every-yr+).',imp:'Saturated.',pri:'—'},
+   {l:'Gap-fill (V-shape)',s:'production',teach:'ICT: a reversal off a raid draws back to fill the originating gap/imbalance.',mech:'--tp full (gap_top/gap_bot).',v:'Validated combine target.',imp:'Failure-swing DOL not robustly better → keep gap-fill.',pri:'closed'},
+   {l:'KZ / session exit',s:'production',teach:'ICT: the algorithmic delivery completes within the killzone; be flat by session close.',mech:'--exit kz.',v:'Validated (== session exit; trades resolve at TP/SL first).',imp:'—',pri:'—'},
+   {l:'Runner / 2R+ (GxT payoff)',s:'dead',teach:'GxT: let winners run to 2R+ on the expansion leg (trend-following payoff).',mech:'target sweep r1→r2→r3→prevday runner.',v:'DEGRADES our entries — our archetype is mean-reversion scalp, not trend runner.',imp:'Non-convertible; stop trying to make our engine GxT.',pri:'closed'},
  ]},
  {id:'risk', label:'Risk, Sizing & Validation', nodes:[
-   {l:'Equal-risk + half-budget',s:'production',mech:'$100/1R; Book C = M9 + 0.5·(M5-NQ + M5-YM) at same total scalp budget.',v:'Book C return/DD 31.7 (IN-SAMPLE) — YM half-budget diversifies (corr ~0).',imp:'In-sample only; needs live-demo OOS.',pri:'—'},
-   {l:'Frozen kill-criteria',s:'built',mech:'book_c_kill_criteria.py — block-bootstrap 12wk dist; KILL if PF<0.90 OR R-sum<−2.',v:'BUILT + frozen (sha256). The pre-registered go-live gate.',imp:'Run on live demo; no re-tuning on demo data.',pri:'P1'},
-   {l:'Execution stress',s:'built',mech:'execution_stress.py — adverse fills + commission vs the kill line.',v:'62T combine robust; Book C drag ~⅓ of R-sum at 2tk but no MEDIAN breach → a demo kill = real edge decay.',imp:'Re-run with real demo fills.',pri:'P2'},
-   {l:'Reconciliation logger',s:'built',mech:'demo_reconciliation.py — live-vs-engine parity + slippage(ticks) + latency → emits --score CSV.',v:'BUILT; chain live→reconcile→kill-criteria verified (self-test).',imp:'Wire mnq-server API relay fills into it.',pri:'P1'},
-   {l:'Live demo OOS',s:'candidate',mech:'Book C at min size on MNQM6; score vs frozen kill-criteria.',v:'The ONLY clean OOS left (2020-2026 is burned/in-sample).',imp:'Start it — this is the whole remaining lever.',pri:'P1'},
+   {l:'Equal-risk + half-budget',s:'production',teach:'Portfolio discipline (not ICT): size each trade to equal $ risk; split the scalp budget across uncorrelated instruments.',mech:'$100/1R; Book C = M9 + 0.5·(M5-NQ + M5-YM).',v:'Book C return/DD 31.7 (IN-SAMPLE) — YM half-budget diversifies (corr ~0).',imp:'In-sample only; needs live-demo OOS.',pri:'—'},
+   {l:'Frozen kill-criteria',s:'built',teach:'Statistical discipline: pre-register the kill threshold before the OOS so the demo can’t be rationalised.',mech:'book_c_kill_criteria.py — block-bootstrap 12wk dist; KILL if PF<0.90 OR R-sum<−2.',v:'BUILT + frozen (sha256). The go-live gate.',imp:'Run on live demo; no re-tuning on demo data.',pri:'P1'},
+   {l:'Execution stress',s:'built',teach:'Realism check: does execution cost alone breach the edge?',mech:'execution_stress.py — adverse fills + commission vs the kill line.',v:'62T combine robust; Book C drag ~⅓ of R-sum at 2tk but no MEDIAN breach → a demo kill = real edge decay.',imp:'Re-run with real demo fills.',pri:'P2'},
+   {l:'Reconciliation logger',s:'built',teach:'Attribution: separate edge-decay from execution by comparing live fills to the engine.',mech:'demo_reconciliation.py — parity + slippage(ticks) + latency → emits --score CSV.',v:'BUILT; chain live→reconcile→kill-criteria verified (self-test).',imp:'Wire mnq-server API relay fills into it.',pri:'P1'},
+   {l:'Live demo OOS',s:'candidate',teach:'The only pristine out-of-sample test: forward data the engine has never seen.',mech:'Book C at min size on MNQM6; score vs frozen kill-criteria.',v:'The ONLY clean OOS left (2020-2026 is burned/in-sample).',imp:'Start it — this is the whole remaining lever.',pri:'P1'},
  ]},
+];
+
+// ICT teaching connections between concepts (concept label -> concept label)
+const LINKS = [
+ ['OTE direction','SMT / NQ-leads','Two reads of institutional order flow: HTF bias + cross-asset SMT.'],
+ ['OTE direction','NY-AM killzone','HTF bias sets the side; the killzone is WHEN the algorithm delivers it.'],
+ ['NY-AM killzone','Liquidity sweep / raid','Inside the killzone the manipulation (Judas) leg raids liquidity first — PO3.'],
+ ['Liquidity sweep / raid','V-shape CSD reversal','The reclaim after the raid = change in state of delivery → reversal trigger.'],
+ ['Liquidity sweep / raid','FVG (fair value gap)','Displacement off the raid leaves an imbalance (FVG).'],
+ ['FVG (fair value gap)','OTE zone (62–79%)','Price retraces INTO the FVG, to the 62-79% OTE discount/premium.'],
+ ['OTE zone (62–79%)','OTE 70.5% limit','Entry at the 70.5% sweet spot inside the OTE zone.'],
+ ['SMT / NQ-leads','OTE 70.5% limit','SMT divergence confirms the entry side.'],
+ ['V-shape CSD reversal','Gap-fill (V-shape)','The reversal draws back to fill the originating gap.'],
+ ['OTE 70.5% limit','Tight R1 (scalp)','Scalp: target the nearest internal draw on liquidity (1R).'],
+ ['OTE 70.5% limit','R2 / R3 (swing)','Swing: target the next external draw on liquidity (PDH/PDL).'],
+ ['R2 / R3 (swing)','KZ / session exit','Hold to the draw or flatten at session close.'],
+ ['Order block / breaker','OTE zone (62–79%)','ICT: the OB/breaker often sits at the OTE — an alternate entry refinement (untested).'],
+ ['ORG / NWOG / NDOG gaps','FVG (fair value gap)','ICT treats session/weekend gaps as repricing magnets like FVGs (driver falsified for us).'],
 ];
 
 const SPINE = [
  {n:'01 Bias',t:'Weekly / daily bias',c:'Direction = OTE into discount (buy) or premium (sell).'},
  {n:'02 When',t:'NY-AM killzone',c:'London off. Pre-market + NY AM/PM only.'},
- {n:'03 Setup',t:'OTE zone / active 4H FVG',c:'Retracement zone (swing/scalp) or FVG (combine V-shape).'},
- {n:'04 Confirm',t:'NQ-leads SMT',c:'Session-level cross-asset divergence (NQ/ES primary).'},
+ {n:'03 Setup',t:'OTE zone / active 4H FVG',c:'Retracement into the imbalance (swing/scalp/combine).'},
+ {n:'04 Confirm',t:'NQ-leads SMT + raid→reclaim',c:'Cross-asset divergence + change in state of delivery.'},
  {n:'05 Entry',t:'OTE 70.5% limit / V-shape',c:'1m-resolved true fill (no entry-bar lookahead).'},
- {n:'06 Target',t:'R1 scalp · R2/R3 swing · gap-fill',c:'Tight target IS the scalp edge.'},
+ {n:'06 Target',t:'R1 scalp · R2/R3 swing · gap-fill',c:'Draw on liquidity. Tight target IS the scalp edge.'},
  {n:'07 Exit',t:'Killzone / session close',c:'Resolve at TP/SL; flat by session end.'},
  {n:'08 Risk',t:'Equal-risk half-budget',c:'Book C = M9 + 0.5·(M5-NQ + M5-YM).'},
  {n:'09 Validate',t:'Frozen kill-criteria → LIVE DEMO',c:'The only clean OOS. No re-tuning on demo data.'},
 ];
 
+const TEACHCHAIN = ['HTF bias·draw on liquidity','Killzone·timing','Manipulation·liquidity RAID',
+ 'Displacement·creates FVG','Retrace·into OTE 62-79%','Confirm·SMT + CSD reclaim',
+ 'Entry·70.5% limit','Expansion·to the DOL target','Exit·session close'];
+
 const PIPE = ['Teaching·ICT 493 transcripts','Discover·qmd','Ground rules·NotebookLM',
  'Mechanise·backtest engine','Test·edge backtest','Gate-logic·/research-critiquer',
  'Gate-stats·Fable (external)','Production·Book C | Graveyard·dead-ends'];
 
-const PRI = [
- {p:'P1',i:'Live demo (Book C, min size)',d:'The only pristine OOS left — 2020-2026 is burned/in-sample. Seed demo_reconciliation.py with real MNQM6 fills, score vs the frozen kill-criteria.'},
- {p:'P1',i:'Wire API relay → reconciliation',d:'Route mnq-server (Tradovate API) fills into demo_reconciliation.py — the production path, not the web UI. Resolves symbol (MNQM6→MNQU6 roll) + $0.50/$2.00 pt-value in one place.'},
- {p:'P2',i:'Re-run execution stress on real fills',d:'Replace the analytic adverse-fill estimate with measured demo slippage; confirm the kill line stays unreachable by costs.'},
- {p:'P3',i:'NWOG range-week flag (log only)',d:'Measured: does NOT differentiate Book C weeks (corr ~+0.05). Log alongside demo trades; do NOT merge into the frozen book.'},
- {p:'P3',i:'Untested Charter models',d:'Model 6/7 Universal, Silver Bullet, Venom/Order-block. Fable: bias-importing wrappers, prior ≤ ORG’s 15%, FX/BTC data-blocked. Only if the demo proves the core.'},
- {p:'closed',i:'Dead-ends (do not re-run)',d:'drivers/PSP/SMT-bar/SSMT/COT/SD/reversal/ORG/Asia-1H/order-flow-delta/first-touch/C2/runner/failure-swing — tested & dead or neutral.'},
+const MATRIX = [
+ {pr:'ok',k:'Bias = draw on liquidity',m:'Trade WITH weekly/daily bias; OTE into discount/premium',r:'production',d:'Core works. No improvement — re-wrapping it adds nothing (saturated).'},
+ {pr:'ok',k:'Imbalance retrace (FVG→OTE)',m:'OTE 70.5% limit inside an active FVG, 1m fill',r:'production',d:'The edge. Saturated.'},
+ {pr:'ok',k:'Manipulation → reclaim (CSD)',m:'V-shape reversal at the FVG (62T combine)',r:'production',d:'Wins not separable from dead trades by any filter (5 tried).'},
+ {pr:'ok',k:'SMT confirmation',m:'check_nq_leads (session-level, NQ/ES primary)',r:'production',d:'Bar-level SMT too aggressive; session-level is the right grain.'},
+ {pr:'P3',k:'Order block / breaker entry',m:'Not built',r:'candidate',d:'ICT alternate entry at the OTE. Build an --entry ob variant and ablate vs OTE — but continuation entries have all failed (prior ≤15%).'},
+ {pr:'P3',k:'ICT macros (timing refinement)',m:'Not built',r:'candidate',d:'Restrict entries to ~20-min macro windows; likely a session-filter wrapper. Low prior.'},
+ {pr:'P3',k:'Session/weekend gaps (ORG/NWOG)',m:'org_driver_falsifier.py',r:'dead',d:'Driver falsified. Only residual: NWOG range-week FLAG as a logged regime tag (measure-only, weak).'},
+ {pr:'closed',k:'Drivers / PSP / SSMT / SD / COT',m:'Built + ablated',r:'dead',d:'All anti-predictive discretionary reads — non-mechanizable. Do not revisit.'},
+ {pr:'P1',k:'Forward validation (OOS)',m:'Frozen kill-criteria + reconciliation logger',r:'built',d:'Run the live demo, attribute misses to edge-decay vs execution, score vs the frozen line.'},
 ];
 
-const cx=0, cy=0, R1=150, R2=300, deg=Math.PI/180;
+const FEATURES = [
+ {p:'P1',i:'API-relay fill capture',d:'Hook mnq-server (Tradovate API) fills straight into demo_reconciliation.py — the real execution path. One place to resolve the MNQM6→MNQU6 roll and $0.50/$2.00 pt-value.'},
+ {p:'P2',i:'Live equity / kill-gauge dashboard',d:'A small page that plots the running demo equity vs the frozen 12-wk kill band in real time — see at a glance whether you’re tracking the in-sample envelope or breaching it.'},
+ {p:'P2',i:'Liquidity map overlay (visibility)',d:'Auto-mark PDH/PDL, relative equal highs/lows, prior-week levels per session. Pure visibility (no new signal) — helps sanity-check the engine’s DOL targets against ICT liquidity.'},
+ {p:'P3',i:'MTF-confluence QUALITY score (disclosure, not filter)',d:'Score each entry by HTF-bias × MTF-FVG × LTF-OTE alignment and LOG it — then check post-OOS whether high-score trades outperform. Disclosure first; only becomes a filter if the demo proves it (filters have all failed in-sample).'},
+ {p:'P3',i:'Regime tag as a SIZING modulator',d:'Instead of using a regime flag (NWOG/vol/ADX) to skip trades (which failed), log it and test whether HALF-sizing in flagged weeks improves return/DD — a sizing lever, not an entry filter.'},
+ {p:'P3',i:'Teaching-coverage meter',d:'Auto-compute % of ICT taught techniques that are mechanised + tested (this map’s data) — a living "what’s left" gauge for the factory.'},
+ {p:'note',i:'Honest caveat',d:'New-edge features are low-prior: every direction-driver tested is dead and 2020-2026 is burned. The durable wins are validation + visibility, not new signals. Build edge features only if the live demo confirms the core.'},
+];
+
+const PRI = [
+ {p:'P1',i:'Live demo (Book C, min size)',d:'The only pristine OOS left. Seed demo_reconciliation.py with real MNQM6 fills, score vs the frozen kill-criteria.'},
+ {p:'P1',i:'Wire API relay → reconciliation',d:'Route mnq-server fills into demo_reconciliation.py — production path, not the web UI. Resolves symbol + pt-value in one place.'},
+ {p:'P2',i:'Re-run execution stress on real fills',d:'Replace the analytic estimate with measured demo slippage; confirm the kill line stays unreachable by costs.'},
+ {p:'P3',i:'NWOG range-week flag (log only)',d:'Measured: does NOT differentiate Book C weeks (corr ~+0.05). Log alongside demo trades; do NOT merge.'},
+ {p:'P3',i:'Untested Charter models / OB entry',d:'Model 6/7 Universal, Silver Bullet, Venom, Order-block entry. Fable: bias-importing wrappers, prior ≤15%, FX/BTC data-blocked. Only if the demo proves the core.'},
+ {p:'closed',i:'Dead-ends (do not re-run)',d:'drivers/PSP/SMT-bar/SSMT/COT/SD/reversal/ORG/Asia-1H/order-flow-delta/first-touch/C2/runner/failure-swing.'},
+];
+
+const cx=0, cy=0, R1=155, R2=310, deg=Math.PI/180;
 const svg=document.getElementById('svg');
 const NS='http://www.w3.org/2000/svg';
 function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
 const filterOff={};
+let showLinks=false;
+const nodeByLabel={};
 
 function layout(){
   const N=ROLES.length;
@@ -204,20 +283,29 @@ function layout(){
       const t = k===1?0:(j/(k-1)-0.5);
       const na=a + t*spread;
       nd.x=cx+R2*Math.cos(na); nd.y=cy+R2*Math.sin(na); nd.na=na;
+      nodeByLabel[nd.l]=nd;
     });
   });
 }
+function bez(a,b){const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,k=0.25;return `M${a.x},${a.y} Q${mx-(b.y-a.y)*k},${my+(b.x-a.x)*k} ${b.x},${b.y}`;}
 
 function render(){
   svg.innerHTML='';
   const g=el('g',{id:'root'}); svg.appendChild(g);
   ROLES.forEach(role=>{
     g.appendChild(el('path',{class:'edge role',d:`M${cx},${cy} L${role.x},${role.y}`}));
-    role.nodes.forEach(nd=>{
-      if(filterOff[nd.s])return;
-      g.appendChild(el('path',{class:'edge',d:`M${role.x},${role.y} L${nd.x},${nd.y}`}));
-    });
+    role.nodes.forEach(nd=>{ if(filterOff[nd.s])return;
+      g.appendChild(el('path',{class:'edge',d:`M${role.x},${role.y} L${nd.x},${nd.y}`})); });
   });
+  if(showLinks){
+    LINKS.forEach(lk=>{
+      const a=nodeByLabel[lk[0]], b=nodeByLabel[lk[1]];
+      if(!a||!b||filterOff[a.s]||filterOff[b.s])return;
+      const p=el('path',{class:'tedge',d:bez(a,b)});
+      const ti=el('title'); ti.textContent=lk[0]+' → '+lk[1]+' : '+lk[2]; p.appendChild(ti);
+      g.appendChild(p);
+    });
+  }
   const cg=el('g',{class:'node center'});
   cg.appendChild(el('circle',{cx,cy,r:34,fill:'#1b2330',stroke:'#6aa9ff','stroke-width':2}));
   const ct=el('text',{x:cx,y:cy-2,'text-anchor':'middle'});ct.textContent='Book C';
@@ -229,8 +317,7 @@ function render(){
     const right=Math.cos(role.a)>=0;
     const tx=el('text',{x:role.x+(right?13:-13),y:role.y+4,'text-anchor':right?'start':'end'});
     tx.textContent=role.label; rg.appendChild(tx); g.appendChild(rg);
-    role.nodes.forEach(nd=>{
-      if(filterOff[nd.s])return;
+    role.nodes.forEach(nd=>{ if(filterOff[nd.s])return;
       const ng=el('g',{class:'node',style:`color:${C[nd.s]}`});
       ng.appendChild(el('circle',{cx:nd.x,cy:nd.y,r:7.5,fill:C[nd.s]}));
       const r2=Math.cos(nd.na)>=0;
@@ -247,9 +334,9 @@ function showDetail(nd,role){
   const c=C[nd.s];
   document.getElementById('detail').innerHTML=
     '<span class="badge" style="background:'+c+'">'+STATUS_LABEL[nd.s]+'</span>'+
-    '<div class="d-title">'+nd.l+'</div>'+
-    '<div class="d-role">'+role.label+'</div>'+
-    '<div class="row"><div class="k">Mechanisation</div><div class="v">'+nd.mech+'</div></div>'+
+    '<div class="d-title">'+nd.l+'</div><div class="d-role">'+role.label+'</div>'+
+    '<div class="row teach"><div class="k">ICT teaching &amp; how it links</div><div class="v">'+nd.teach+'</div></div>'+
+    '<div class="row"><div class="k">How we mechanised it</div><div class="v">'+nd.mech+'</div></div>'+
     '<div class="row"><div class="k">Test verdict</div><div class="v">'+nd.v+'</div></div>'+
     '<div class="row"><div class="k">How it could improve</div><div class="v">'+nd.imp+'</div></div>'+
     '<div class="row"><div class="k">Priority</div><div class="v">'+priChip(nd.pri)+'</div></div>';
@@ -259,6 +346,7 @@ function priChip(p){
   if(p==='P2')return '<span class="pri p2">P2</span>';
   if(p==='P3')return '<span class="pri p3">P3 · low prior</span>';
   if(p==='closed')return '<span class="pri pc">closed</span>';
+  if(p==='note')return '<span class="pri p3" style="opacity:.7">note</span>';
   return '<span class="pri p3" style="opacity:.6">— production</span>';
 }
 
@@ -270,25 +358,29 @@ svg.addEventListener('mousedown',e=>{drag=true;sx=e.clientX;sy=e.clientY;});
 window.addEventListener('mousemove',e=>{if(!drag)return;tx+=(e.clientX-sx);ty+=(e.clientY-sy);sx=e.clientX;sy=e.clientY;applyTransform();});
 window.addEventListener('mouseup',()=>drag=false);
 
-function buildLegend(){
-  const L=document.getElementById('legend');
-  Object.keys(C).forEach(s=>{
-    const d=document.createElement('div');d.className='lg';d.dataset.s=s;
+document.getElementById('tbtn').onclick=function(){showLinks=!showLinks;this.classList.toggle('off',!showLinks);
+  this.textContent=(showLinks?'⚡ Hide':'⚡ Show')+' ICT teaching links';render();};
+
+function buildLegend(){const L=document.getElementById('legend');
+  Object.keys(C).forEach(s=>{const d=document.createElement('div');d.className='lg';
     d.innerHTML='<span class="d" style="background:'+C[s]+'"></span>'+STATUS_LABEL[s];
-    d.onclick=()=>{filterOff[s]=!filterOff[s];d.classList.toggle('off');render();};
-    L.appendChild(d);
-  });
-}
+    d.onclick=()=>{filterOff[s]=!filterOff[s];d.classList.toggle('off');render();};L.appendChild(d);});}
+function flow(id,arr){document.getElementById(id).innerHTML=arr.map((p,i)=>{const x=p.split('·');
+  return '<div class="pstage"><b>'+x[0]+'</b>'+(x[1]||'')+'</div>'+(i<arr.length-1?'<span class="arrow">→</span>':'');}).join('');}
 function buildSpine(){document.getElementById('spine').innerHTML=SPINE.map(s=>
   '<div class="step"><div class="n">'+s.n+'</div><div class="t">'+s.t+'</div><div class="c">'+s.c+'</div></div>').join('');}
-function buildPipe(){document.getElementById('pipe').innerHTML=PIPE.map((p,i)=>{
-  const parts=p.split('·');
-  return '<div class="pstage"><b>'+parts[0]+'</b>'+(parts[1]||'')+'</div>'+(i<PIPE.length-1?'<span class="arrow">→</span>':'');
-}).join('');}
+function buildMatrix(){const order={P1:0,P2:1,P3:2,ok:3,closed:4};
+  const rows=MATRIX.slice().sort((a,b)=>(order[a.pr]-order[b.pr]));
+  document.querySelector('#matrix tbody').innerHTML=rows.map(r=>
+   '<tr><td><b>'+r.k+'</b></td><td>'+r.m+'</td><td><span class="dotwrap"><span style="color:'+C[r.r]+'">●</span> '+STATUS_LABEL[r.r]+'</span></td><td>'+priChip(r.pr)+' &nbsp;'+r.d+'</td></tr>').join('');}
+function buildFeatures(){document.querySelector('#features tbody').innerHTML=FEATURES.map(r=>
+   '<tr><td>'+priChip(r.p)+'</td><td><b>'+r.i+'</b></td><td>'+r.d+'</td></tr>').join('');}
 function buildPri(){document.querySelector('#pritable tbody').innerHTML=PRI.map(r=>
-  '<tr><td>'+priChip(r.p)+'</td><td><b>'+r.i+'</b></td><td>'+r.d+'</td></tr>').join('');}
+   '<tr><td>'+priChip(r.p)+'</td><td><b>'+r.i+'</b></td><td>'+r.d+'</td></tr>').join('');}
 
-layout();render();buildLegend();buildSpine();buildPipe();buildPri();
+layout();render();buildLegend();buildSpine();
+flow('teachchain',TEACHCHAIN);flow('pipe',PIPE);
+buildMatrix();buildFeatures();buildPri();
 </script>
 </body>
 </html>
