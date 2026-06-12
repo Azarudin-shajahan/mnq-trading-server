@@ -103,6 +103,23 @@ def main():
             print("  %-30s return/DD %6.1f   maxDD $%7.0f   total $%7.0f" % (nm, r, dd, s.sum()))
         print("  -> GC earns a slot only if Book C+GC return/DD > Book C OR maxDD materially lower.")
 
+        # MGC rescale (MFFU bans Full GC; only MGC tradeable). MGC = 1/10 GC on the SAME gold
+        # price -> R-based edge INVARIANT; only $/pt ($100->$10), tick ($10->$1) + sizing change.
+        tr = rows[mid]
+        pts = tr.pnl.sum()
+        dd_pts = tr.groupby("date").pnl.sum()
+        eqc = dd_pts.cumsum(); mdd = (eqc - eqc.cummax()).min(); wd = abs(dd_pts.min())
+        nday = 1000.0 / (wd * 10) if wd else 99; ndd = 2000.0 / (abs(mdd) * 10) if mdd else 99
+        print("\n=== MGC rescale (MFFU-legal vehicle; Full GC banned) ===")
+        print("  edge (PF/every-yr/corr/return-DD) = INVARIANT vs GC (same gold price, R-based).")
+        print("  1 contract 2020-2026 raw: GC $%.0f ($100/pt) | MGC $%.0f ($10/pt); worst day MGC $%.0f"
+              % (pts*100, pts*10, dd_pts.min()*10))
+        print("  max-safe on $50K (DLL $1k / maxDD $2k): %.1f (DLL) / %.1f (maxDD) -> %d MGC; tick 0.10pt=$1"
+              % (nday, ndd, int(min(nday, ndd))))
+        print("  CAVEAT: %d trades x PF %.2f -> commission/slippage eats most of the raw $ "
+              "(low-PF high-freq scalp) -> net marginal standalone. Verdict UNCHANGED (dilutive; "
+              "weak MGC standalone only; EMPIRICAL + in-sample)." % (len(tr), 1.18))
+
     print("\nVERDICT GUIDE: GC qualifies only if every-year-positive across the FAIR band "
           "(0.94-3.75pt), not just the over-filtered tail (the RTY trap), AND daily corr is "
           "low. If PF is good only at min_imp>=3.75 with small n -> over-filter artifact = DEAD. "
