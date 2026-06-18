@@ -832,10 +832,11 @@ def compute_quality_score(df_4h, sess_start_ts, direction, london_profile,
 # ── V-SHAPE ENTRY (instrument-aware) ─────────────────────────────────────────
 def find_5m_gap_bot_reversal(sess5m, fvg, direction, instrument='nq',
                               max_sweep=None, min_close_pos=0.50,
-                              early_window_bars=None):
+                              early_window_bars=None, wick_frac=None):
     lo_col = f'{instrument}_low'
     hi_col = f'{instrument}_high'
     cl_col = f'{instrument}_close'
+    op_col = f'{instrument}_open'
 
     for idx, (_, bar) in enumerate(sess5m.iterrows()):
         if early_window_bars is not None and idx >= early_window_bars:
@@ -845,6 +846,14 @@ def find_5m_gap_bot_reversal(sess5m, fvg, direction, instrument='nq',
         c   = float(bar[cl_col])
         rng = hi - lo
         if rng < 0.5: continue
+
+        # TTrades shallow-sweep wick filter (default off): opposing run (wick opposite the bias)
+        # must be a small fraction of range -> "supports expansion". Body-aware (uses open).
+        if wick_frac is not None:
+            o = float(bar[op_col])
+            opp = (min(o, c) - lo) / rng if direction == 'bull' else (hi - max(o, c)) / rng
+            if opp > wick_frac:
+                continue
 
         if direction == 'bull':
             if lo > fvg.gap_bot:    continue
@@ -946,6 +955,10 @@ def run_backtest(df5m, df_1m, df_4h, df15m=None,
                  fs_tf='1h',            # failure-swing DOL: swing resample TF (sensitivity)
                  fs_tol_mult=1.0,       # failure-swing DOL: multiply FS_CLUSTER_TOL (sensitivity)
                  profiling_gate=False,  # 4H if-then profiling-sequence selector (test)
+                 wick_frac=None,        # TTrades shallow-sweep wick filter (None = off)
+                 killzone=None,         # restrict entries to a kill zone, e.g. 'ny-am' (None = off)
+                 ce_entry=False,        # TTrades CE: enter at FVG 50% (consequent encroachment) vs edge
+                 sd_target=None,        # TTrades SD-projection TP: entry-bar leg * N (None = off)
                  ):
 
     active_sessions = ['london', 'ny_am', 'ny_pm']
@@ -978,6 +991,10 @@ def run_backtest(df5m, df_1m, df_4h, df15m=None,
     if include_asia:            flags.append('asia-session')
     if asia_gate:               flags.append('asia-gate')
     if erl_gate:                flags.append('erl-gate')
+    if wick_frac is not None:   flags.append(f'wick-frac={wick_frac}')
+    if killzone:                flags.append(f'killzone={killzone}')
+    if ce_entry:                flags.append('ce-entry')
+    if sd_target is not None:   flags.append(f'sd-target={sd_target}')
     if news_align:              flags.append('news-align')
     if holiday_filter:          flags.append('us-holidays')
     if entry_cutoff_hm is not None:
@@ -1054,6 +1071,9 @@ def run_backtest(df5m, df_1m, df_4h, df15m=None,
                             and asia_dir == london_dir)
 
         for session_label in active_sessions:
+            # kill-zone gate (default off): concentrate entries in the NY AM kill zone only
+            if killzone == 'ny-am' and session_label != 'ny_am':
+                continue
             sess5m = day_df5m[day_df5m['session'] == session_label].reset_index(drop=True)
             if len(sess5m) < 3: continue
 
@@ -1103,6 +1123,7 @@ def run_backtest(df5m, df_1m, df_4h, df15m=None,
                         max_sweep=max_sweep,
                         min_close_pos=min_close_pos,
                         early_window_bars=early_bars,
+                        wick_frac=wick_frac,
                     )
                     if entry_bar is None:
                         stats[f'no_reversal_{inst}'] += 1; continue
@@ -1253,7 +1274,7 @@ def run_backtest(df5m, df_1m, df_4h, df15m=None,
                                 eb, eb_idx = find_5m_gap_bot_reversal(
                                     c2_sess, fvg, flip_dir, instrument=inst,
                                     max_sweep=max_sweep, min_close_pos=min_close_pos,
-                                    early_window_bars=early_bars)
+                                    early_window_bars=early_bars, wick_frac=wick_frac)
                                 if eb is None: continue
                                 if entry_cutoff_hm is not None:
                                     et = eb['timestamp']
@@ -1277,8 +1298,10 @@ def run_backtest(df5m, df_1m, df_4h, df15m=None,
             for inst, fvg, entry_bar, entry_bar_idx, rel_move, ep_ov, sl_ov, etype, tp_ov, trade_dir in selected:
                 tick = INST_CONFIG[inst]['tick']
 
+                # CE entry (default off): fill at the FVG consequent encroachment (50%) instead of edge
+                _edge = fvg.gap_bot + tick if trade_dir == 'bull' else fvg.gap_top - tick
                 entry_price = ep_ov if ep_ov is not None else (
-                    fvg.gap_bot + tick if trade_dir == 'bull' else fvg.gap_top - tick)
+                    (fvg.gap_top + fvg.gap_bot) / 2 if ce_entry else _edge)
 
                 lo_col = f'{inst}_low'
                 hi_col = f'{inst}_high'
@@ -1309,6 +1332,12 @@ def run_backtest(df5m, df_1m, df_4h, df15m=None,
                     tp = (fvg.gap_top + fvg.gap_bot) / 2
                 if tp_ov is not None:
                     tp = tp_ov
+
+                # SD-projection target (default off): project the sweep/manipulation leg by N
+                if sd_target is not None and tp_ov is None:
+                    el = float(entry_bar[lo_col]); eh = float(entry_bar[hi_col])
+                    tp = (el + sd_target * (fvg.gap_top - el) if trade_dir == 'bull'
+                          else eh - sd_target * (eh - fvg.gap_bot))
 
                 if tp_cap_r is not None:
                     capped = (entry_price + tp_cap_r * risk if trade_dir == 'bull'
@@ -1508,6 +1537,14 @@ if __name__ == '__main__':
                     help='v8.17: skip NYSE market holidays')
     ap.add_argument('--entry-cutoff-ist', type=str, default=None, metavar='HH:MM',
                     help='v8.17: skip entries after this IST time (e.g. 20:30)')
+    ap.add_argument('--wick-frac', type=float, default=None,
+                    help='TTrades shallow-sweep wick filter: max opposing-run frac of the sweep candle (None=off)')
+    ap.add_argument('--killzone', choices=['ny-am'], default=None,
+                    help='restrict entries to the NY AM kill zone session only (None=off)')
+    ap.add_argument('--ce-entry', action='store_true',
+                    help='TTrades CE: enter at FVG 50% (consequent encroachment) instead of the edge')
+    ap.add_argument('--sd-target', type=float, default=None,
+                    help='TTrades SD-projection TP: project entry-bar sweep leg by N (e.g. 2.0)')
     ap.add_argument('--out', default='mnq_trade_log_v8_18.csv')
     args = ap.parse_args()
 
@@ -1575,6 +1612,10 @@ if __name__ == '__main__':
         holiday_filter    = args.us_holiday_filter,
         entry_cutoff_hm   = (lambda s: int(s.split(':')[0])*60 + int(s.split(':')[1]))(args.entry_cutoff_ist)
                             if args.entry_cutoff_ist else None,
+        wick_frac         = args.wick_frac,
+        killzone          = args.killzone,
+        ce_entry          = args.ce_entry,
+        sd_target         = args.sd_target,
     )
 
     print_results(trades, daily_pnl, stats, tuple(args.instruments))
