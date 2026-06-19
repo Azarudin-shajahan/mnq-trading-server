@@ -14,6 +14,7 @@ import pandas as pd
 
 ENGINE_PATH = os.path.expanduser('~/mnq_trading/backtest/mnq_backtest_engine_v8_18.py')
 DEFAULT_5M  = os.path.expanduser('~/mnq_trading/data/MULTI_5min_IST_2020_2025.csv')
+LIVE_5M     = os.path.expanduser('~/mnq_trading/data/MULTI_5min_live_IST.csv')
 TRIAD = ('nq', 'es', 'ym')
 
 
@@ -28,8 +29,16 @@ _ENG = _load_engine()
 is_edt = _ENG.is_edt
 
 
-def load_5m(path=DEFAULT_5M):
+def load_5m(path=DEFAULT_5M, include_live=True):
+    """Load 5m bars. If the daily-refreshed live file exists, concatenate it on
+    top (dedup on timestamp, live wins) so the loop transparently sees fresh days
+    without ever mutating the frozen historical file."""
     df = pd.read_csv(path, parse_dates=['timestamp'])
+    if include_live and os.path.exists(LIVE_5M):
+        live = pd.read_csv(LIVE_5M, parse_dates=['timestamp'])
+        df = (pd.concat([df, live], ignore_index=True)
+                .drop_duplicates(subset='timestamp', keep='last')
+                .sort_values('timestamp').reset_index(drop=True))
     df['date'] = df['timestamp'].dt.date
     return df
 
@@ -152,7 +161,7 @@ CONTEXT_FIELDS = ['date', 'snapshot_ist', 'weekly_quarter', 'true_open_d',
 def _lookahead_selftest():
     """Corrupt every bar from the snapshot forward and assert context is
     unchanged for a sample of dates. Proves the computer is causal."""
-    df = load_5m()
+    df = load_5m(include_live=False)
     dates = sorted(df['date'].unique())
     sample = dates[len(dates)//3: len(dates)//3 + 8]
     ok = 0
