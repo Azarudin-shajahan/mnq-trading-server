@@ -87,10 +87,19 @@ def main():
     df = H.load_5m(args.data)
     ctx = H.compute_context(df, date)
     if ctx is None:
-        sys.exit(f"No bars for {date_str} in {os.path.basename(args.data)} - "
-                 f"data not current. Update the feed or pass --date.")
-
-    show_context(ctx)
+        # architecture B: today's bars are not settled yet. Log the bias now with
+        # blank (pending) machine context; htf_outcomes --update fills it tomorrow.
+        ctx = {f: '' for f in H.CONTEXT_FIELDS}
+        ctx['date'] = date_str
+        ctx['weekly_quarter'] = H.weekly_quarter(date)
+        sh, sm = H.ny_open_ist(date)
+        ctx['snapshot_ist'] = f'{sh:02d}:{sm:02d}'
+        ref_date = max(df['date'])
+        print(f"\n  [{date_str}] bars not settled yet - context PENDING (fills "
+              f"tomorrow). Reference = last completed day {ref_date}:")
+        show_context(H.compute_context(df, ref_date))
+    else:
+        show_context(ctx)
     bias, conf, drivers, override = collect(args)
 
     row = dict(ctx)

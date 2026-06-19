@@ -131,7 +131,9 @@ def main():
 
     client = db.Historical(key)
     start = (args.since + "T00:00:00") if args.since else _incremental_start()
-    end = datetime.date.today().strftime("%Y-%m-%dT00:00:00")   # complete days only
+    # end at yesterday 00:00 UTC: only fully-settled days, and stays inside
+    # Databento's available history edge (recent ~15min is not yet licensed/served).
+    end = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%dT00:00:00")
     if start >= end:
         print(f"  up to date (start {start} >= end {end}); nothing to pull."); return
 

@@ -100,6 +100,12 @@ def update_outcomes(date):
     hit = False
     for r in rows:
         if r['date'] == str(date) and r['split'] == 'forward' and not r['actual_dir']:
+            # fill pending machine context now that the day's bars have settled
+            if not r['true_open_d']:
+                ctx = H.compute_context(df, date)
+                if ctx:
+                    for k, v in ctx.items():
+                        r[k] = '' if v is None else v
             adir, rng = actual_outcome(df, date)
             r['actual_dir'] = adir if adir is not None else ''
             r['actual_range_pts'] = rng if rng is not None else ''
@@ -114,11 +120,27 @@ def update_outcomes(date):
     print(f"updated outcomes for {date}")
 
 
+def update_pending():
+    """Retry every forward row whose outcome is still blank (robust to data lag;
+    the natural cron call - no date guessing)."""
+    if not os.path.exists(JOURNAL):
+        print("no journal yet"); return
+    rows = list(csv.DictReader(open(JOURNAL)))
+    dates = sorted({r['date'] for r in rows
+                    if r['split'] == 'forward' and not r['actual_dir']})
+    if not dates:
+        print("no pending forward rows"); return
+    for ds in dates:
+        update_outcomes(datetime.date.fromisoformat(ds))
+
+
 if __name__ == '__main__':
     import sys
     if '--backfill' in sys.argv:
         backfill_journal()
+    elif '--update-pending' in sys.argv:
+        update_pending()
     elif '--update' in sys.argv:
         update_outcomes(datetime.date.fromisoformat(sys.argv[sys.argv.index('--update') + 1]))
     else:
-        print("usage: python3 htf_outcomes.py --backfill | --update YYYY-MM-DD")
+        print("usage: python3 htf_outcomes.py --backfill | --update YYYY-MM-DD | --update-pending")
