@@ -79,6 +79,14 @@ def append_and_resample(new_1m, live_1m=LIVE_1M, live_5m=LIVE_5M, live_4h=LIVE_4
     return combined
 
 
+def _is_billing_error(msg):
+    """True if a Databento error looks like an out-of-credit / spend-limit block
+    (you cap the budget on Databento's side; we only need to surface the block)."""
+    m = msg.lower()
+    return any(w in m for w in ("credit", "balance", "insufficient", "payment",
+                                "billing", "funds", "quota", "spend", "exceeded"))
+
+
 def _incremental_start():
     """UTC start datetime for the next pull = last live bar + 1min, else gap start."""
     if LIVE_1M.exists():
@@ -138,13 +146,19 @@ def main():
         print(f"  up to date (start {start} >= end {end}); nothing to pull."); return
 
     print(f"[COST] {SCHEMA} NQ/ES/YM {start} -> {end}")
-    cost = client.metadata.get_cost(dataset=DATASET, symbols=SYMBOLS, schema=SCHEMA,
-                                    stype_in="continuous", start=start, end=end)
-    print(f"  estimated cost: ${cost:.4f}")
-    if args.cost_only:
-        print("  re-run without --cost-only to download."); return
+    try:
+        cost = client.metadata.get_cost(dataset=DATASET, symbols=SYMBOLS, schema=SCHEMA,
+                                        stype_in="continuous", start=start, end=end)
+        print(f"  estimated cost: ${cost:.4f}")
+        if args.cost_only:
+            print("  re-run without --cost-only to download."); return
+        new_1m = fetch_1m(client, start, end)
+    except Exception as e:
+        if _is_billing_error(str(e)):
+            print(f"LOW_BALANCE: Databento pull blocked - {e}")
+            sys.exit(3)                      # wrapper turns this into a notification
+        raise
 
-    new_1m = fetch_1m(client, start, end)
     if len(new_1m) == 0:
         print("  no new bars settled yet."); return
     append_and_resample(new_1m)
