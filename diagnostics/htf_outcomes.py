@@ -88,9 +88,37 @@ def backfill_journal():
     return rows
 
 
+def update_outcomes(date):
+    """Fill a forward row's outcome columns the day AFTER capture. Requires the
+    data feed + v8.18 trade log to be current through `date`. Idempotent: only
+    touches a forward row whose outcome is still blank."""
+    if not os.path.exists(JOURNAL):
+        print("no journal yet"); return
+    rows = list(csv.DictReader(open(JOURNAL)))
+    df = H.load_5m()
+    tradelog = list(csv.DictReader(open(TRADELOG)))
+    hit = False
+    for r in rows:
+        if r['date'] == str(date) and r['split'] == 'forward' and not r['actual_dir']:
+            adir, rng = actual_outcome(df, date)
+            r['actual_dir'] = adir if adir is not None else ''
+            r['actual_range_pts'] = rng if rng is not None else ''
+            for k, v in v818_for_date(tradelog, date).items():
+                r[k] = '' if v is None else v
+            hit = True
+    if not hit:
+        print(f"no open forward row for {date}"); return
+    with open(JOURNAL, 'w', newline='') as f:
+        w = csv.DictWriter(f, fieldnames=ALL_FIELDS)
+        w.writeheader(); w.writerows(rows)
+    print(f"updated outcomes for {date}")
+
+
 if __name__ == '__main__':
     import sys
     if '--backfill' in sys.argv:
         backfill_journal()
+    elif '--update' in sys.argv:
+        update_outcomes(datetime.date.fromisoformat(sys.argv[sys.argv.index('--update') + 1]))
     else:
-        print("usage: python3 htf_outcomes.py --backfill")
+        print("usage: python3 htf_outcomes.py --backfill | --update YYYY-MM-DD")
