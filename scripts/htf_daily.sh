@@ -30,4 +30,7 @@ fi
 
 # always try to fill pending outcomes from whatever data we now have
 /usr/local/bin/python3 diagnostics/htf_outcomes.py --update-pending >> "$LOG" 2>&1
+# rebuild the vol-regime table off the freshened data so demo_sizer can resolve
+# a real regime (not 'unknown') for new live/demo dates
+/usr/local/bin/python3 diagnostics/regime_filter.py --build >> "$LOG" 2>&1
 echo "----- done (refresh rc=$RC) -----" >> "$LOG"
