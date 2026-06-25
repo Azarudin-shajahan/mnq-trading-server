@@ -15,10 +15,15 @@ TRADELOG = os.path.expanduser('~/mnq_trading/backtest/mnq_trade_log_v8_18.csv')
 JOURNAL  = os.path.expanduser('~/mnq_trading/data/htf_journal.csv')
 
 HUMAN_FIELDS = ['human_bias', 'human_conf', 'human_drivers', 'human_override']
+# playbook_grade = the cockpit/playbook verdict grade shown for this setup at
+# decision time (forward-only, like the human labels). Lets grades be EARNED
+# yellow->green from forward outcomes (hardened cockpit plan).
+GRADE_FIELDS = ['playbook_grade']
 V818_FIELDS  = ['v818_traded', 'v818_dir', 'v818_outcome', 'v818_pts']
 OUTCOME_FIELDS = ['actual_dir', 'actual_range_pts']
 # tagged_ts = wall-clock IST when the human locked the bias (proves pre-outcome).
-ALL_FIELDS = H.CONTEXT_FIELDS + ['tagged_ts'] + HUMAN_FIELDS + V818_FIELDS + OUTCOME_FIELDS + ['split']
+ALL_FIELDS = (H.CONTEXT_FIELDS + ['tagged_ts'] + HUMAN_FIELDS + GRADE_FIELDS
+              + V818_FIELDS + OUTCOME_FIELDS + ['split'])
 
 _OUTCOME_RANK = {'WIN': 3, 'BE': 2, 'EXPIRED': 1}
 
@@ -73,8 +78,8 @@ def backfill_journal():
         adir, rng = actual_outcome(df, d)
         row = dict(ctx)
         row['tagged_ts'] = ''                # backfill has no human tag time
-        for f in HUMAN_FIELDS:
-            row[f] = ''                      # human label: forward-only, never backfilled
+        for f in HUMAN_FIELDS + GRADE_FIELDS:
+            row[f] = ''                      # human label + grade: forward-only, never backfilled
         row.update(v818_for_date(tradelog, d))
         row['actual_dir'] = adir
         row['actual_range_pts'] = rng

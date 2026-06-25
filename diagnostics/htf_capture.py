@@ -20,6 +20,7 @@ from htf_outcomes import JOURNAL, ALL_FIELDS
 
 BIAS = ('long', 'short', 'no-trade')
 OVERRIDE = ('take', 'skip', 'flip')
+GRADE = ('green', 'yellow', 'red', 'none')   # playbook/cockpit verdict for this setup
 
 
 def already_logged(date_str):
@@ -57,14 +58,16 @@ def collect(args):
     if args.bias:
         bias, conf = args.bias, str(args.conf or 2)
         drivers, override = (args.drivers or ''), (args.override or 'take')
+        grade = args.grade or 'none'
     else:
         bias = _ask("bias", BIAS)
         conf = _ask("confidence", ('1', '2', '3'))
         drivers = input("  drivers (free text, e.g. 'discount+bull-smt+Q3'): ").strip()
         override = _ask("vs v8.18 today", OVERRIDE)
-    if bias not in BIAS or override not in OVERRIDE:
-        sys.exit(f"invalid bias/override: {bias} / {override}")
-    return bias, conf, drivers, override
+        grade = _ask("playbook grade for this setup", GRADE)
+    if bias not in BIAS or override not in OVERRIDE or grade not in GRADE:
+        sys.exit(f"invalid bias/override/grade: {bias} / {override} / {grade}")
+    return bias, conf, drivers, override, grade
 
 
 def main():
@@ -74,6 +77,7 @@ def main():
     ap.add_argument('--conf', type=int, choices=(1, 2, 3))
     ap.add_argument('--drivers', default=None)
     ap.add_argument('--override', choices=OVERRIDE)
+    ap.add_argument('--grade', choices=GRADE)
     ap.add_argument('--dry-run', action='store_true')
     ap.add_argument('--data', default=H.DEFAULT_5M)
     args = ap.parse_args()
@@ -100,7 +104,7 @@ def main():
         show_context(H.compute_context(df, ref_date))
     else:
         show_context(ctx)
-    bias, conf, drivers, override = collect(args)
+    bias, conf, drivers, override, grade = collect(args)
 
     row = dict(ctx)
     row['tagged_ts'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -108,6 +112,7 @@ def main():
     row['human_conf'] = conf
     row['human_drivers'] = drivers
     row['human_override'] = override
+    row['playbook_grade'] = grade
     for f in ('v818_traded', 'v818_dir', 'v818_outcome', 'v818_pts',
               'actual_dir', 'actual_range_pts'):
         row[f] = ''                          # filled next day by htf_outcomes
@@ -116,7 +121,8 @@ def main():
     if args.dry_run:
         print("  [DRY-RUN] would append:")
         print("   " + {k: row[k] for k in ('date', 'tagged_ts', 'human_bias',
-              'human_conf', 'human_drivers', 'human_override', 'split')}.__repr__())
+              'human_conf', 'human_drivers', 'human_override', 'playbook_grade',
+              'split')}.__repr__())
         return
 
     new_file = not os.path.exists(JOURNAL)
