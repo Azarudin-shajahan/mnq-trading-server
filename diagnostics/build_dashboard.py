@@ -535,7 +535,8 @@ def render_html(st, commits, results):
         '<div class="cmdbar">'
         '<input id="cmd" placeholder="⌖ filter everything — type to search panels...">'
         '<button class="btn" id="brief">▶ Brief me</button>'
-        '<button class="btn" id="listen">◉ Voice</button></div>'
+        '<button class="btn" id="listen">◉ Voice</button>'
+        '<a class="btn" href="../education/index.html" style="text-decoration:none">📚 The Framework</a></div>'
         % (proj, e(str(st.get("updated", "?"))), gen))
     foot = ('<p class="foot">JARVIS HUD &middot; static + deterministic. Regenerate: '
             '<code>/usr/local/bin/python3 ~/mnq_trading/diagnostics/build_dashboard.py</code></p>'

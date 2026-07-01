@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Framework — mentor education</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="banner">⚠ <b>IN-SAMPLE ONLY.</b> This system has never been validated live or out-of-sample. Nothing here clears you to fund or size up — only a forward/live demo does. Backtest $ are @ $0.50/pt (live = $2.00/pt).</div>
+<header>
+  <h1>The Framework <span class="insample">IN-SAMPLE ONLY</span></h1>
+  <div class="sub">How the whole mentor corpus (ICT · Daye · GxT · TTrades · Dexter) converges into one way to frame a setup — graded by our own backtests (in-sample, not live-validated).</div>
+</header>
+<nav id="nav">
+  <button data-v="frame" class="on">The Frame</button>
+  <button data-v="live">Read It Live</button>
+  <button data-v="concepts">Concept Library</button>
+  <button data-v="mentors">Mentor Lenses</button>
+  <button data-v="sessions">Session Playbook</button>
+  <button data-v="self">Self-Check</button>
+</nav>
+<main>
+
+  <!-- THE FRAME -->
+  <section class="view on" id="frame">
+    <h2>The Frame — one setup, no guessing</h2>
+    <p class="lead">Every mentor is saying the same thing in different words. This is the single stack. Click a stage to see what it means, the concepts it uses, how each mentor names it, and whether it holds up on our backtests.</p>
+    <div class="legend">
+      <span><span class="chip s">IN-SAMPLE</span> positive on its own data — fragile, don't size up</span>
+      <span><span class="chip g">FORWARD-VALIDATED</span> proven live/OOS — <b>none yet</b></span>
+      <span><span class="chip a">UNVALIDATED</span> taught, not tested here</span>
+      <span><span class="chip r">DEAD (our engine)</span> net-negative in our backtest</span>
+      <span><span class="chip w">MECHANIC</span> refinement, not standalone</span>
+    </div>
+    <p class="asof">Verdicts are EVIDENCE tier, not truth. From the 2020-01-02 → 2026-05-26 backtest window (in-sample; no OOS/forward). 🔴 = dead in <i>our</i> engine on <i>our</i> data, not universally invalid.</p>
+    <div class="pipe" id="pipe"></div>
+    <div class="detail" id="stageDetail"></div>
+    <div class="cta">
+      <div>
+        <div class="q">Now walk one through, live.</div>
+        <div class="note">Answer five questions about the market in front of you → get the framed setup, or a clear "skip".</div>
+      </div>
+      <button class="btn" id="gotoWalk">Read It Live →</button>
+    </div>
+  </section>
+
+  <!-- READ IT LIVE -->
+  <section class="view" id="live">
+    <h2>Read It Live — frame the setup in front of you</h2>
+    <p class="lead">A guided walk-through of the exact same stack. Answer honestly about what price is doing right now; it will either frame the setup or tell you to skip — and why. Grounded in the locked rules (NY-only, V-shape-is-the-edge, no mid-gap entries). <b>This is a framing illustration to train your eye — not a signal, not sized, and it does not clear you to trade.</b> A "framed" result means the pattern matches our in-sample edge, not that you should click buy.</p>
+    <div class="wt" id="walkHost"></div>
+  </section>
+
+  <!-- CONCEPT LIBRARY -->
+  <section class="view" id="concepts">
+    <h2>Concept Library — every atom, nothing missed</h2>
+    <p class="lead">The complete vocabulary. Click a card to expand its definition, how to spot it, bull vs bear, and where it lives in the frame. Any term the rest of the page uses is defined here — nothing left to assume.</p>
+    <input id="conceptSearch" class="csearch" placeholder="⌖ look up any term — fvg, true open, quarter, cisd, smt...">
+    <div class="sublabel">Layer 0 — PD Arrays (the atoms)</div>
+    <div class="grid" id="pdgrid"></div>
+    <div class="sublabel">Layer 1 — Mechanics (how atoms combine)</div>
+    <div class="grid" id="mechgrid"></div>
+    <div class="sublabel">Quarterly Theory &amp; Time — Daye</div>
+    <div class="grid" id="timinggrid"></div>
+    <div class="sublabel">Mentor Models &amp; Named Vocabulary</div>
+    <div class="grid" id="modelsgrid"></div>
+    <p class="note" id="searchEmpty" style="display:none">No concept matches that term. Tell me what's missing and I'll add it.</p>
+  </section>
+
+  <!-- MENTOR LENSES -->
+  <section class="view" id="mentors">
+    <h2>Mentor Lenses — how each reads the market</h2>
+    <p class="lead">Same frame, five viewpoints. Each mentor owns one layer best. Click a mentor for their philosophy, the sessions they emphasize, their signature setups, and how their vocabulary maps back to the frame.</p>
+    <div class="mgrid" id="mgrid"></div>
+    <div class="mpanel" id="mPanel"></div>
+  </section>
+
+  <!-- SESSION PLAYBOOK -->
+  <section class="view" id="sessions">
+    <h2>Session Playbook — the day, hour by hour</h2>
+    <p class="lead">What each mentor trades, when. Verdict colors tell you where to focus. Click a session to expand; the ★ killzones (NY AM / NY PM) are where the proven edge lives.</p>
+    <div class="legend">
+      <span><span class="chip s">IN-SAMPLE</span></span><span><span class="chip g">FORWARD-VALIDATED (none yet)</span></span>
+      <span><span class="chip a">UNVALIDATED</span></span>
+      <span><span class="chip r">DEAD (our engine)</span></span><span><span class="chip w">MECHANIC</span></span>
+    </div>
+    <div id="seslist"></div>
+  </section>
+
+  <!-- SELF-CHECK -->
+  <section class="view" id="self">
+    <h2>Self-Check — did you get it right?</h2>
+    <p class="lead">Three kinds of questions: recall a concept, know who trades what &amp; where, and frame a live scenario. Reveal the answer, then mark what you've genuinely understood — your coverage is saved on this device.</p>
+    <div class="progress">
+      <b id="pcount">0 / 0 checks understood</b>
+      <div class="bar"><i id="pbar"></i></div>
+      <div class="note" id="pgaps"></div>
+    </div>
+    <div id="quizzes"></div>
+  </section>
+
+</main>
+<div class="mockbadge">The Framework · v1</div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
