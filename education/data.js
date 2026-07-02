@@ -124,9 +124,11 @@ timing: [
   spot:"Q1 builds a range → Q2 runs stops (the manipulation / Judas) → Q3 delivers the real move → Q4 reverses or continues.",
   bb:"Trade the Distribution (Q3) AFTER the Q2 manipulation — not during accumulation.", step:"Steps 01–04"},
  {t:"True Open (Daye)", v:"a",
-  d:"The algorithmic starting price for Q2 of any cycle — the reference used to measure manipulation (the Judas swing forms at/near it). It is NOT the calendar open.",
+  d:"The algorithmic starting price for Q2 of any cycle — the reference the algo manipulates AROUND (the Judas swing forms at/near it). It is NOT the calendar open.",
   spot:"True Year = open of the 1st Monday of April · True Month = open of the 2nd Monday · True Week = Monday 6:00 PM ET · True Day = 12:00 AM (midnight) · NY session = 7:30 AM ET · Afternoon = 1:30 PM ET.",
-  bb:"Bull bias → look to BUY below the True Open. Bear bias → look to SELL above it.", step:"Steps 01 & 05 — anchor"},
+  bb:"Bull bias → look to BUY below the True Open. Bear bias → look to SELL above it (it's your premium/discount 50% line).",
+  use:"How to hunt with it: (1) mark the session's True Open (NY AM = 7:30 ET; daily = midnight). (2) Set HTF bias FIRST. (3) Wait for the Judas swing — price runs the WRONG side of the TO (below it on a bull day to grab sell-stops; above it on a bear day) = the manipulation. (4) Enter as price REVERSES back through the TO, confirmed by CISD/displacement (+ SMT). (5) Only long below the TO (discount) / short above (premium). (6) Best when the TO overlaps an HTF FVG/OB = a 'Precision Level'. Stop beyond the Judas extreme; target the opposite liquidity. For reversals use the Revolving True Open (Q4 open) with Q3→Q4 SMT.",
+  step:"Steps 01 & 05 — anchor"},
  {t:"Revolving True Open", v:"a",
   d:"The opening price of Q4 within a cycle. Used mainly when Sequential SMT appears between Q3 and Q4 — it signals a high-probability reversal.",
   spot:"Mark the open of the 4th quarter (e.g. the 1:30 PM Afternoon open for the daily cycle).",
@@ -233,6 +235,67 @@ mentors: [
   setups:[["10am PO3 Expansion","a"],["Devil's Mark Reversal","a"],["Tuesday Reversal","a"],["EOM/EOQ Range Scalp","a"]],
   vocab:"SD terminus → step 1 bias & step 7 target · PO3 manipulation → step 3."}
 ],
+
+/* Per-mentor coverage matrix + cross-mentor gap-fill. Grounded in GxT_vs_Daye_CrossMap.md,
+   Daye QT study guide, GxT_Execution_Spec.md, mentor_setup_catalog.md, layer-ownership map.
+   c = full | partial | none. Gaps fill from authorities[step] (never a dead source). */
+coverage: {
+ authorities: { 1:"ttrades", 2:"daye", 3:"ict", 4:"gxt", 5:"gxt", 6:"ict", 7:"gxt" },
+ mentors: {
+  ttrades: { dead:[], steps:{
+   1:{c:"full",own:"mechanical daily-bias: close beyond the prior day's range = continuation, sweep + close-back = reversal (fractal C1→C2→C3)"},
+   2:{c:"partial",own:"trades the NY continuation window",note:"doesn't define killzone/quarter timing rigorously"},
+   3:{c:"full",own:"C1 sweeps the prior candle's high/low; 'let the wick form, trade the body'"},
+   4:{c:"full",own:"CISD; IC-CISD (intracandle CISD); trade the body of the shift"},
+   5:{c:"partial",own:"T-Spot order block / CISD retest",note:"lighter on FVG/OTE 62–79% precision"},
+   6:{c:"full",own:"protected swing behind the CISD"},
+   7:{c:"full",own:"PDH/PDL, 2R, next HTF liquidity"} }},
+  daye: { dead:[
+    {step:4,label:"Sequential-SMT cascade as a standalone driver",tier:"r",why:"= our ssmt_psp_engine — dead on the sealed 2025-26 holdout"},
+    {step:7,label:"Far SD-projection-only targets",tier:"a",why:"far/projected targets lowered net vs the tight first-target in our tests"}
+   ], steps:{
+   1:{c:"full",own:"which quarter/phase (AMDX); True Open premium/discount; the dealing range"},
+   2:{c:"full",own:"daily quarters (Q1 Asia … Q4 Afternoon); True Opens select which session to hunt"},
+   3:{c:"full",own:"the Manipulation leg (Q2); the Judas swing at the True Open"},
+   4:{c:"partial",own:"displacement/CSD off a PD-array at a True-Open level; sequential SMT (Q3→Q4)",note:"less mechanical on the precise CISD trigger"},
+   5:{c:"partial",own:"enter at NWOG/NDOG/BPR/FVG at the True Open",note:"lighter on OTE / first-presented-FVG precision"},
+   6:{c:"full",own:"protected swing = the sweep-leg extreme (+ SD/fib offset)"},
+   7:{c:"partial",own:"opposite dealing-range liquidity; the Magneto level; SD projection",note:"leans on far SD-projection targets"} }},
+  gxt: { dead:[
+    {step:4,label:"Two-stage strength-switch / laggard-SMT entry",tier:"r",why:"single-TF SSMT dead OOS (tail noise); the cascade failed the holdout"},
+    {step:4,label:"News driver-pairing bias",tier:"r",why:"all driver levers closed; --driver-news had zero effect"},
+    {step:7,label:"3R/4R far R-multiple targets",tier:"a",why:"far targets dilutive vs the tight first-target"}
+   ], steps:{
+   1:{c:"full",own:"direction via candle profiling (open-low = bull / open-high = bear) + the IRL→ERL draw"},
+   2:{c:"partial",own:"session windows (6am / 10am / London reversal)",note:"borrows which session/quarter to hunt from Daye's clock"},
+   3:{c:"full",own:"sweep of IRL before the ERL delivery"},
+   4:{c:"full",own:"CSD + V-shape signature; 2-stage PSP; SMT triad (NQ/ES/YM)"},
+   5:{c:"full",own:"SMT-in-gap; limit on the LTF FVG after the PSP (Universal Model)"},
+   6:{c:"full",own:"protected swing = the manipulation-leg low (+ body-closure offset)"},
+   7:{c:"full",own:"External Range Liquidity / unestablished extreme; 2R; asset-sync exit"} }},
+  ict: { dead:[
+    {step:5,label:"SMC Opening-Range Gap fade",tier:"r",why:"ORG driver falsified — 16th percentile of the random-direction null"}
+   ], steps:{
+   1:{c:"full",own:"HTF PD array + Power-of-3 phase; premium/discount"},
+   2:{c:"full",own:"killzones (London / NY AM / Lunch / NY PM); Silver Bullet hours; midnight open"},
+   3:{c:"full",own:"BSL/SSL; the Judas swing; turtle soup; draw on liquidity"},
+   4:{c:"full",own:"MSS (market structure shift) on displacement; SMT"},
+   5:{c:"full",own:"FVG / OB / breaker + OTE 62–79% — the full PD-array vocabulary"},
+   6:{c:"full",own:"one tick beyond the swing / the FVG candle"},
+   7:{c:"full",own:"opposing swing / -0.5 / -1 / -1.5 SD"} }},
+  dexter: { dead:[
+    {step:7,label:"Far fixed 2–2.5 SD-only targets",tier:"a",why:"far-SD-only is dilutive here; pair it with the tight first-opposing target"},
+    {step:4,label:"Standalone PO3 cascade",tier:"a",why:"unvalidated on our data"}
+   ], steps:{
+   1:{c:"partial",own:"PO3 SD-terminus (is continuation already capped?); time-based bias (Tuesday / EOM)",note:"no mechanical daily-bias / direction"},
+   2:{c:"partial",own:"HTF candle opens (10:00 / 14:00 ET); calendar reversals",note:"no killzone / quarter timing"},
+   3:{c:"partial",own:"manipulation to the SD extreme; no-wick expansion (Devil's Mark)",note:"lighter on liquidity-pool naming"},
+   4:{c:"partial",own:"reversal displacement (prints the missing wick) + SMT",note:"no mechanical CISD trigger"},
+   5:{c:"partial",own:"OB end-of-manip / 1st FVG / inversion FVG at the 10am open",note:"lighter on OTE precision"},
+   6:{c:"partial",own:"stop beyond the manipulation / SMR extreme",note:"borrows the protected-swing framing"},
+   7:{c:"full",own:"PO3 2–2.5 SD projection (→ 3.5–4); the SD terminus"} }}
+ }
+},
 
 sessions: [
  {name:"Asian Range", time:"20:00–00:00 ET", star:false, rows:[
