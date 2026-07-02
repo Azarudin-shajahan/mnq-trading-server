@@ -41,6 +41,7 @@ window.GUIDE = {
 <li><b>Entry buffer:</b> don't enter exactly at 62% — for longs, a buy limit at 62% <b>+ 5 pips</b>; for shorts, a sell limit at 62% <b>− 5 pips</b> (to account for spread).</li>
 <li><b>Stop:</b> 5 pips below the anchor swing low (longs) / 5 pips above the anchor swing high (shorts).</li>
 <li><b>Management:</b> don't move the stop to break-even until the position reaches exactly <b>75% of the profit objective</b>.</li>
+<li><b>Forex vs index futures:</b> the "+5 pip" entry buffer and the "10/20/30 pip" liquidity-run figures are <i>forex-specific</i>. Index futures (MNQ) are measured in points/handles and the corpus gives no exact point equivalent — treat them as "a few ticks past the level" and "a small sweep beyond the old high/low", not literal pips.</li>
 </ul>` },
 
     { id:"glossary", title:"Concept glossary", html:`
@@ -72,21 +73,28 @@ window.GUIDE = {
 <p>The algorithmic blueprint of the daily Open-High-Low-Close: bullish day = open near the low, decline (Judas swing), expand higher, close near the high; bearish day = open near the high, rally (Judas), expand lower, close near the low. <b>Nuance:</b> on anticipated bullish days you must buy <i>at or below</i> the daily open; on bearish days sell <i>at or above</i> it.</p>` },
 
     { id:"timing", title:"Timing & sessions", html:`
-<p>Every phase of delivery is chained to the clock. These are ICT's core algorithmic timings.</p>
-<h3>Midnight Opening Range (00:00–00:30 ET)</h3>
-<p>A strict 30-minute window that sets the boundary markers for the daily range and founds the daily Power of 3. Identify the midnight NY open plus the high and low formed 00:00–00:30; the algorithm refers back to the first displacement (FVG) inside this window later. Projecting standard deviations (−0.5, −1, −2.5) off this 30-minute range projects where the daily high/low will form.</p>
-<h3>London Open Killzone (2:00–5:00 AM ET)</h3>
-<p>The prime session for the "Judas Swing" — the false breakout that traps retail before the true daily high/low. The algorithmic sweet spot is <b>3:30 AM ET</b>: if the market is going to reverse and draw into a midnight-opening-range inefficiency, it fires off at that minute.</p>
-<h3>New York AM Killzone &amp; Opening Range (7:00–10:00 AM ET)</h3>
-<p>The primary US volatility injection, using pre-market sweeps to set up explosive RTH moves. At <b>7:00 AM ET</b> algorithms across all asset classes come online; gauge the narrative from what liquidity was taken at <b>6:30 AM ET</b>. The <b>AM Opening Range (9:30–10:00)</b> is strictly 30 minutes — the algorithm leaves the <b>1st Presented FVG</b> (the first 1-minute FVG at 9:31 or later, with true breakaway displacement — never the 9:30 candle itself), extended forward as a reference all day.</p>
-<h3>Silver Bullet hours (10:00–11:00 AM &amp; 2:00–3:00 PM ET)</h3>
-<p>High-probability continuation windows. There has never been a day where an FVG didn't form in the 10:00 AM hour; in low-resistance conditions a new FVG forms in <i>every</i> 15-minute quarter of the hour. The afternoon equivalent triggers at <b>2:00 PM ET</b> as PM trends unfold and morning/lunch stops are purged.</p>
-<h3>New York Lunch Macro (11:30 AM–1:30 PM ET)</h3>
-<p>Designed to be sneaky and stagnant — beginners avoid it entirely. For experienced traders: if the morning dropped without sweeping minor highs, mark 10:00 AM and find the very first swing high after it — that becomes the draw-on-liquidity for the lunch retracement.</p>
-<h3>New York PM &amp; final-hour macros (1:30–4:00 PM ET)</h3>
-<p>Mirrors the morning. The <b>PM Opening Range (1:30–2:00)</b> sets the afternoon (find its 1st Presented FVG); then watch the <b>2:50–3:10 PM macro</b> and the <b>Final Hour of RTH macro (3:15–3:45 PM)</b>, which sets the final liquidity run into the 3:50 PM Market-On-Close algorithm.</p>
-<h3>Universal 20-minute macros</h3>
-<p>Regardless of session, algorithmic turning points occur in 20-minute windows bridging the top of the hour — the <b>last 10 minutes before</b> and the <b>first 10 minutes after</b> the hour (e.g. 9:50–10:10, 10:50–11:10). The algorithm spools price here to form the leading candles that break structure and validate PD arrays.</p>` },
+<p>ICT originally taught the killzones in a <b>forex</b> context; for <b>index futures</b> (S&amp;P / Nasdaq / Dow e-minis — what applies to MNQ) he shifts the focus to the 9:30 equities open. The corpus distinguishes the two, so they're sorted below.</p>
+<h3>Forex killzones (ICT's original framing)</h3>
+<ul>
+<li><b>London Open Killzone — 1:00–5:00 AM ET</b> (some lectures quote 2:00–5:00 with opening range 1:30–2:00; the 1:00-vs-2:00 difference is forex-killzone framing / DST, not an index distinction). The prime "Judas Swing" session that traps retail before the true daily high/low; algorithmic sweet spot <b>3:30 AM ET</b>.</li>
+<li><b>New York Killzone — 7:00–10:00 AM ET</b> (purist 7:00–9:00, extends to 10:00 specifically for forex).</li>
+<li><b>London Close Killzone — 10:00 AM–12:00 PM ET.</b></li>
+</ul>
+<h3>Index-futures sessions (indices — what applies to MNQ)</h3>
+<ul>
+<li><b>NY AM session — 8:30–11:00 AM ET.</b> For futures, 7:00–9:30 is just pre-market ahead of the 9:30 bell. The true day high/low tends to form <b>9:30–10:30</b>; for AM index SMT, compare relative highs/lows between <b>5:00 AM and the 9:30 open</b>.</li>
+<li><b>AM Opening Range — strictly 9:30–10:00 AM ET.</b> The algorithm leaves the <b>1st Presented FVG</b> (the first 1-minute FVG at 9:31 or later with true breakaway displacement — never the 9:30 candle itself), extended forward as a reference all day.</li>
+<li><b>NY PM session — 1:00–4:00 PM ET.</b> The PM trend heats up ~<b>2:00 PM</b>; the true PM high/low forms in the final hour <b>3:00–4:00 PM</b>. The <b>PM Opening Range (1:30–2:00)</b> sets the afternoon (find its 1st Presented FVG).</li>
+</ul>
+<h3>Universal windows (all asset classes)</h3>
+<ul>
+<li><b>Midnight Opening Range (00:00–00:30 ET):</b> sets the daily-range boundary markers and founds the daily Power of 3; the algorithm refers back to the first displacement (FVG) inside it. Projecting standard deviations (−0.5, −1, −2.5) off this 30-minute range projects the daily high/low.</li>
+<li><b>7:00 AM ET algo fire-up:</b> algorithms across all asset classes come online (universal NY-open opening range 7:00–7:30); gauge the narrative from what liquidity was taken at <b>6:30 AM</b>.</li>
+<li><b>Silver Bullet hours — 10:00–11:00 AM &amp; 2:00–3:00 PM ET</b> (not distinguished by instrument): there has never been a day without an FVG in the 10:00 AM hour; in low-resistance conditions a new FVG forms in <i>every</i> 15-minute quarter.</li>
+<li><b>NY Lunch macro (11:30 AM–1:30 PM ET):</b> sneaky and stagnant — beginners avoid it; experienced traders use the first swing high after a marked 10:00 AM as the lunch-retracement draw.</li>
+<li><b>Final-hour macros:</b> the <b>2:50–3:10 PM</b> macro and the <b>Final Hour of RTH macro (3:15–3:45 PM)</b>, setting the final liquidity run into the 3:50 PM Market-On-Close algorithm.</li>
+<li><b>Universal 20-minute macros:</b> the last 10 minutes before and first 10 minutes after the top of the hour (e.g. 9:50–10:10, 10:50–11:10) — the algorithm spools price to form the leading candles that break structure and validate PD arrays.</li>
+</ul>` },
 
     { id:"setups", title:"Signature setups, step-by-step", html:`
 <h3>1. NY AM V-Shape / Optimal Trade Entry (OTE)</h3>
@@ -164,6 +172,6 @@ window.GUIDE = {
 <p>Scale out at logical low-hanging objectives — demanding your whole position hit the final HTF objective usually turns a winner into a stop-out.</p>` },
 
     { id:"grounding", title:"Grounding & sources", html:`
-<p>This guide is transcribed faithfully from ICT's NotebookLM notebooks — Charter Models (<code>dd17ad76…</code>) and Core Content 2016–17 (<code>b2c21c14…</code>), built from the <b>@InnerCircleTrader</b> channel. It is deliberately <b>bounded to ICT's teaching core</b> (PD arrays, liquidity, killzones, OTE, Power-of-3, MSS — the vocabulary the other four mentors build on), not the full 600+ lecture archive. Every claim traces to a NotebookLM answer grounded in that corpus; the bracketed <code>[n]</code> citations in the underlying answers map to individual source videos. Nothing here is imported from outside the corpus. Note: killzone boundaries vary slightly between ICT's own lectures (e.g. London 1:00–5:00 vs 2:00–5:00 AM) — both appear as the corpus states them.</p>` }
+<p>This guide is transcribed faithfully from ICT's NotebookLM notebooks — Charter Models (<code>dd17ad76…</code>) and Core Content 2016–17 (<code>b2c21c14…</code>), built from the <b>@InnerCircleTrader</b> channel. It is deliberately <b>bounded to ICT's teaching core</b> (PD arrays, liquidity, killzones, OTE, Power-of-3, MSS — the vocabulary the other four mentors build on), not the full 600+ lecture archive. Every claim traces to a NotebookLM answer grounded in that corpus; the bracketed <code>[n]</code> citations in the underlying answers map to individual source videos. Nothing here is imported from outside the corpus. Note: ICT taught killzones in a <b>forex</b> context and index-futures sessions around the 9:30 equities open — the Timing section sorts them by instrument class (index-futures = what applies to MNQ). The London 1:00–5:00 vs 2:00–5:00 AM difference is within his forex-killzone framing (and DST adjustment), not a forex-vs-futures split. The "5 pip" entry buffer and "10/20/30 pip" liquidity-run figures are forex-specific; index futures use points/handles (no exact equivalent given in the corpus).</p>` }
   ]
 };
