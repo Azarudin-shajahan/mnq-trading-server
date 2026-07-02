@@ -95,6 +95,7 @@ function showMentor(i){
   document.querySelectorAll('.mcard').forEach(e=>e.classList.toggle('sel',+e.dataset.i===i));
   const m=E.mentors[i], p=$('#mPanel'); p.classList.add('on');
   p.innerHTML='<h3>'+m.name+' <span class="owns" style="font-size:12px;color:var(--accent)">'+m.owns+'</span></h3>'+
+    '<p><a class="guidelink" href="mentors/'+m.id+'.html">📖 Full guide →</a></p>'+
     row('Philosophy', m.phil)+
     row('Sessions', m.ses)+
     row('Signature setups', m.setups.map(s=>'<span class="tag">'+s[0]+' '+chip(s[1])+'</span>').join(''))+
