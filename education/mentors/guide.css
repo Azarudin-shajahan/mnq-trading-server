@@ -1,0 +1,22 @@
+/* Mentor deep-guide styling. Reuses the base page's tokens. */
+:root{ --bg:#0f1216; --panel:#171b21; --ink:#e8ecf1; --muted:#9aa6b2; --accent:#5db0ff; --line:#232a33; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 -apple-system,Segoe UI,Roboto,sans-serif}
+a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+#guide{max-width:1100px;margin:0 auto;padding:0 20px 80px;display:grid;grid-template-columns:220px 1fr;gap:32px}
+.ghead{grid-column:1/-1;padding:24px 0 12px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.ghead .back{font-size:13px;color:var(--muted)}
+.ghead h1{margin:6px 0 4px;font-size:30px}
+.ghead .tag{color:var(--accent);font-size:14px}
+nav.toc{position:sticky;top:16px;align-self:start;font-size:13px;border-left:2px solid var(--line);padding-left:14px}
+nav.toc a{display:block;color:var(--muted);padding:4px 0}
+nav.toc a:hover{color:var(--ink)}
+main.body{min-width:0}
+section.gsec{padding:14px 0 22px;border-bottom:1px solid var(--line)}
+section.gsec h2{font-size:21px;margin:0 0 10px;scroll-margin-top:16px}
+section.gsec p{margin:0 0 10px} section.gsec ul{margin:0 0 10px 18px}
+section.gsec h3{font-size:16px;color:var(--accent);margin:16px 0 6px}
+.nc{color:var(--muted);font-style:italic}
+.gnav{grid-column:1/-1;display:flex;justify-content:space-between;padding-top:22px}
+.gnav a{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+@media(max-width:760px){#guide{grid-template-columns:1fr} nav.toc{position:static;border-left:0;padding-left:0}}
