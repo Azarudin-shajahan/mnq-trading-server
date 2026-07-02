@@ -1,5 +1,5 @@
 /* Mentor deep-guide styling. Reuses the base page's tokens. */
-:root{ --bg:#0f1216; --panel:#171b21; --ink:#e8ecf1; --muted:#9aa6b2; --accent:#5db0ff; --line:#232a33; }
+:root{ --bg:#ffffff; --panel:#f4f6f8; --ink:#111111; --muted:#5a6672; --accent:#1558b0; --line:#e2e6ea; }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 -apple-system,Segoe UI,Roboto,sans-serif}
 a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
