@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Mentor Deep-Guides</title>
 <style>
 /* Mentor deep-guide styling. Reuses the base page's tokens. */
@@ -56,5 +58,6 @@ GUIDES.forEach(function(g,i){var b=document.createElement('button');b.textConten
 function select(i){var kids=tabs.children;for(var j=0;j<kids.length;j++){kids[j].classList.toggle('on',j===i);}render(GUIDES[i]);}
 select(0);
 </script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js');});}</script>
 </body>
 </html>

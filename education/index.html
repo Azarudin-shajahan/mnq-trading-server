@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>The Framework — mentor education</title>
 <link rel="stylesheet" href="styles.css?v=8">
 </head>
@@ -136,5 +139,6 @@
 <script src="data.js?v=8"></script>
 <script src="uses.js?v=8"></script>
 <script src="app.js?v=8"></script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js');});}</script>
 </body>
 </html>
