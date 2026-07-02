@@ -4,6 +4,9 @@ const E = window.EDU;
 const V = E.verdicts;
 const chip = v => '<span class="chip '+v+'">'+V[v]+'</span>';
 const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const MCLS = {ttrades:'m-tt',daye:'m-daye',gxt:'m-gxt',ict:'m-ict',dexter:'m-dx',all:'m-all'};
+const mcls = name => MCLS[name.toLowerCase().replace(/[^a-z]/g,'')] || 'm-all';
 
 /* ---------------- The Frame ---------------- */
 const pipe = $('#pipe');
@@ -31,6 +34,7 @@ function conceptCard(c){
     '<div class="more">'+
       '<div><span class="lab">How to spot</span>'+c.spot+'</div>'+
       '<div><span class="lab">Bull vs bear</span>'+c.bb+'</div>'+
+      (function(){var u=c.use||(E.uses&&E.uses[c.t]);return u?'<div><span class="lab">How to use it</span>'+u+'</div>':'';})()+
       '<div><span class="lab">In the frame</span>'+c.step+'</div>'+
     '</div></div>';
 }
@@ -59,6 +63,27 @@ if(csearch){
   });
 }
 
+/* ---------------- How to Trade (cheat sheet) ---------------- */
+(function(){
+  const groups=[['Layer 0 — PD Arrays (the atoms)',E.pd_arrays],['Layer 1 — Mechanics',E.mechanics],['Quarterly Theory & Time — Daye',E.timing],['Mentor Models & Named Vocabulary',E.models]];
+  let html='';
+  groups.forEach(g=>{
+    html+='<div class="htgroup"><div class="sublabel">'+g[0]+'</div>';
+    g[1].forEach(c=>{
+      const u=c.use||(E.uses&&E.uses[c.t])||'<span class="mnone">(no recipe yet)</span>';
+      html+='<div class="htrow"><div class="hthead"><span class="httitle">'+esc(c.t)+'</span>'+chip(c.v)+'<span class="htstep">'+esc(c.step)+'</span></div><div class="htuse">'+u+'</div></div>';
+    });
+    html+='</div>';
+  });
+  const host=$('#howtoList'); host.innerHTML=html;
+  const box=$('#howtoSearch');
+  if(box) box.addEventListener('input',()=>{
+    const q=box.value.trim().toLowerCase();
+    host.querySelectorAll('.htrow').forEach(r=>r.classList.toggle('hide', !!q && r.textContent.toLowerCase().indexOf(q)===-1));
+    host.querySelectorAll('.htgroup').forEach(gr=>{ const vis=gr.querySelectorAll('.htrow:not(.hide)').length>0; gr.classList.toggle('hide', !!q && !vis); });
+  });
+})();
+
 /* ---------------- Mentor Lenses ---------------- */
 const mg=$('#mgrid');
 E.mentors.forEach((m,i)=>{
@@ -76,6 +101,70 @@ function showMentor(i){
     row('Maps to frame', m.vocab);
 }
 showMentor(0);
+
+/* ---------------- Mind Map ---------------- */
+(function(){
+  const all = [].concat(E.pd_arrays, E.mechanics, E.timing, E.models);
+  const stepsOf = c => [...new Set(((c.step||'').match(/\d{1,2}/g)||[]).map(x=>parseInt(x,10)))].filter(n=>n>=1&&n<=7);
+  const byStep = {}; for(let i=1;i<=7;i++) byStep[i]=[];
+  all.forEach(c => stepsOf(c).forEach(n => byStep[n].push(c)));
+  const host=$('#mapHost'), meter=$('#mapMeter');
+  const nm = id => { const m=E.mentors.find(x=>x.id===id); return m?m.name:id; };
+  const conceptChips = num => (byStep[num]||[]).map(c=>'<button class="mchip '+c.v+'" data-concept="'+esc(c.t)+'">'+esc(c.t.replace(/\s*\(.*\)\s*/,''))+'</button>').join('') || '<span class="mnone">—</span>';
+
+  function renderCombined(){
+    meter.innerHTML='';
+    let html='<div class="maproot">🎯 Framing a high-probability setup</div>';
+    E.frame.forEach((s,i)=>{
+      const num=i+1, mentors=s.mentors;
+      const isAll = mentors.some(m=>/^all$/i.test(m[0]));
+      const syncN = isAll ? 5 : new Set(mentors.map(m=>m[0].toLowerCase())).size;
+      const mChips = mentors.map(m=>'<button class="mchip '+mcls(m[0])+'" data-mentor="'+m[0].toLowerCase()+'" title="'+esc(m[1])+'">'+esc(m[0])+'</button>').join('');
+      html += '<div class="mapstep'+(syncN>=4?' sync':'')+'">'+
+        '<div class="mcluster left">'+conceptChips(num)+'</div>'+
+        '<div class="mnode"><div class="mnum">STEP '+s.n+'</div><div class="mttl">'+esc(s.t)+'</div>'+chip(s.verdict[0])+
+          '<div class="msync">'+(syncN>=5?'all 5 mentors sync ⚡':syncN+' mentors')+'</div></div>'+
+        '<div class="mcluster right">'+mChips+'</div></div>';
+    });
+    host.innerHTML=html;
+  }
+
+  function renderMentor(id){
+    const cov=E.coverage.mentors[id], auth=E.coverage.authorities, M=E.mentors.find(x=>x.id===id);
+    let solo=0; const fillSet=new Set();
+    for(let n=1;n<=7;n++){ const covered=cov.steps[n].c==='full'||auth[n]===id; if(covered) solo++; else fillSet.add(auth[n]); }
+    const fills=[...fillSet].map(a=>'<span class="mchip '+mcls(a)+'">'+esc(nm(a))+'</span>').join(' ');
+    meter.innerHTML='<span class="mchip '+mcls(id)+'">'+esc(M.name)+'</span> <b>'+esc(M.owns)+'</b> — covers <b>'+solo+'/7</b> steps on its own; '+(7-solo)+' gap-filled via '+(fills||'—')+'.';
+    let html='<div class="maproot '+mcls(id)+'">'+esc(M.name)+' — '+esc(M.owns)+'</div>';
+    E.frame.forEach((s,i)=>{
+      const num=i+1, cell=cov.steps[num], isAuth=auth[num]===id, covered=cell.c==='full'||isAuth;
+      let teach='';
+      if(cell.own) teach+='<div class="teach own '+mcls(id)+'"><span class="tlab">'+esc(M.name)+(cell.c==='partial'&&!isAuth?' (partial)':'')+'</span>'+esc(cell.own)+'</div>';
+      if(!covered){ const a=auth[num]; teach+='<div class="teach fill"><span class="tlab">via '+esc(nm(a))+'</span>'+esc(E.coverage.mentors[a].steps[num].own)+'</div>'; }
+      (cov.dead||[]).filter(d=>d.step===num).forEach(d=>{ teach+='<div class="teach drop"><span class="tlab">✕ drop '+chip(d.tier)+'</span>'+esc(d.label)+' — '+esc(d.why)+'</div>'; });
+      html += '<div class="mapstep'+(covered?'':' gap')+'">'+
+        '<div class="mcluster left">'+conceptChips(num)+'</div>'+
+        '<div class="mnode"><div class="mnum">STEP '+s.n+'</div><div class="mttl">'+esc(s.t)+'</div>'+chip(s.verdict[0])+
+          '<div class="msync">'+(covered?'own':'gap → via '+esc(nm(auth[num])))+'</div></div>'+
+        '<div class="mcluster right teachcol">'+teach+'</div></div>';
+    });
+    host.innerHTML=html;
+  }
+
+  function setMap(mode){
+    document.querySelectorAll('#mapMode button').forEach(b=>b.classList.toggle('on',b.dataset.map===mode));
+    if(mode==='combined') renderCombined(); else renderMentor(mode);
+    host.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+  document.querySelectorAll('#mapMode button, .maplegend [data-map]').forEach(b=>b.onclick=()=>setMap(b.dataset.map));
+  host.addEventListener('click',e=>{
+    const c=e.target.getAttribute&&e.target.getAttribute('data-concept');
+    const m=e.target.getAttribute&&e.target.getAttribute('data-mentor');
+    if(c){ switchView('concepts'); const box=$('#conceptSearch'); if(box){ box.value=c; box.dispatchEvent(new Event('input')); } }
+    if(m){ switchView('mentors'); const idx=E.mentors.findIndex(x=>x.id===m); if(idx>=0) showMentor(idx); }
+  });
+  renderCombined();
+})();
 
 /* ---------------- Session Playbook ---------------- */
 $('#seslist').innerHTML=E.sessions.map(s=>

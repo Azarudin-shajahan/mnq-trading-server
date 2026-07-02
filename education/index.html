@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Framework — mentor education</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
 <div class="banner">⚠ <b>IN-SAMPLE ONLY.</b> This system has never been validated live or out-of-sample. Nothing here clears you to fund or size up — only a forward/live demo does. Backtest $ are @ $0.50/pt (live = $2.00/pt).</div>
@@ -14,8 +14,10 @@
 </header>
 <nav id="nav">
   <button data-v="frame" class="on">The Frame</button>
+  <button data-v="map">Mind Map</button>
   <button data-v="live">Read It Live</button>
   <button data-v="concepts">Concept Library</button>
+  <button data-v="howto">How to Trade</button>
   <button data-v="mentors">Mentor Lenses</button>
   <button data-v="sessions">Session Playbook</button>
   <button data-v="self">Self-Check</button>
@@ -45,6 +47,27 @@
     </div>
   </section>
 
+  <!-- MIND MAP -->
+  <section class="view" id="map">
+    <h2>The Mind Map — the whole framework in one place</h2>
+    <p class="lead">The 7-step spine is the backbone. Every concept sits on the step where it's actually used (left), and each mentor's vocabulary maps onto the same spine (right). Where many mentors land on the same step, the node glows — that convergence is exactly the one methodology the backtests kept re-finding. Click any concept or mentor to jump to it.</p>
+    <div class="maplegend">
+      <button class="mchip m-tt" data-map="ttrades">TTrades · bias</button><button class="mchip m-daye" data-map="daye">Daye · timing</button>
+      <button class="mchip m-gxt" data-map="gxt">GxT · entry</button><button class="mchip m-ict" data-map="ict">ICT · substrate</button>
+      <button class="mchip m-dx" data-map="dexter">Dexter · targets</button>
+    </div>
+    <div class="mapmode" id="mapMode">
+      <button data-map="combined" class="on">Combined</button>
+      <button data-map="ttrades">TTrades</button>
+      <button data-map="daye">Daye</button>
+      <button data-map="gxt">GxT</button>
+      <button data-map="ict">ICT</button>
+      <button data-map="dexter">Dexter</button>
+    </div>
+    <div id="mapMeter" class="mapmeter"></div>
+    <div id="mapHost" class="map"></div>
+  </section>
+
   <!-- READ IT LIVE -->
   <section class="view" id="live">
     <h2>Read It Live — frame the setup in front of you</h2>
@@ -66,6 +89,14 @@
     <div class="sublabel">Mentor Models &amp; Named Vocabulary</div>
     <div class="grid" id="modelsgrid"></div>
     <p class="note" id="searchEmpty" style="display:none">No concept matches that term. Tell me what's missing and I'll add it.</p>
+  </section>
+
+  <!-- HOW TO TRADE -->
+  <section class="view" id="howto">
+    <h2>How to Trade Each Concept — the cheat sheet</h2>
+    <p class="lead">Every concept with its plain-English "here's what you actually do", all in one place — no clicking. Written for a beginner. Scroll, or filter below. 🔴/dashed ones say "learn to recognise, don't trade."</p>
+    <input id="howtoSearch" class="csearch" placeholder="⌖ filter — fvg, stop, target, ote, sweep...">
+    <div id="howtoList"></div>
   </section>
 
   <!-- MENTOR LENSES -->
@@ -102,7 +133,8 @@
 
 </main>
 <div class="mockbadge">The Framework · v1</div>
-<script src="data.js"></script>
-<script src="app.js"></script>
+<script src="data.js?v=7"></script>
+<script src="uses.js?v=7"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>
