@@ -1,6 +1,6 @@
 /* Mentor deep-guide renderer. Reads window.GUIDE, renders into #guide. Vanilla, no deps. */
 (function(){
-  var ORDER=[["ttrades","TTrades"],["daye","Daye"],["gxt","GxT"],["ict","ICT"],["dexter","Dexter"]];
+  var ORDER=[["ttrades","TTrades"],["daye","Daye"],["gxt","GxT"],["ict","ICT"],["dexter","Dexter"],["xyj","XYJ"]];
   var G=window.GUIDE, host=document.getElementById('guide');
   if(!G||!host){ console.error('GUIDE data or #guide host missing'); return; }
   function esc(s){return String(s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}

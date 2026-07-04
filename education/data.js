@@ -233,7 +233,12 @@ mentors: [
   phil:"Power-of-3 and standard-deviation projections. Price accumulates, manipulates to a 2–2.5 SD terminus, then reverses. Strong on where the move ends and on time-based reversals (Tuesday, EOM/EOQ).",
   ses:"HTF candle opens (10:00 & 14:00 ET); calendar reversals.",
   setups:[["10am PO3 Expansion","a"],["Devil's Mark Reversal","a"],["Tuesday Reversal","a"],["EOM/EOQ Range Scalp","a"]],
-  vocab:"SD terminus → step 1 bias & step 7 target · PO3 manipulation → step 3."}
+  vocab:"SD terminus → step 1 bias & step 7 target · PO3 manipulation → step 3."},
+ {id:"xyj", name:"XYJ", owns:"the MMXM SYNTHESIS",
+  phil:"TheMMXMTrader / the Lathyrus Model. Every swing is a Market Maker Model distributing liquidity ERL↔IRL; correlated assets desynchronize and 'strength switching' validates the reversal. A rigid 5-step daily checklist (draw · protraction profile · key level · Crack-in-Correlation · LTF CISD) removes guessing.",
+  ses:"18:00 anchor; London 02:00–05:00 manipulation; 06:00 decoupled; 09:30 Judas/trigger; 10:00 resync/continuation; 14:00 macro.",
+  setups:[["Lathyrus 80% Model","a"],["2-Stage CiC True Reversal","a"],["MMXM Continuation (C3)","a"],["Strength-Switch / Lagging Asset","a"],["Seek & Destroy","a"]],
+  vocab:"ERL↔IRL → steps 1 & 3 · protraction profile → step 1 bias · 2-stage CiC/PSP → step 4 · LTF CISD → step 5."}
 ],
 
 /* Per-mentor coverage matrix + cross-mentor gap-fill. Grounded in GxT_vs_Daye_CrossMap.md,
