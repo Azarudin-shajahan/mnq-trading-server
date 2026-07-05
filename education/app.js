@@ -246,6 +246,73 @@ function resetWalk(){ state={}; step=0; trail=[]; renderWalk(); }
 resetWalk();
 $('#gotoWalk') && ($('#gotoWalk').onclick=()=>switchView('live'));
 
+/* ---------------- Model Playbook ---------------- */
+const MODELS = window.MODELS || [];
+const MENTOR_ORDER = ["TTrades","Daye","GxT","ICT","Dexter","XYJ","Daye Mentorship"];
+const SESSION_LABELS = {asia:"Asia",london:"London","ny-am":"NY AM",lunch:"Lunch","ny-pm":"NY PM",news:"News",'htf-open':"HTF Open",dow:"Day-of-Week"};
+let mFilter = {mentor:"all", session:"all", verdict:"all", q:""};
+
+function modelRow(k,v){ return v ? '<div class="row"><div class="k">'+k+'</div><div class="v">'+esc(v)+'</div></div>' : ''; }
+
+function modelCard(m){
+  const tools = (m.tools||[]).map(t=>'<span class="tag">'+esc(t)+'</span>').join('');
+  return '<div class="card model '+mcls(m.mentor)+'" onclick="this.classList.toggle(\'open\')">'+
+    '<h4>'+esc(m.name)+' '+chip(m.verdict)+'</h4>'+
+    '<p class="sess">'+esc(m.session)+'</p>'+
+    '<div class="more">'+
+      modelRow('HTF context', m.htf)+
+      modelRow('Trigger', m.trigger)+
+      modelRow('Entry', m.entry)+
+      modelRow('Stop', m.stop)+
+      modelRow('Target', m.target)+
+      modelRow('Timeframes', m.tfs)+
+      (tools?'<div class="row"><div class="k">Tools</div><div class="v">'+tools+'</div></div>':'')+
+      modelRow('Example', m.example)+
+      '<div class="row"><div class="k">&nbsp;</div><div class="v"><a href="mentors/'+esc(m.guideId)+'.html">Full guide →</a></div></div>'+
+    '</div></div>';
+}
+
+function modelMatches(m){
+  if(mFilter.mentor!=="all" && m.mentor!==mFilter.mentor) return false;
+  if(mFilter.session!=="all" && m.sessionKey!==mFilter.session) return false;
+  if(mFilter.verdict!=="all" && m.verdict!==mFilter.verdict) return false;
+  if(mFilter.q){ const t=(m.name+' '+m.trigger+' '+(m.tools||[]).join(' ')).toLowerCase(); if(t.indexOf(mFilter.q)<0) return false; }
+  return true;
+}
+
+function renderModelGroups(){
+  const host=$('#modelGroups'); if(!host) return;
+  const shown=MODELS.filter(modelMatches);
+  let html='';
+  MENTOR_ORDER.forEach(mn=>{
+    const list=shown.filter(m=>m.mentor===mn);
+    if(!list.length) return;
+    html+='<div class="mgroup"><h3 class="'+mcls(mn)+'">'+esc(mn)+' <span class="cnt">('+list.length+')</span></h3>'+
+      list.map(modelCard).join('')+'</div>';
+  });
+  host.innerHTML = html || '<p class="lead">No models match these filters.</p>';
+}
+
+function renderModelFilters(){
+  const host=$('#modelFilters'); if(!host) return;
+  const chipBtn=(dim,val,label,cls)=> '<button class="fchip '+(cls||'')+(mFilter[dim]===val?' on':'')+'" data-dim="'+dim+'" data-val="'+esc(val)+'">'+esc(label)+'</button>';
+  let h='<div class="frow"><span class="flab">Mentor</span>'+chipBtn('mentor','all','All');
+  MENTOR_ORDER.forEach(mn=> h+=chipBtn('mentor',mn,mn,mcls(mn)) ); h+='</div>';
+  h+='<div class="frow"><span class="flab">Session</span>'+chipBtn('session','all','All');
+  Object.keys(SESSION_LABELS).forEach(k=> h+=chipBtn('session',k,SESSION_LABELS[k]) ); h+='</div>';
+  h+='<div class="frow"><span class="flab">Verdict</span>'+chipBtn('verdict','all','All');
+  ['s','a','r'].forEach(v=> h+=chipBtn('verdict',v,V[v],'chip '+v) ); h+='</div>';
+  host.innerHTML=h;
+  host.querySelectorAll('.fchip').forEach(b=> b.onclick=()=>{ mFilter[b.dataset.dim]=b.dataset.val; renderModelFilters(); renderModelGroups(); });
+}
+
+if($('#modelGroups')){
+  renderModelFilters();
+  renderModelGroups();
+  const ms=$('#modelSearch');
+  if(ms) ms.addEventListener('input',()=>{ mFilter.q=ms.value.trim().toLowerCase(); renderModelGroups(); });
+}
+
 /* ---------------- nav ---------------- */
 function switchView(v){
   document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
