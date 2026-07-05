@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>The Framework — mentor education</title>
-<link rel="stylesheet" href="styles.css?v=10">
+<link rel="stylesheet" href="styles.css?v=11">
 </head>
 <body>
 <div class="banner">⚠ <b>IN-SAMPLE ONLY.</b> This system has never been validated live or out-of-sample. Nothing here clears you to fund or size up — only a forward/live demo does. Backtest $ are @ $0.50/pt (live = $2.00/pt).</div>
@@ -23,6 +23,7 @@
   <button data-v="howto">How to Trade</button>
   <button data-v="mentors">Mentor Lenses</button>
   <button data-v="sessions">Session Playbook</button>
+  <button data-v="models">Model Playbook</button>
   <button data-v="self">Self-Check</button>
 </nav>
 <main>
@@ -122,6 +123,16 @@
     <div id="seslist"></div>
   </section>
 
+  <!-- MODEL PLAYBOOK -->
+  <section class="view" id="models">
+    <h2>Model Playbook</h2>
+    <p class="lead">Every model the seven mentors teach — 33 in total — with its full tradable spec. Grouped by mentor. Filter by session or by our backtest verdict.</p>
+    <div class="banner">Verdicts grade OUR backtest <b>evidence</b>, not the mentors' claims. FORWARD-VALIDATED is deliberately empty — nothing here is proven live/OOS. <b>IN-SAMPLE</b> (only 2 models) = our in-sample edge (the v8.18 62T — never size up on it); <b>UNVALIDATED</b> = taught but not gated here; <b>DEAD</b> = net-negative in our engine. A learning catalog, not a signal source.</div>
+    <div id="modelFilters" class="filters"></div>
+    <input id="modelSearch" class="search" placeholder="Search model / trigger / tool…">
+    <div id="modelGroups"></div>
+  </section>
+
   <!-- SELF-CHECK -->
   <section class="view" id="self">
     <h2>Self-Check — did you get it right?</h2>
@@ -136,9 +147,10 @@
 
 </main>
 <div class="mockbadge">The Framework · v1</div>
-<script src="data.js?v=10"></script>
-<script src="uses.js?v=10"></script>
-<script src="app.js?v=10"></script>
+<script src="data.js?v=11"></script>
+<script src="uses.js?v=11"></script>
+<script src="models.js?v=11"></script>
+<script src="app.js?v=11"></script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js');});}</script>
 </body>
 </html>
