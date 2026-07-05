@@ -61,7 +61,7 @@ window.GUIDE = {
 <h3>Operating windows</h3>
 <ul>
 <li><b>6:00 PM (18:00) — the anchor:</b> the daily open, used to study the daily protraction profile (the manipulation wick is measured against it; e.g. wait for an open-low to frame longs on a bullish day).</li>
-<li><b>2:00–5:00 AM (London):</b> the primary manipulation engine. If London cleanly manipulates into a HTF PD array (Classic/Delayed protraction), NY expands safely away from it.</li>
+<li><b>London manipulation window (~12:00–3:00 AM classic / 2:00–8:00 AM delayed protraction):</b> the primary manipulation phase. If London cleanly manipulates into a HTF PD array (Classic/Delayed protraction), NY expands safely away from it.</li>
 <li><b>6:00 AM — the decoupled move:</b> the open of a new 4H cycle, notorious for "decoupled expansion" (Algorithm 1) where triad assets move opposite to manipulate.</li>
 <li><b>9:30 AM (equities open):</b> a massive volatility injection. If London <i>failed</i> to manipulate, NY uses 9:30 to engineer a violent Judas Swing — sweeping the London lows to trap traders before reversing. If 6 AM decoupled, 9:30 is often where the reversal trigger forms.</li>
 <li><b>10:00 AM — the resync / continuation window:</b> if 6 AM decoupled, this is where the leading asset fails to manipulate further, forcing the triad to resync and catch up — prime for continuations.</li>

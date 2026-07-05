@@ -31,16 +31,16 @@ window.GUIDE = {
 </ul>
 <h3>Step 5 — high-probability PD arrays</h3>
 <ul>
-<li><b>Fair Value Gap:</b> a 3-candle imbalance; in a bearish FVG the upper half is "balanced" — the true sensitivity is in the lower half (and vice versa for bullish). High-probability FVGs break away from a range and don't overlap old choppy price.</li>
+<li><b>Fair Value Gap:</b> a 3-candle imbalance; its key level is the <b>consequent encroachment</b> (the 50% midpoint of the gap), which price gravitates to. High-probability FVGs break away from a range and don't overlap old choppy price.</li>
 <li><b>Order Block:</b> the last down-close candle before an expansion swing — but it <i>must</i> be coupled with an FVG that forms right after. Sensitivity is at the open or the mean threshold (the 50% midpoint of the body).</li>
 <li><b>Breaker:</b> a failed order block — a bearish breaker forms on High → Low → Higher High (raiding BSL) then a break below the low; the last down-close candle between the two highs becomes the breaker.</li>
 </ul>
 <h3>Step 6 — Optimal Trade Entry (OTE)</h3>
 <ul>
-<li><b>The 62% rule:</b> anchor the fib from the low to the high of the displacement swing; OTE keys off the exact 62% retracement (prioritized over 70.5% / 79%).</li>
-<li><b>Entry buffer:</b> don't enter exactly at 62% — for longs, a buy limit at 62% <b>+ 5 pips</b>; for shorts, a sell limit at 62% <b>− 5 pips</b> (to account for spread).</li>
-<li><b>Stop:</b> 5 pips below the anchor swing low (longs) / 5 pips above the anchor swing high (shorts).</li>
-<li><b>Management:</b> don't move the stop to break-even until the position reaches exactly <b>75% of the profit objective</b>.</li>
+<li><b>The OTE zone:</b> anchor the fib from the low to the high of the displacement swing; OTE keys off the <b>62–79% retracement zone</b>, with the <b>70.5% level as the "sweet spot"</b> (62% and 79% bracket it).</li>
+<li><b>Entry buffer:</b> place the limit in the OTE zone (around the 70.5% sweet spot) with a small spread buffer — the classic ICT figure is <b>+5 pips</b> (longs) / <b>−5 pips</b> (shorts), which is <i>forex</i>-specific; on index futures (MNQ) it's a few ticks, not pips.</li>
+<li><b>Stop:</b> <b>structural</b> — just beyond the anchor swing low (longs) / high (shorts); a few ticks on MNQ. (The "5 pips" is the forex entry buffer, not the stop distance.)</li>
+<li><b>Management:</b> scale out at logical objectives (e.g. reduce ~25% at a quarter of the target) and roll the stop to break-even once structure confirms (ICT: after the second profit multiple). <i>The exact "75%-to-BE" figure is a convention, not a stated ICT rule.</i></li>
 <li><b>Forex vs index futures:</b> the "+5 pip" entry buffer and the "10/20/30 pip" liquidity-run figures are <i>forex-specific</i>. Index futures (MNQ) are measured in points/handles and the corpus gives no exact point equivalent — treat them as "a few ticks past the level" and "a small sweep beyond the old high/low", not literal pips.</li>
 </ul>` },
 
@@ -66,7 +66,7 @@ window.GUIDE = {
 <h3>MSS (Market Structure Shift)</h3>
 <p>Price breaking a significant short-term high (bullish) or low (bearish) following an impulse. <b>Nuance:</b> most potent immediately after a stop run (turtle soup) into a higher-timeframe PD array — once it occurs, retracements back into the new range are treated as safe entries.</p>
 <h3>Judas Swing</h3>
-<p>A false, protractionary move counter to the true daily direction, engineered to trick breakout traders and trigger stops. <b>Nuance:</b> highly time-sensitive — typically initiates at the 00:00 GMT open, the midnight NY open, or the 8:30 AM news embargo lift; smart money uses the fake expansion to accumulate its true positions.</p>
+<p>A false, protractionary move counter to the true daily direction, engineered to trick breakout traders and trigger stops. <b>Nuance:</b> highly time-sensitive — typically initiates at the <b>midnight New York open</b> (the primary anchor) or the 8:30 AM news embargo lift; some 2022 Core Content protraction material also references 0 GMT / 4 GMT windows. Smart money uses the fake expansion to accumulate its true positions.</p>
 <h3>Killzone</h3>
 <p>Specific high-volume windows where institutional order flow dominates — London 1:00–5:00 AM NY, New York 7:00–10:00 AM NY, London Close 10:00 AM–12:00 PM NY. <b>Nuance:</b> the day's high or low predominantly forms within these windows; a setup outside a killzone has far lower odds of institutional sponsorship.</p>
 <h3>Power of 3</h3>
@@ -100,9 +100,9 @@ window.GUIDE = {
 <h3>1. NY AM V-Shape / Optimal Trade Entry (OTE)</h3>
 <ul>
 <li><b>Context:</b> stalked in the NY killzone (7:00–10:00 AM ET), looking for a retracement against London's momentum.</li>
-<li><b>Trigger:</b> price retraces into the exact 62% fib of the dealing range.</li>
-<li><b>Entry:</b> a limit at 62% <b>+ 5 pips</b> (longs) / <b>− 5 pips</b> (shorts) for spread.</li>
-<li><b>Stop:</b> exactly 5 pips below the anchor swing low (longs) / above the anchor swing high (shorts); don't move to break-even until 75% of the profit objective.</li>
+<li><b>Trigger:</b> price retraces into the OTE zone (62–79%), keying on the 70.5% sweet spot, of the dealing range.</li>
+<li><b>Entry:</b> a limit in the OTE zone (≈70.5%) with a small spread buffer (+5 pips forex / a few ticks on MNQ).</li>
+<li><b>Stop:</b> structural — just beyond the anchor swing low (longs) / high (shorts); scale out at logical objectives and move to break-even once structure confirms.</li>
 <li><b>Target:</b> first partials at the day's anchor high/low, then 10/20/30 pips beyond the previous day's range into external liquidity.</li>
 <li><b>Nuance:</b> draw the fib using candle <b>bodies</b> to capture core volume — ignore the wicks.</li>
 </ul>
@@ -141,11 +141,11 @@ window.GUIDE = {
 <h3>Step 2 — displacement &amp; MSS (9:45–9:55)</h3>
 <p>Immediately after purging buy stops, price drops with heavy displacement, violently breaking a recent short-term swing low. <b>Nuance:</b> a valid MSS must be preceded by a liquidity raid, and does not require a body close below the swing — a wick with rapid displacement is sufficient.</p>
 <h3>Step 3 — the Silver Bullet FVG &amp; OTE (10:00)</h3>
-<p>The displacement leaves a 3-candle bearish FVG. At 10:00 we enter the Silver Bullet window and wait for price to retrace up into that inefficiency. <b>Nuance 1:</b> in a bearish FVG the upper half is balanced — the true inefficiency is the lower half. <b>Nuance 2:</b> anchor the fib from the displacement high down to the low using candle <i>bodies</i>, ignoring wicks.</p>
+<p>The displacement leaves a 3-candle bearish FVG. At 10:00 we enter the Silver Bullet window and wait for price to retrace up into that inefficiency. <b>Nuance 1:</b> the key level of the bearish FVG is its consequent encroachment (the 50% midpoint). <b>Nuance 2:</b> anchor the fib from the displacement high down to the low using candle <i>bodies</i>, ignoring wicks.</p>
 <h3>Step 4 — exact entry &amp; stop</h3>
-<p>Key on the 62% level (over 70.5%/79%); note it aligns inside the lower half of the bearish FVG. Place a <b>sell limit at 62% − 5 pips</b>; the moment it's placed, the stop goes exactly <b>5 pips above the anchor swing high</b>.</p>
+<p>Key on the 70.5% "sweet spot" within the 62–79% OTE zone; note it aligns with the consequent encroachment (50%) of the bearish FVG. Place a <b>sell limit there</b> (a few ticks of spread buffer); the moment it's placed, the stop goes <b>just above the anchor swing high</b> (structural).</p>
 <h3>Step 5 — target &amp; management</h3>
-<p>At 10:10 price taps the limit at the lower half of the FVG, stalls at the consequent encroachment (50% midpoint), and falls toward the SSL below yesterday's low. Manage mechanically: at 25% of objective reduce stop risk 25%; at 50% reduce 50%; at exactly <b>75%</b> — and only then — move the stop to break-even. Hold the final portion until price sweeps 10/20/30 pips below the old daily low, completing ERL → IRL → ERL delivery.</p>` },
+<p>At 10:10 price taps the limit at the lower half of the FVG, stalls at the consequent encroachment (50% midpoint), and falls toward the SSL below yesterday's low. Manage mechanically: scale out at logical objectives (reduce ~25% at a quarter of the target) and roll the stop to break-even once structure confirms. Hold the final portion until price sweeps 10/20/30 pips below the old daily low, completing ERL → IRL → ERL delivery.</p>` },
 
     { id:"nuances", title:"Nuances you must not miss", html:`
 <h3>Focus on candle bodies, not wicks</h3>

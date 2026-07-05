@@ -219,6 +219,11 @@ mentors: [
   ses:"Frames each session as its own Q1–Q4 cycle; NY AM 'Q3-of-Q3' sweet spot.",
   setups:[["Q1 Asian Dynamic S/R","a"],["Daily Q2 London Stop Hunt","a"],["Q3-of-Q3 Sweet Spot","a"],["Q4 Afternoon Reversal","a"]],
   vocab:"Quarter / phase → Frame steps 1–2 · manipulation → step 3 · True Open → step 5 anchor."},
+ {id:"dayement", name:"Daye Mentorship", owns:"the QT MENTORSHIP",
+  phil:"The full Quarterly-Theory mentorship (@DayeMentorship_, 69 videos). Same system as Daye, in far more depth: Sequential SMT is the sole reversal engine, confirmed by Precision Swing Points and executed at a True Open in the Q3-of-Q3 window with a Fib-SD stop. Adds Doubling Theory, Hidden SMT, Stage-4 / Monday-Expansion / CPI models — and hardens a few rules (UTC+2 clock, 3R minimum, a 13th 'Joker' week).",
+  ses:"UTC+2 'algorithmic' clock; daily quarters Q1 Asia … Q4 Afternoon; 9:00–10:30 AM 'Q3-of-Q3' sweet spot; Thursday = best day.",
+  setups:[["Two-stage Sequential SMT (One-Shot-One-Kill)","a"],["Stage-4 Advanced Setup","a"],["Monday Expansion Model","a"],["CPI Trading Model","a"],["Q4 Afternoon Reversal","a"]],
+  vocab:"Quarter/phase (AMD) → Frame steps 1–2 · Sequential SMT / PSP → step 4 · True Open → step 5 anchor · Fib-SD stop → step 6."},
  {id:"gxt", name:"GxT", owns:"owns ENTRY",
   phil:"The Universal Sequence: internal range liquidity draws to external (IRL→ERL); a 2-stage PSP/CISD with an SMT triad confirms; you take the precise entry. He answers WHAT / WHERE — he calls the shot.",
   ses:"NY AM & PM reversals off the 6:00 / 10:00 ET opens.",
@@ -266,6 +271,17 @@ coverage: {
    5:{c:"partial",own:"enter at NWOG/NDOG/BPR/FVG at the True Open",note:"lighter on OTE / first-presented-FVG precision"},
    6:{c:"full",own:"protected swing = the sweep-leg extreme (+ SD/fib offset)"},
    7:{c:"partial",own:"opposite dealing-range liquidity; the Magneto level; SD projection",note:"leans on far SD-projection targets"} }},
+  dayement: { dead:[
+    {step:4,label:"Two-stage Sequential-SMT cascade as a standalone driver",tier:"r",why:"= our ssmt_psp_engine — dead on the sealed 2025-26 holdout"},
+    {step:7,label:"Hardened 3R-minimum target",tier:"a",why:"the base channel says 'even 2R works'; far/fixed R-targets lowered net vs the tight first-target in our tests"}
+   ], steps:{
+   1:{c:"full",own:"which quarter/phase (AMD); True Open premium/discount; Stacked True Opens"},
+   2:{c:"full",own:"daily quarters (Q1 Asia … Q4 Afternoon) on the UTC+2 clock; True Opens select which session to hunt"},
+   3:{c:"full",own:"the Manipulation leg (Q2 Judas); omit the first third of Q1, use T2/T3"},
+   4:{c:"full",own:"Sequential SMT (closes not wicks) + Precision Swing Point at a quarter boundary; two-stage HTF→LTF confirmation"},
+   5:{c:"partial",own:"enter on the True-Open cross or SMT-Fill at a Precision Level (True Open + PSP wick)",note:"lighter on OTE / first-presented-FVG precision"},
+   6:{c:"full",own:"Fibonacci-standard-deviation stop (1 SD, or 0.5 SD 'cheeky') off the liquidity-run swing"},
+   7:{c:"partial",own:"symmetrical highs/lows (draw on liquidity); exit on opposing Sequential SMT; the Magneto level",note:"pushes a hardened 3R minimum"} }},
   gxt: { dead:[
     {step:4,label:"Two-stage strength-switch / laggard-SMT entry",tier:"r",why:"single-TF SSMT dead OOS (tail noise); the cascade failed the holdout"},
     {step:4,label:"News driver-pairing bias",tier:"r",why:"all driver levers closed; --driver-news had zero effect"},

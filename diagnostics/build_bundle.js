@@ -1,6 +1,6 @@
 const fs=require('fs');
 const base='education/mentors';
-const ids=['ttrades','daye','gxt','ict','dexter','xyj'];
+const ids=['ttrades','daye','dayement','gxt','ict','dexter','xyj'];
 const guides=ids.map(id=>{ const src=fs.readFileSync(`${base}/data/${id}.js`,'utf8'); const window={}; new Function('window',src)(window); return window.GUIDE; });
 const css=fs.readFileSync(`${base}/guide.css`,'utf8');
 const html=`<!doctype html>
