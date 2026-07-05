@@ -55,7 +55,7 @@ in `data.js` and `window.GUIDE` in the guide files). One object per model:
   target:    "2R / HTF ERL",
   tfs:       "1H POI -> 5m execution",  // timeframe nest
   tools:     ["breaker block","FVG","liquidity sweep"],  // PD-arrays / concepts used
-  verdict:   "yellow",                  // green | yellow | red  (OUR backtest evidence)
+  verdict:   "a",                       // s|a|r|w — REUSE window.EDU.verdicts codes (OUR evidence)
   example:   "NQ sweeps the Asia low, breaks the 1H breaker, retraces into the 5m FVG ...",
   guideId:   "ttrades"                  // links back to the full mentor guide (mentors/ttrades.html)
 }
@@ -69,13 +69,19 @@ runtime HTML-parsing of the guides (prose is inconsistent; curation lets us reco
 fields the guides state loosely, e.g. HTF/tfs/tools). Any field a source does not cover is set to the
 literal string `"not covered in corpus"` — never fabricated (enforced project rule).
 
-`verdict` mapping (grounded in OUR backtests, per `mentor_setup_catalog.md` legend, NOT mentor
-claims):
-- `green` — survives our gates / is the production edge. Exactly **2**: the NY-AM V-shape
+`verdict` — REUSE the existing `window.EDU.verdicts` code system (so the model cards render with the
+same `chip()` helper and CSS as the rest of the dashboard):
+`{ g:"FORWARD-VALIDATED", s:"IN-SAMPLE", a:"UNVALIDATED", r:"DEAD (our engine)", w:"MECHANIC" }`.
+
+Mapping (grounded in OUR backtests, NOT mentor claims):
+- `g` (FORWARD-VALIDATED) — **deliberately EMPTY**. Nothing is forward/OOS-validated. Do NOT tag any
+  model `g`.
+- `s` (IN-SAMPLE) — our in-sample production edge. Exactly **2** models: the NY-AM V-shape
   sweep-reversal (OTE) and the NY-PM continuation (= v8.18 62T core). Any mentor's rendering of the
-  NY-AM V-shape maps to green.
-- `yellow` — taught & plausible, never independently validated here (or only marginal).
-- `red` — our backtests found it net-negative / lookahead-artifact / null-failing (e.g. driver
+  NY-AM V-shape maps to `s`.
+- `a` (UNVALIDATED) — taught & plausible, never independently validated here (or only marginal). The
+  majority of the 33.
+- `r` (DEAD) — our backtests found it net-negative / lookahead-artifact / null-failing (e.g. driver
   pairing, single-TF strength-switch/Lathyrus, Son's/30-sec model, London-leg setups).
 
 ## 5. The view
@@ -96,11 +102,13 @@ New `<section class="view" id="models">` and a nav button **"Model Playbook"** i
 
 ## 6. Honesty layer (non-negotiable)
 
-Every model card shows its verdict badge. A persistent banner at the top of the view:
+Every model card shows its verdict chip (via the existing `chip()` helper). A persistent banner at
+the top of the view:
 
-> "Verdicts grade OUR backtest evidence, not the mentors' claims. 🟢 = our production edge (only 2);
-> 🟡 = taught but unvalidated here; 🔴 = dead in our engine. This is a learning catalog, not a
-> signal source."
+> "Verdicts grade OUR backtest EVIDENCE, not the mentors' claims. FORWARD-VALIDATED is deliberately
+> empty — nothing here is proven live/OOS. IN-SAMPLE (only 2 models) = our in-sample edge (the v8.18
+> 62T, never size up on it); UNVALIDATED = taught but not gated here; DEAD = net-negative in our
+> engine. This is a learning catalog, not a signal source."
 
 Consistent with the tiering used across the rest of the dashboard (`data.js` verdict tags, the
 Concept Library, Session Playbook).
@@ -125,7 +133,8 @@ Headless-browser check (project standard):
 2. 33 model cards render across 7 mentor groups with correct counts (4/4/4/4/6/6/5).
 3. Each filter (Mentor / Session / Verdict) narrows the set correctly; search narrows by
    name/trigger/tools; filters compose.
-4. Exactly 2 cards carry the green verdict badge (NY-AM V-shape OTE, NY-PM continuation).
+4. Exactly 2 cards carry the `s` (IN-SAMPLE) verdict chip (NY-AM V-shape OTE, NY-PM continuation);
+   0 cards carry `g` (FORWARD-VALIDATED stays empty).
 5. Each "Full guide ->" link points to an existing `mentors/<id>.html`.
 6. `build_bundle.js` regenerates; the offline `mentor-guides.html` opens and shows the Model
    Playbook view.
