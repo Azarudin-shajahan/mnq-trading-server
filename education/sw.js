@@ -1,8 +1,8 @@
 /* Service worker: precache the whole education app so it works offline once installed.
    Cache-first with ignoreSearch so ?v=N cache-bust query strings still hit the cache. */
-const CACHE = 'mentor-guides-v4';
+const CACHE = 'mentor-guides-v5';
 const ASSETS = [
-  'index.html', 'styles.css', 'app.js', 'data.js', 'uses.js',
+  'index.html', 'styles.css', 'app.js', 'data.js', 'uses.js', 'models.js',
   'mentor-guides.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png',
   'mentors/guide.css', 'mentors/guide.js',
   'mentors/ttrades.html', 'mentors/daye.html', 'mentors/dayement.html', 'mentors/gxt.html', 'mentors/ict.html', 'mentors/dexter.html', 'mentors/xyj.html',
