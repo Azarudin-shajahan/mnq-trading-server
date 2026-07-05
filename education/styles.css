@@ -184,3 +184,16 @@ tr:last-child td{border-bottom:none}
 .teach.drop .tlab{color:var(--red)}
 .mapstep.gap .mnode{border-style:dashed;border-color:#4a5663}
 @media(max-width:760px){.mapstep{grid-template-columns:1fr}.map::before{display:none}.mcluster.left,.mcluster.right{justify-content:flex-start}}
+
+/* --- Model Playbook --- */
+#models .banner{background:#fff7e6;border:1px solid #f0d999;border-radius:8px;padding:10px 12px;margin:10px 0;font-size:13px;line-height:1.5}
+#models .filters{margin:10px 0}
+#models .frow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0}
+#models .flab{font-size:12px;font-weight:600;color:#666;min-width:64px}
+#models .fchip{border:1px solid #ccc;background:#fff;border-radius:14px;padding:3px 10px;font-size:12px;cursor:pointer}
+#models .fchip.on{background:#1558b0;color:#fff;border-color:#1558b0}
+#models .search{width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:8px;margin:6px 0 14px;font-size:14px;box-sizing:border-box}
+#models .mgroup{margin:0 0 18px}
+#models .mgroup h3{border-bottom:2px solid #eee;padding-bottom:4px}
+#models .mgroup h3 .cnt{color:#999;font-weight:400;font-size:14px}
+#models .card.model .sess{color:#1558b0;font-size:12px;font-weight:600;margin:2px 0 0}
