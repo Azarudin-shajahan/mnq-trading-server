@@ -110,7 +110,11 @@ mechanics: [
  {t:"Candle Profiling", v:"a", d:"Reading candle open/close/wick to infer the phase (the TTrades fractal C1→C2→C3 model).",
   spot:"C1 sweeps, C2 closes back inside, C3 expands.", bb:"Bias follows the C2 close direction.", step:"Step 01"},
  {t:"Wick Analysis", v:"a", d:"A shallow opposing wick on the sweep candle 'supports expansion' — the transferable wick-filter (frac ≤0.33).",
-  spot:"Measure the opposing wick vs the candle range.", bb:"Small opposing wick favors continuation of the body.", step:"Step 04 (filter)"}
+  spot:"Measure the opposing wick vs the candle range.", bb:"Small opposing wick favors continuation of the body.", step:"Step 04 (filter)"},
+ {t:"Daily Bias", v:"s", d:"The single directional lean for the whole day — long or short — set from HTF context BEFORE you trade. Sources: prior-day close vs its own range (close beyond = continuation; sweep + close back inside = reversal), 4H/Daily order flow and unfilled PD arrays, and the day's draw on liquidity (PDH/PDL).",
+  spot:"Price holding above/below the daily open & key HTF levels; prior day closed beyond its range (continuation) or swept a side and closed back in (reversal); direction of the last 4H FVG/displacement.", bb:"Bullish bias → expect an up expansion, buy discount below the daily/True Open. Bearish → expect a down expansion, sell premium above it.", step:"Step 01"},
+ {t:"Intraday Bias", v:"a", d:"The daily bias refined to the CURRENT session — which way the algo is likely to deliver in this killzone. Set from the session/midnight open, the AM range, and which correlated asset is leading (session SMT).",
+  spot:"Price vs the 09:30 / midnight open (above = premium/favour shorts, below = discount/favour longs); has the AM already swept one side; is NQ leading ES (session SMT).", bb:"Aligns with or refines the daily bias — take only session setups pointing the same way; a session opposing the daily bias is a stand-aside warning.", step:"Step 01"}
 ],
 
 /* Quarterly Theory & Time (Daye) — grounded in ict_extraction/Daye_Quarterly_Theory_Study_Guide.md */
