@@ -1,0 +1,148 @@
+//@version=6
+// =============================================================================
+// TMR SSMT STRATEGY  —  forward-test harness
+// Mechanization of the Chris Mellow / "The Market Revelation" (TMR) method:
+//   killzones + sequential macros + 90m-cycle timing + Sequential SMT (NQ vs
+//   ES/YM) + liquidity sweep + CISD/displacement + SD/2R targets.
+// Every technique is a toggle so you can ablate it exactly like ssmt_psp_engine.
+//
+// HONEST FRAMING (read before trusting any number this prints):
+//   * The Python version of this cascade (backtest/ssmt_psp_engine.py) is
+//     DEAD on the sealed 2020-2026 holdout (every config PF 0.31-0.48).
+//   * 2020-2026 is a BURNED window — a green Strategy-Tester result over
+//     history here is overfitting, and TV's intrabar fills are MORE optimistic
+//     than the Python. Do NOT treat a rosy backtest as validation.
+//   * The ONLY legitimate use is FORWARD: arm it from today, paper-log the
+//     alerts on unseen bars. That is the real OOS test.
+//
+// ANTI-LOOKAHEAD: all request.security use lookahead_off; signals use confirmed
+//   / [1] values; evaluated on bar close; orders fill next bar.
+// =============================================================================
+strategy("TMR SSMT [forward-test]", overlay=true, pyramiding=0,
+     default_qty_type=strategy.fixed, default_qty_value=1,
+     initial_capital=100000, calc_on_every_tick=false,
+     process_orders_on_close=false, max_labels_count=200, max_lines_count=200)
+
+// ── Session & Time ───────────────────────────────────────────────────────────
+tz          = input.string("America/New_York", "Timezone (DST-aware)", group="Session & Time", tooltip="TMR sync GMT; NY tz auto-handles DST. Use 'GMT' to match his clock exactly.")
+useNYAM     = input.bool(true,  "NY AM killzone",  group="Session & Time")
+sessNYAM    = input.session("0930-1100", "  NY AM window", group="Session & Time")
+useNYPM     = input.bool(true,  "NY PM killzone",  group="Session & Time")
+sessNYPM    = input.session("1330-1600", "  NY PM window", group="Session & Time")
+useLondon   = input.bool(false, "London killzone", group="Session & Time")
+sessLondon  = input.session("0200-0500", "  London window", group="Session & Time")
+useMacros   = input.bool(false, "Restrict to Time Macros only", group="Session & Time")
+sessMac1    = input.session("0950-1010", "  Macro 1", group="Session & Time")
+sessMac2    = input.session("1050-1110", "  Macro 2", group="Session & Time")
+sessMac3    = input.session("1350-1410", "  Macro 3", group="Session & Time")
+
+// ── HTF bias (PO3 / directional filter) ──────────────────────────────────────
+useBias     = input.bool(false, "HTF bias filter", group="HTF Bias")
+biasTF      = input.timeframe("240", "  Bias timeframe", group="HTF Bias")
+biasLen     = input.int(50, "  Bias EMA length", minval=2, group="HTF Bias")
+
+// ── Sequential SMT (the core signal) ─────────────────────────────────────────
+useSMT      = input.bool(true,  "Require Sequential SMT", group="SMT")
+smtSym      = input.symbol("CME_MINI:ES1!", "  SMT partner (leader/laggard)", group="SMT")
+useSMT2     = input.bool(false, "  Require 2nd partner too", group="SMT")
+smtSym2     = input.symbol("CBOT_MINI:YM1!", "  2nd partner", group="SMT")
+
+// ── Liquidity sweep ──────────────────────────────────────────────────────────
+sweepLB     = input.int(20, "Sweep lookback (bars)", minval=3, group="Sweep")
+
+// ── CISD / displacement confirm ──────────────────────────────────────────────
+useConfirm  = input.bool(true,  "Require displacement close-back (CISD)", group="Confirm")
+atrLen      = input.int(14, "  ATR length", minval=1, group="Confirm")
+dispMult    = input.float(1.0, "  Displacement body / ATR", minval=0.1, step=0.1, group="Confirm")
+
+// ── Stop & Target ────────────────────────────────────────────────────────────
+buffTicks   = input.int(4, "Structural stop buffer (ticks)", minval=0, group="Stop & Target")
+targetMode  = input.string("Fixed RR", "Target mode", options=["Fixed RR","SD Projection"], group="Stop & Target")
+rrTarget    = input.float(2.0, "  Fixed R:R", minval=0.5, step=0.1, group="Stop & Target")
+sdMult      = input.float(2.0, "  SD multiple of manipulation leg", minval=0.5, step=0.5, group="Stop & Target")
+
+// ── Display ──────────────────────────────────────────────────────────────────
+showWin     = input.bool(true, "Shade trade windows", group="Display")
+showMarks   = input.bool(true, "Plot signal markers", group="Display")
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+mn_tick = syminfo.mintick
+inSess(s) => not na(time(timeframe.period, s, tz))
+
+inKZ  = (useNYAM and inSess(sessNYAM)) or (useNYPM and inSess(sessNYPM)) or (useLondon and inSess(sessLondon))
+inMac = inSess(sessMac1) or inSess(sessMac2) or inSess(sessMac3)
+inWin = useMacros ? (inKZ and inMac) : inKZ
+
+// HTF bias (confirmed HTF value, no lookahead)
+htfUp = request.security(syminfo.tickerid, biasTF, close > ta.ema(close, biasLen), lookahead=barmerge.lookahead_off)
+htfDn = request.security(syminfo.tickerid, biasTF, close < ta.ema(close, biasLen), lookahead=barmerge.lookahead_off)
+biasBull = not useBias or htfUp
+biasBear = not useBias or htfDn
+
+// Partner lows/highs for SMT (lookahead OFF)
+pLow  = request.security(smtSym,  timeframe.period, low,  lookahead=barmerge.lookahead_off)
+pHigh = request.security(smtSym,  timeframe.period, high, lookahead=barmerge.lookahead_off)
+qLow  = request.security(smtSym2, timeframe.period, low,  lookahead=barmerge.lookahead_off)
+qHigh = request.security(smtSym2, timeframe.period, high, lookahead=barmerge.lookahead_off)
+
+// Swept levels = extreme of the PRIOR sweepLB bars (exclude current)
+swLow   = ta.lowest(low, sweepLB)[1]
+swHigh  = ta.highest(high, sweepLB)[1]
+pSwLow  = ta.lowest(pLow, sweepLB)[1]
+pSwHigh = ta.highest(pHigh, sweepLB)[1]
+qSwLow  = ta.lowest(qLow, sweepLB)[1]
+qSwHigh = ta.highest(qHigh, sweepLB)[1]
+
+weSweptLow  = low  < swLow
+weSweptHigh = high > swHigh
+
+// Bullish SMT: we made the lower-low, partner(s) held (did NOT make a lower-low)
+pHeldLow  = pLow  >= pSwLow
+pHeldHigh = pHigh <= pSwHigh
+qHeldLow  = qLow  >= qSwLow
+qHeldHigh = qHigh <= qSwHigh
+smtBull = weSweptLow  and pHeldLow  and (not useSMT2 or qHeldLow)
+smtBear = weSweptHigh and pHeldHigh and (not useSMT2 or qHeldHigh)
+smtOkBull = not useSMT or smtBull
+smtOkBear = not useSMT or smtBear
+
+// CISD / displacement confirm (close back inside + displacement body)
+atr = ta.atr(atrLen)
+dispBull = close > open and (close - open) > atr * dispMult
+dispBear = open  > close and (open  - close) > atr * dispMult
+confBull = not useConfirm or (dispBull and close > swLow)
+confBear = not useConfirm or (dispBear and close < swHigh)
+
+// ── Signals (bar-close) ──────────────────────────────────────────────────────
+longSig  = inWin and biasBull and weSweptLow  and smtOkBull and confBull
+shortSig = inWin and biasBear and weSweptHigh and smtOkBear and confBear
+// resolve conflicts: skip if both fire on the same bar
+longOK  = longSig  and not shortSig
+shortOK = shortSig and not longSig
+
+buf = buffTicks * mn_tick
+
+if longOK and strategy.position_size == 0
+    slL   = low - buf
+    riskL = close - slL
+    tpL   = targetMode == "Fixed RR" ? close + rrTarget * riskL : close + sdMult * riskL
+    strategy.entry("L", strategy.long)
+    strategy.exit("L-exit", "L", stop=slL, limit=tpL)
+
+if shortOK and strategy.position_size == 0
+    slS   = high + buf
+    riskS = slS - close
+    tpS   = targetMode == "Fixed RR" ? close - rrTarget * riskS : close - sdMult * riskS
+    strategy.entry("S", strategy.short)
+    strategy.exit("S-exit", "S", stop=slS, limit=tpS)
+
+// ── Forward-log alerts (fire once, on bar close) ─────────────────────────────
+if longOK and barstate.isconfirmed
+    alert("TMR-SSMT LONG " + syminfo.ticker + " @ " + str.tostring(close, format.mintick), alert.freq_once_per_bar_close)
+if shortOK and barstate.isconfirmed
+    alert("TMR-SSMT SHORT " + syminfo.ticker + " @ " + str.tostring(close, format.mintick), alert.freq_once_per_bar_close)
+
+// ── Display ──────────────────────────────────────────────────────────────────
+bgcolor(showWin and inWin ? color.new(color.blue, 92) : na)
+plotshape(showMarks and longOK,  title="Long",  style=shape.triangleup,   location=location.belowbar, color=color.new(color.teal, 0),   size=size.small)
+plotshape(showMarks and shortOK, title="Short", style=shape.triangledown, location=location.abovebar, color=color.new(color.red, 0),    size=size.small)
