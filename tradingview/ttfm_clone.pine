@@ -296,3 +296,153 @@ if newHtfPeriod and showVLines and not pairUnsupported
     if array.size(vLines) > 24
         line.delete(array.shift(vLines))
 
+// ===== 6. FORMATION STATE MACHINE =====
+// States
+int ST_C2      = 0   // C2 closed, waiting on C3 (gray)
+int ST_C3      = 1   // C3 closed, tracking C4 (gray)
+int ST_CONSOL  = 2   // next HTF candle neither expanded nor failed (orange)
+int ST_FAILED  = 3   // price returned to sweep extreme before HTF swing formed (red)
+int ST_DONE    = 4   // delivered (C4 seen) — kept for history
+
+type Formation
+    int   dir            // 1 bull, -1 bear
+    int   state
+    int   c1Idx          // index into htfArr of Candle 1
+    float sweepLevel     // C1 extreme that was swept
+    float sweepExtreme   // furthest manipulation price (C2 wick tip)
+    float c2O
+    float c2H
+    float c2L
+    float c2C
+    int   c2BStart
+    int   c2BEnd
+    bool  ideal          // protected swing on the closure candle (★)
+    float cisdLevel
+    bool  cisdConfirmed
+    int   cisdRunStartB  // bar_index of first candle of the opposing LTF run
+    // drawings
+    line  sweepLn
+    array<line> cisdLns
+    array<line> eqLns
+    box   tspotBx
+    label lbl
+    array<line> projLns
+    array<label> projLbls
+    array<line> liqLns
+
+var array<Formation> formations = array.new<Formation>()
+
+// bull C2: sweeps C1 low AND body closes back inside C1 range (corpus: wick-only is NOT a C2)
+isC2(HTFCandle c1, HTFCandle c2, int dir) =>
+    dir == 1 ? (c2.l < c1.l and c2.c > c1.l) : (c2.h > c1.h and c2.c < c1.h)
+
+// C3 closure: close beyond C2 extreme (Body break) or beyond 50% of C2 range (50% threshold)
+isC3(Formation f, HTFCandle c3) =>
+    float thr = c3Mode == "Body break" ?
+         (f.dir == 1 ? math.max(f.c2O, f.c2C) : math.min(f.c2O, f.c2C)) :
+         (f.c2H + f.c2L) / 2
+    f.dir == 1 ? c3.c > thr : c3.c < thr
+
+// Ideal Formation: closure candle also closes through the opposing HTF candle series
+// (bull: consecutive down-close candles into the low; level = open of the FIRST candle of that run)
+opposingSeriesOpen(int endIdx, int dir) =>
+    // walk back from htfArr[endIdx] while candles oppose `dir`
+    float lvl = na
+    int i = endIdx
+    while i >= 0
+        HTFCandle hc = array.get(htfArr, i)
+        bool opposing = dir == 1 ? hc.c < hc.o : hc.c > hc.o
+        if not opposing
+            break
+        lvl := hc.o
+        i -= 1
+    lvl
+
+eraseFormation(Formation f, bool full) =>
+    // full = delete everything; else only the "cease plotting on failure" set
+    line.delete(f.sweepLn)
+    box.delete(f.tspotBx)
+    for ln in f.eqLns
+        line.delete(ln)
+    for ln in f.projLns
+        line.delete(ln)
+    for lb in f.projLbls
+        label.delete(lb)
+    if full
+        for ln in f.cisdLns
+            line.delete(ln)
+        for ln in f.liqLns
+            line.delete(ln)
+        label.delete(f.lbl)
+
+lblSizeConst() => lblSize == "Tiny" ? size.tiny : lblSize == "Small" ? size.small : size.normal
+
+setLabel(Formation f, string txt, color col) =>
+    if showLabels
+        label.delete(f.lbl)
+        int x = (f.c2BStart + f.c2BEnd) / 2
+        f.lbl := label.new(x, f.sweepExtreme, txt,
+             style = f.dir == 1 ? label.style_label_up : label.style_label_down,
+             color = color.new(col, 20), textcolor = color.white, size = lblSizeConst(), xloc = xloc.bar_index)
+
+biasAllows(int dir) =>
+    biasMode == "Neutral" ? true :
+     biasMode == "Bullish" ? dir == 1 :
+     biasMode == "Bearish" ? dir == -1 : true   // Auto Bias wired in Task 11
+
+// --- lifecycle driver: runs once per completed HTF candle ---
+if newHtfPeriod and modelEnabled and nHtf >= 2
+    HTFCandle cur = array.get(htfArr, nHtf - 1)   // just closed
+    HTFCandle pre = array.get(htfArr, nHtf - 2)
+
+    // 1) advance existing formations
+    for f in formations
+        if f.state == ST_C2 or f.state == ST_C3
+            bool failed = f.dir == 1 ? cur.l < f.sweepExtreme : cur.h > f.sweepExtreme
+            if failed
+                f.state := ST_FAILED
+                setLabel(f, f.ideal ? "C2 ★" : "C2", color.red)
+                eraseFormation(f, false)   // cease projections/EQ/sweep/T-Spot per real TTFM
+            else if f.state == ST_C2
+                if isC3(f, cur)
+                    f.state := ST_C3
+                    if showC3
+                        setLabel(f, f.ideal ? "C3 ★" : "C3", color.gray)
+                else
+                    f.state := ST_CONSOL
+                    setLabel(f, "C2", color.orange)
+            else if f.state == ST_C3
+                bool c4cont = f.dir == 1 ? cur.c > cur.o : cur.c < cur.o
+                f.state := ST_DONE
+                if c4cont and showC4
+                    setLabel(f, f.ideal ? "C4 ★" : "C4", color.gray)
+
+    // 2) detect a NEW C2 on the just-closed candle (both directions)
+    array<int> dirs = array.from(1, -1)
+    for dir in dirs
+        if isC2(pre, cur, dir) and biasAllows(dir) and (showC2 or showC3 or showC4)
+            float seriesOpen = opposingSeriesOpen(nHtf - 2, dir)
+            bool idealFlag = not na(seriesOpen) and (dir == 1 ? cur.c > seriesOpen : cur.c < seriesOpen)
+            Formation f = Formation.new(
+                 dir = dir, state = ST_C2, c1Idx = nHtf - 2,
+                 sweepLevel = dir == 1 ? pre.l : pre.h,
+                 sweepExtreme = dir == 1 ? cur.l : cur.h,
+                 c2O = cur.o, c2H = cur.h, c2L = cur.l, c2C = cur.c,
+                 c2BStart = cur.bStart, c2BEnd = cur.bEnd,
+                 ideal = idealFlag, cisdLevel = float(na), cisdConfirmed = false, cisdRunStartB = int(na),
+                 sweepLn = line(na), cisdLns = array.new<line>(), eqLns = array.new<line>(),
+                 tspotBx = box(na), lbl = label(na), projLns = array.new<line>(), projLbls = array.new<label>(),
+                 liqLns = array.new<line>())
+            if showSweep
+                f.sweepLn := line.new(pre.bStart, f.sweepLevel, cur.bEnd, f.sweepLevel,
+                     color = sweepCol, width = 1, xloc = xloc.bar_index)
+            if showC2
+                setLabel(f, idealFlag ? "C2 ★" : "C2", color.gray)
+            array.push(formations, f)
+
+    // 3) history cap: keep current + historyN per direction
+    int keep = (historyN + 1) * 2 + 2
+    while array.size(formations) > keep
+        Formation old = array.shift(formations)
+        eraseFormation(old, true)
+
