@@ -207,3 +207,92 @@ int nHtf = array.size(htfArr)
 HTFCandle lastHtf = nHtf > 0 ? array.get(htfArr, nHtf - 1) : na
 HTFCandle prevHtf = nHtf > 1 ? array.get(htfArr, nHtf - 2) : na
 
+// ===== 5. HTF CANDLE PANEL =====
+var array<box>   htfBoxes  = array.new<box>()
+var array<line>  htfWicks  = array.new<line>()
+var array<label> htfTimeLbls = array.new<label>()
+
+clearHtfPanel() =>
+    while array.size(htfBoxes) > 0
+        box.delete(array.pop(htfBoxes))
+    while array.size(htfWicks) > 0
+        line.delete(array.pop(htfWicks))
+    while array.size(htfTimeLbls) > 0
+        label.delete(array.pop(htfTimeLbls))
+
+tzActive() => useCustomTz ? customTz : syminfo.timezone
+
+fmtTime(int t) =>
+    str.format_time(t, timeFmt == "24h" ? "HH:mm" : "hh:mm a", tzActive())
+
+// slot i = 0..count-1, 0 = oldest displayed; developing candle occupies the last slot
+htfSlotX(int i) =>
+    bar_index + htfOffset + i * (htfSizePx + 2)
+
+drawHtfCandle(float o, float h, float l, float c, int t, int slot, bool developing) =>
+    int x1 = htfSlotX(slot)
+    int x2 = x1 + htfSizePx
+    int xm = x1 + htfSizePx / 2
+    color bod = c >= o ? bullBody : bearBody
+    color brd = c >= o ? bullBrdr : bearBrdr
+    array.push(htfBoxes, box.new(x1, math.max(o, c), x2, math.min(o, c),
+         border_color = developing ? color.new(brd, 40) : brd,
+         bgcolor = developing ? color.new(bod, 60) : bod, xloc = xloc.bar_index))
+    array.push(htfWicks, line.new(xm, h, xm, math.max(o, c), color = wickColr, xloc = xloc.bar_index))
+    array.push(htfWicks, line.new(xm, math.min(o, c), xm, l, color = wickColr, xloc = xloc.bar_index))
+    if showTimeLbl
+        array.push(htfTimeLbls, label.new(xm, l, fmtTime(t), style = label.style_label_up,
+             textcolor = color.gray, size = size.tiny, color = color.new(color.white, 100), xloc = xloc.bar_index))
+
+// model-level drawing helper honoring Drawing Type (On Chart / HTF Candle / Both)
+// draws a horizontal level; onChart span = [b1, b2] chart bars; panel span = current panel slots
+drawLevel(float price, int b1, int b2, color col, string styl, int lnWidth) =>
+    array<line> out = array.new<line>()
+    lineStyle = styl == "dashed" ? line.style_dashed : styl == "dotted" ? line.style_dotted : line.style_solid
+    if drawType != "HTF Candle"
+        array.push(out, line.new(b1, price, b2, price, color = col, style = lineStyle, width = lnWidth, xloc = xloc.bar_index))
+    if drawType != "On Chart"
+        array.push(out, line.new(htfSlotX(0), price, htfSlotX(math.max(htfCount - 1, 0)) + htfSizePx, price,
+             color = col, style = lineStyle, width = lnWidth, xloc = xloc.bar_index))
+    out
+
+var line htfOpenLn = na
+var line prevEqLn  = na
+var line prevHiLn  = na
+var line prevLoLn  = na
+var array<line> vLines = array.new<line>()
+
+if barstate.islast and htfCount > 0 and not pairUnsupported
+    clearHtfPanel()
+    int shown = math.min(htfCount - 1, nHtf)   // completed candles shown (last slot = developing)
+    if shown > 0
+        for i = 0 to shown - 1
+            HTFCandle hc = array.get(htfArr, nHtf - shown + i)
+            drawHtfCandle(hc.o, hc.h, hc.l, hc.c, hc.tOpen, i, false)
+    drawHtfCandle(aggO, aggH, aggL, close, aggT, shown, true)
+
+    // HTF open line (open of the developing HTF candle, from its first bar to now)
+    line.delete(htfOpenLn)
+    if showHtfOpen
+        htfOpenLn := line.new(aggB, aggO, bar_index + htfOffset, aggO, color = color.gray,
+             style = line.style_dotted, xloc = xloc.bar_index)
+    // Previous HTF candle levels
+    line.delete(prevEqLn)
+    line.delete(prevHiLn)
+    line.delete(prevLoLn)
+    if nHtf > 0
+        HTFCandle p = array.get(htfArr, nHtf - 1)
+        if showPrevEQ
+            prevEqLn := line.new(aggB, (p.h + p.l) / 2, bar_index + htfOffset, (p.h + p.l) / 2,
+                 color = eqCol, style = line.style_dashed, xloc = xloc.bar_index)
+        if showLHLines
+            prevHiLn := line.new(p.bStart, p.h, bar_index + htfOffset, p.h, color = color.gray, xloc = xloc.bar_index)
+            prevLoLn := line.new(p.bStart, p.l, bar_index + htfOffset, p.l, color = color.gray, xloc = xloc.bar_index)
+
+// vertical period lines drawn once per HTF boundary (persistent, not repainted)
+if newHtfPeriod and showVLines and not pairUnsupported
+    array.push(vLines, line.new(bar_index, low, bar_index, high, extend = extend.both,
+         color = color.new(color.gray, 70), style = line.style_dotted, xloc = xloc.bar_index))
+    if array.size(vLines) > 24
+        line.delete(array.shift(vLines))
+
