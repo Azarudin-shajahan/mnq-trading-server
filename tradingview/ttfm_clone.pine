@@ -1,0 +1,113 @@
+//@version=6
+// TTFM Clone — faithful re-implementation of Fractal Model [Pro+] (TTrades) as a PASSIVE
+// charting/learning tool. Grounded in the ttrades.com corpus; see
+// docs/superpowers/specs/2026-07-09-ttfm-clone-indicator-design.md. NOT a signal tool.
+indicator("Fractal Model (TTFM Clone)", "TTFM Clone", overlay = true,
+     max_lines_count = 500, max_boxes_count = 500, max_labels_count = 500)
+
+// ===== 1. SETTINGS =====
+// -- Warnings --
+bool showWarnings = input.bool(true, "Show warnings / errors", group = "Warnings")
+
+// -- General --
+bool  alertsOn   = input.bool(false, "Alerts", group = "General",
+     tooltip = "Master enable. Individual alert events are toggled in their own sections.")
+int   historyN   = input.int(0, "History", minval = 0, maxval = 40, group = "General",
+     tooltip = "How many past formations stay on chart (each = 1 bullish + 1 bearish).")
+string fractalMode = input.string("Automatic", "Fractal", group = "General",
+     options = ["Automatic", "30m - 3m", "1H - 5m", "4H - 15m", "Daily - 1H", "Weekly - 4H", "Monthly - Daily", "Custom"])
+bool  showC2 = input.bool(true,  "C2", inline = "cc", group = "General")
+bool  showC3 = input.bool(true,  "C3", inline = "cc", group = "General")
+bool  showC4 = input.bool(true,  "C4", inline = "cc", group = "General")
+string customHtf = input.timeframe("60", "Custom fractal: HTF", group = "General")
+string customLtf = input.timeframe("5",  "Custom fractal: LTF", group = "General")
+string biasMode  = input.string("Neutral", "Bias", group = "General",
+     options = ["Neutral", "Bullish", "Bearish", "Auto Bias 1", "Auto Bias 2"])
+
+// -- HTF Candles --
+int   htfCount  = input.int(4, "HTF candles", minval = 0, maxval = 40, group = "HTF Candles")
+int   htfSizePx = input.int(2, "Size (bars per candle)", minval = 1, maxval = 6, group = "HTF Candles")
+int   htfOffset = input.int(10, "Offset (bars right of price)", minval = 3, maxval = 100, group = "HTF Candles",
+     tooltip = "Bump to 17+ on a second stacked instance.")
+color bullBody  = input.color(color.new(#0b9981, 0), "Bull body",  inline = "bc", group = "HTF Candles")
+color bullBrdr  = input.color(#0b9981, "border", inline = "bc", group = "HTF Candles")
+color bearBody  = input.color(color.new(#d13c50, 0), "Bear body", inline = "rc", group = "HTF Candles")
+color bearBrdr  = input.color(#d13c50, "border", inline = "rc", group = "HTF Candles")
+color wickColr  = input.color(color.gray, "Wick", group = "HTF Candles")
+bool  showHtfOpen  = input.bool(true,  "HTF open line", group = "HTF Candles")
+bool  showVLines   = input.bool(true,  "Vertical lines (HTF period)", group = "HTF Candles")
+bool  showLHLines  = input.bool(false, "L/H lines (prev HTF high/low)", group = "HTF Candles")
+bool  showPrevEQ   = input.bool(true,  "Previous EQ (50% prev HTF candle)", group = "HTF Candles")
+string drawType    = input.string("On Chart", "Drawing type", options = ["On Chart", "HTF Candle", "Both"], group = "HTF Candles")
+bool  showTimeLbl  = input.bool(true, "Time labels", group = "HTF Candle Time Labels")
+string timeFmt     = input.string("24h", "Format", options = ["24h", "AM/PM"], group = "HTF Candle Time Labels")
+bool  useCustomTz  = input.bool(false, "Custom timezone", group = "HTF Candle Time Labels")
+string customTz    = input.string("America/New_York", "Timezone", group = "HTF Candle Time Labels")
+
+// -- Model Style --
+bool  showLabels = input.bool(true, "TTFM labels (C2/C3/C4)", group = "Model Style")
+string lblSize   = input.string("Small", "Label size", options = ["Tiny", "Small", "Normal"], group = "Model Style")
+bool  showSweep  = input.bool(true, "Candle 1 sweep line", group = "Model Style")
+color sweepCol   = input.color(color.orange, "Sweep color", group = "Model Style")
+bool  showCisdB  = input.bool(true, "Bullish CISD", inline = "cb", group = "Model Style")
+color cisdBCol   = input.color(#0b9981, "", inline = "cb", group = "Model Style")
+bool  showCisdS  = input.bool(true, "Bearish CISD", inline = "cs", group = "Model Style")
+color cisdSCol   = input.color(#d13c50, "", inline = "cs", group = "Model Style")
+bool  showEq     = input.bool(true, "Candle equilibrium", group = "Model Style")
+color eqCol      = input.color(color.silver, "EQ color", group = "Model Style")
+bool  showTspot  = input.bool(true, "T-Spot", inline = "ts", group = "Model Style")
+color tspotBull  = input.color(color.new(#0b9981, 82), "bull", inline = "ts", group = "Model Style")
+color tspotBear  = input.color(color.new(#d13c50, 82), "bear", inline = "ts", group = "Model Style")
+bool  earlyCisd  = input.bool(false, "Show early C2 CISD (preview, before HTF close)", group = "Model Style")
+bool  earlyCisdAlert = input.bool(false, "Early C2 CISD alerts", group = "Model Style")
+string c3Mode    = input.string("Body break", "C3 closure mode", options = ["Body break", "50% threshold"], group = "Model Style")
+
+// -- SMT Divergence --
+bool   smtOn     = input.bool(false, "Enable SMT?", group = "SMT Divergence")
+bool   smtAlerts = input.bool(false, "SMT alerts", group = "SMT Divergence")
+bool   smtLabels = input.bool(true,  "Labels", group = "SMT Divergence")
+string smtMode   = input.string("Automatic", "SMT mode", options = ["Automatic", "Custom"], group = "SMT Divergence")
+string smtSym1   = input.symbol("CME_MINI:ES1!", "Custom symbol 1", group = "SMT Divergence")
+bool   smtUse2   = input.bool(false, "Enable secondary pair", group = "SMT Divergence")
+string smtSym2   = input.symbol("CBOT_MINI:YM1!", "Custom symbol 2", group = "SMT Divergence")
+bool   smtInverse = input.bool(false, "Inverse correlation", group = "SMT Divergence")
+
+// -- Standard Deviation Projections --
+bool   projOn    = input.bool(true, "Enable projections", group = "Projections")
+bool   projLbls  = input.bool(true, "Labels", group = "Projections")
+string projType  = input.string("Wick", "Type", options = ["Wick", "Body"], group = "Projections")
+string projLvlsS = input.string("-1,-2,-2.5,-4,-4.5", "Levels (negative, comma-separated)", group = "Projections")
+
+// -- Formation Liquidity --
+bool  formLiqOn  = input.bool(false, "Enable formation liquidity", group = "Formation Liquidity")
+color formLiqCol = input.color(color.new(color.orange, 30), "Color", group = "Formation Liquidity")
+
+// -- Time Filter --
+bool   tfilterOn = input.bool(false, "Enable time filter", group = "Time Filter")
+string tfApplyBelow = input.timeframe("60", "Apply below (chart TF <=)", group = "Time Filter")
+bool   tf1On = input.bool(false, "Filter 1", inline = "f1", group = "Time Filter")
+string tf1   = input.session("0930-1100", "", inline = "f1", group = "Time Filter")
+bool   tf2On = input.bool(false, "Filter 2", inline = "f2", group = "Time Filter")
+string tf2   = input.session("1330-1600", "", inline = "f2", group = "Time Filter")
+bool   tf3On = input.bool(false, "Filter 3", inline = "f3", group = "Time Filter")
+string tf3   = input.session("0300-0500", "", inline = "f3", group = "Time Filter")
+string tfTz  = input.string("America/New_York", "Filter timezone", group = "Time Filter")
+
+// -- Info Table --
+bool   tblOn   = input.bool(true, "Show info", group = "Info Table")
+string tblSize = input.string("Small", "Size", options = ["Tiny", "Small", "Normal"], group = "Info Table")
+string tblLoc  = input.string("Bottom Right", "Location", group = "Info Table",
+     options = ["Top Left", "Top Right", "Bottom Left", "Bottom Right"])
+bool tblAsset  = input.bool(true, "Asset", inline = "t1", group = "Info Table")
+bool tblTf     = input.bool(true, "Chart TF", inline = "t1", group = "Info Table")
+bool tblPair   = input.bool(true, "Pairing", inline = "t2", group = "Info Table")
+bool tblCount  = input.bool(true, "Countdown", inline = "t2", group = "Info Table")
+bool tblBias   = input.bool(true, "Bias", inline = "t3", group = "Info Table")
+bool tblFilter = input.bool(true, "Time filter", inline = "t3", group = "Info Table")
+bool tblSmt    = input.bool(false, "SMT", inline = "t3", group = "Info Table")
+
+// -- Calculation --
+int calcBars = input.int(0, "Calculated bars (0 = all)", minval = 0, group = "Calculation")
+
+// ===== 1b. CALC GUARD =====
+bool inCalcWindow = calcBars == 0 or (last_bar_index - bar_index) <= calcBars
