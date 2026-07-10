@@ -446,3 +446,99 @@ if newHtfPeriod and modelEnabled and nHtf >= 2
         Formation old = array.shift(formations)
         eraseFormation(old, true)
 
+// ===== 7. LTF CISD ENGINE =====
+// Tracks, inside the developing HTF candle, the consecutive down-close (up-close) LTF run
+// that contains the lowest low (highest high). CISD level = open of the run's first candle.
+var float bullCisdLvl = na      // level to close ABOVE (from down-run into the low)
+var int   bullRunStartB = na
+var float bearCisdLvl = na      // level to close BELOW (from up-run into the high)
+var int   bearRunStartB = na
+var float runOpenDown = na      // open of current consecutive down-close run
+var int   runStartBDown = na
+var float runOpenUp = na
+var int   runStartBUp = na
+var float lowestInHtf = na
+var float highestInHtf = na
+
+if newHtfPeriod
+    bullCisdLvl := na
+    bullRunStartB := na
+    bearCisdLvl := na
+    bearRunStartB := na
+    runOpenDown := na
+    runOpenUp := na
+    lowestInHtf := na
+    highestInHtf := na
+
+if barstate.isconfirmed and modelEnabled
+    bool downClose = close < open
+    bool upClose   = close > open
+    // extend / start runs
+    if downClose
+        if na(runOpenDown) or not (close[1] < open[1])
+            runOpenDown := open
+            runStartBDown := bar_index
+    else
+        runOpenDown := na
+    if upClose
+        if na(runOpenUp) or not (close[1] > open[1])
+            runOpenUp := open
+            runStartBUp := bar_index
+    else
+        runOpenUp := na
+    // capture the run that contains the HTF-candle extreme
+    if na(lowestInHtf) or low < lowestInHtf
+        lowestInHtf := low
+        if not na(runOpenDown)
+            bullCisdLvl := runOpenDown
+            bullRunStartB := runStartBDown
+    if na(highestInHtf) or high > highestInHtf
+        highestInHtf := high
+        if not na(runOpenUp)
+            bearCisdLvl := runOpenUp
+            bearRunStartB := runStartBUp
+
+// pending/confirmed CISD lines for ACTIVE formations (state C2/C3, this HTF candle)
+drawCisd(Formation f) =>
+    bool enabled = f.dir == 1 ? showCisdB : showCisdS
+    color col = f.dir == 1 ? cisdBCol : cisdSCol
+    if enabled and not na(f.cisdLevel)
+        for ln in f.cisdLns
+            line.delete(ln)
+        array.clear(f.cisdLns)
+        array<line> newLns = drawLevel(f.cisdLevel, f.cisdRunStartB, bar_index,
+             f.cisdConfirmed ? col : color.new(col, 40), f.cisdConfirmed ? "solid" : "dashed", 2)
+        for ln in newLns
+            array.push(f.cisdLns, ln)
+
+if barstate.isconfirmed and modelEnabled
+    for f in formations
+        if f.state == ST_C2 or f.state == ST_C3
+            // adopt the current intra-HTF level while unconfirmed
+            if not f.cisdConfirmed
+                float lvl = f.dir == 1 ? bullCisdLvl : bearCisdLvl
+                int   rsb = f.dir == 1 ? bullRunStartB : bearRunStartB
+                if not na(lvl)
+                    f.cisdLevel := lvl
+                    f.cisdRunStartB := rsb
+                if not na(f.cisdLevel)
+                    bool crossed = f.dir == 1 ? close > f.cisdLevel : close < f.cisdLevel
+                    if crossed
+                        f.cisdConfirmed := true
+            drawCisd(f)
+
+// Early C2 CISD preview: developing HTF candle has swept prev HTF extreme and an LTF close
+// crossed the intra-candle CISD level — shown BEFORE the HTF closes (flagged preview, like real TTFM)
+var line earlyLn = na
+if earlyCisd and modelEnabled and barstate.isconfirmed and nHtf >= 1
+    line.delete(earlyLn)
+    HTFCandle p = array.get(htfArr, nHtf - 1)
+    bool sweptLo = aggL < p.l and not na(bullCisdLvl) and close > bullCisdLvl
+    bool sweptHi = aggH > p.h and not na(bearCisdLvl) and close < bearCisdLvl
+    if sweptLo
+        earlyLn := line.new(bullRunStartB, bullCisdLvl, bar_index, bullCisdLvl,
+             color = color.new(cisdBCol, 50), style = line.style_dotted, width = 2, xloc = xloc.bar_index)
+    else if sweptHi
+        earlyLn := line.new(bearRunStartB, bearCisdLvl, bar_index, bearCisdLvl,
+             color = color.new(cisdSCol, 50), style = line.style_dotted, width = 2, xloc = xloc.bar_index)
+
