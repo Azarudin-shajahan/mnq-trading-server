@@ -19,7 +19,8 @@ window.MODELS = [
     tfs:"Daily bias → 1H structure → 5m/15m execution",
     tools:["C1/C2/C3 fractal","CISD","protected swing","PDH/PDL","T-Spot"],
     verdict:"a",
-    example:"Daily candle sweeps the PDL into an HTF FVG and closes back inside the prior day's range (C2 closure, small wick); 1H CISD confirms; 5m entry on the retest targets the PDH." },
+    example:"Daily candle sweeps the PDL into an HTF FVG and closes back inside the prior day's range (C2 closure, small wick); 1H CISD confirms; 5m entry on the retest targets the PDH.",
+    donts:["Skip if a major HTF objective was just hit — no room left for expansion","Never force an entry when the trigger forms sluggishly or turns into consolidation","Don't move stop to break-even prematurely — invalidation is at the protected-swing extreme, not at entry","A continuation trigger forming exactly when a short-term target is swept = skip"] },
 
   { id:"ttrades-ic-cisd", mentor:"TTrades", mentorKey:"ttrades", guideId:"ttrades",
     name:"IC-CISD (Intracandle CISD)",
@@ -32,7 +33,8 @@ window.MODELS = [
     tfs:"Daily/4H bias → 5m/15m execution",
     tools:["IC-CISD","protected swing","T-Spot","order block","C3/C4 continuation"],
     verdict:"a",
-    example:"Daily C2 bullish closure locks direction; inside the new 4H candle price dips to the T-Spot, prints a 15m IC-CISD (closes through the down-close OB), locking the wick; entry targets the PDH." },
+    example:"Daily C2 bullish closure locks direction; inside the new 4H candle price dips to the T-Spot, prints a 15m IC-CISD (closes through the down-close OB), locking the wick; entry targets the PDH.",
+    donts:["Don't overcomplicate with dozens of PD arrays — analysis paralysis kills the IC-CISD read","Skip if the HTF candle's LTF trend is sluggish / forms consolidation instead of a clean wick","Never enter before the LTF closes back through the opposing order block — wait for the close","Avoid if a major HTF target was hit during this candle (no room to expand)"] },
 
   { id:"ttrades-unicorn", mentor:"TTrades", mentorKey:"ttrades", guideId:"ttrades",
     name:"Unicorn (Breaker + FVG)",
@@ -45,7 +47,8 @@ window.MODELS = [
     tfs:"HTF context → 5m execution",
     tools:["breaker block","FVG","liquidity sweep","stop hunt","displacement"],
     verdict:"a",
-    example:"9:30 spike sweeps the pre-market high (stop hunt), aggressively displaces down through the last up-close candle (breaker), leaving a bearish FVG inside it; limit short at the breaker start targets 2R." },
+    example:"9:30 spike sweeps the pre-market high (stop hunt), aggressively displaces down through the last up-close candle (breaker), leaving a bearish FVG inside it; limit short at the breaker start targets 2R.",
+    donts:["Never anticipate expansion on a reversal candle with a large opposing wick — range and time already exhausted","Don't blindly catch the wick; wait for the wick to form and trade the continuation body","Skip if the breaker and FVG don't cleanly overlap — the edge requires the precise coincidence","Avoid if SMT divergence is present without a valid structural displacement to back it up"] },
 
   { id:"ttrades-ttfm-continuation", mentor:"TTrades", mentorKey:"ttrades", guideId:"ttrades",
     name:"TTFM Continuation (Candle 3/4)",
@@ -58,7 +61,8 @@ window.MODELS = [
     tfs:"Daily C3/C4 → 4H C3 → 15m protected swing (all three aligned)",
     tools:["C3/C4 continuation","CISD","protected swing","PDH/PDL","SD projection"],
     verdict:"a",
-    example:"Daily C3 bullish expansion day; 4H C3 aligned; 15m price retraces to an FVG in the lower half, displaces through the down-close OB (protected swing), targets the PDH." },
+    example:"Daily C3 bullish expansion day; 4H C3 aligned; 15m price retraces to an FVG in the lower half, displaces through the down-close OB (protected swing), targets the PDH.",
+    donts:["Skip if the retracement is deep — true C3 expansion has shallow pullbacks, a deep OTE retrace is an invalidation signal","Stay out of the internal chop of a 'Seek & Destroy' consolidation (no clean C3 profile)","Don't chase continuation if all three TF frames (Daily/4H/15m) are not aligned on C3/C4","Avoid if a continuation trigger prints exactly when a short-term HTF target is swept"] },
 
   // ─── Daye (4) ──────────────────────────────────────────────────────────────
 
@@ -73,7 +77,8 @@ window.MODELS = [
     tfs:"Daily context → 15m execution",
     tools:["True Open","Quarterly Theory","FVG","Q1 defining range","SD projection"],
     verdict:"a",
-    example:"Asia Q1 tight range; price dips into the 7:30 PM True Open overlapping a 15m FVG at T2; long targets 1 SD of the T2/T3 range." },
+    example:"Asia Q1 tight range; price dips into the 7:30 PM True Open overlapping a 15m FVG at T2; long targets 1 SD of the T2/T3 range.",
+    donts:["Avoid Mondays — Q1 is the weekly barometer, choppy/low-prob (only tradeable with a major driver like NFP)","Skip if there is no confirmed directional premise in premium/discount (no room to the opposing external liquidity)","A LTF SMT that opposes the higher-timeframe cycle SMT is fake — don't trade it","Don't enter in T1; wait for the pullback to form in T2 or T3 before the setup qualifies"] },
 
   { id:"daye-q2-london-stophunt", mentor:"Daye", mentorKey:"daye", guideId:"daye",
     name:"Daily Q2 London Stop Hunt",
@@ -86,7 +91,8 @@ window.MODELS = [
     tfs:"Daily/4H bias → 15m structure → 5m execution",
     tools:["Judas Swing","Sequential SMT","Stacked True Opens","FVG","True Day Open","London True Open"],
     verdict:"a",
-    example:"London sweeps Asia lows below the 1:30 AM True Open (which is below the 12:00 AM True Day Open = stacked discount); Sequential SMT forms (NQ lower low, ES fails); long on 5m FVG targets Asian buy-side." },
+    example:"London sweeps Asia lows below the 1:30 AM True Open (which is below the 12:00 AM True Day Open = stacked discount); Sequential SMT forms (NQ lower low, ES fails); long on 5m FVG targets Asian buy-side.",
+    donts:["Don't trade on Tuesday unless red-folder news is present — no driver = no valid Judas","A LTF SMT opposing the higher-timeframe cycle is fake — the HTF SMT calls the shots","Don't sell the very first high/low that creates the Sequential SMT — wait for the timed run-out","Skip if price is NOT below both the 12:00 AM True Day Open and 1:30 AM London True Open (stacking required)"] },
 
   { id:"daye-q3-sweet-spot", mentor:"Daye", mentorKey:"daye", guideId:"daye",
     name:"Q3-of-Q3 \"Sweet Spot\"",
@@ -99,7 +105,8 @@ window.MODELS = [
     tfs:"Daily cycle (15m) → 90-minute cycle (5m)",
     tools:["Sequential SMT","True Open","Quarterly Theory","FVG","SD stop","Q3-of-Q3 timing"],
     verdict:"a",
-    example:"8:30 news spikes down; 9:15 NASDAQ makes a lower low below the 7:30 AM NY True Open while ES holds higher; Sequential SMT confirmed; long on 5m FVG targets external buy-side liquidity." },
+    example:"8:30 news spikes down; 9:15 NASDAQ makes a lower low below the 7:30 AM NY True Open while ES holds higher; Sequential SMT confirmed; long on 5m FVG targets external buy-side liquidity.",
+    donts:["Skip on Wednesdays/Thursdays only — avoid if neither Q1 barometer nor a red-folder driver is present","An HTF setup is disqualified until confirmed by a newly forming LTF SMT — 'if there is no confirmation it will just fail'","Non-sequential SMT (wrong day, wrong quarter order) = engineered trap, not a real signal","Don't enter above the 7:30 AM NY True Open in a long setup — price must be in the structural discount"] },
 
   { id:"daye-q4-afternoon-reversal", mentor:"Daye", mentorKey:"daye", guideId:"daye",
     name:"Q4 Afternoon Reversal",
@@ -112,7 +119,8 @@ window.MODELS = [
     tfs:"Daily cycle (15m) → 90-minute Q4 cycle (5m)",
     tools:["Revolving True Open","Sequential SMT","Q3/Q4 transition","FVG","Quarterly Theory"],
     verdict:"a",
-    example:"NY Q3 expands bullishly; at 1:30 PM price breaks above the Revolving True Open but NQ makes a higher high while YM fails (Sequential SMT); short below the Revolving True Open targets the 50% day equilibrium." },
+    example:"NY Q3 expands bullishly; at 1:30 PM price breaks above the Revolving True Open but NQ makes a higher high while YM fails (Sequential SMT); short below the Revolving True Open targets the 50% day equilibrium.",
+    donts:["Skip on Fridays — Friday is intentionally excluded (retrace day), only a TGIF reversal qualifies","A LTF SMT that opposes the higher-timeframe cycle SMT is fake — need the larger cycle to cancel it","Don't execute on the strong asset (the one breaking the old high/low) — trade the laggard","Skip if there is no confirmed Q3 expansion to reverse off — Q4 reversal requires a full Q3 expansion first"] },
 
   // ─── GxT (4) ───────────────────────────────────────────────────────────────
 
@@ -127,7 +135,8 @@ window.MODELS = [
     tfs:"4H profile → 1H/30m structure → 5m/3m execution",
     tools:["4H candle profiling","V-shape CSD","FVG","breaker","driver pairing","IRL/ERL"],
     verdict:"a",
-    example:"6:00 AM 4H candle sweeps the overnight low with a V-shape CSD; at 10:00 open price retraces into the FVG left by the displacement; long targets the engineered equal highs (ERL)." },
+    example:"6:00 AM 4H candle sweeps the overnight low with a V-shape CSD; at 10:00 open price retraces into the FVG left by the displacement; long targets the engineered equal highs (ERL).",
+    donts:["If the 8:30/9:30 driver fails to reverse, that is invalidation to the whole profile — don't assume a random time will reverse the day","Never frame a reversal off close-proximity / low-resistance highs and lows (failure swings only)","A deep pullback to OTE is an invalidation — true expansion has shallow retracements","Skip if the 6:00 AM candle prints a large opposing wick (doesn't support expansion; adjust targets back to the daily open)"] },
 
   { id:"gxt-ny-am-vshape", mentor:"GxT", mentorKey:"gxt", guideId:"gxt",
     name:"NY AM V-Shape Reversal",
@@ -140,7 +149,8 @@ window.MODELS = [
     tfs:"4H/1H context → 5m/3m/1m execution",
     tools:["V-shape CSD","FVG","SMT Fill","IRL/ERL","failure swings"],
     verdict:"s",
-    example:"9:35 NQ V-shapes off the 4H FVG; 3m CSD confirms; entry on the SMT fill (YM hits the gap, NQ doesn't); targets the engineered equal highs." },
+    example:"9:35 NQ V-shapes off the 4H FVG; 3m CSD confirms; entry on the SMT fill (YM hits the gap, NQ doesn't); targets the engineered equal highs.",
+    donts:["A deep retracement to OTE is an invalidation — true expansion has shallow retracements; if you see one, don't enter","Skip if the candle prints a large opposing manipulation wick from the open — it doesn't support expansion","Never frame off close-proximity / low-resistance failure swings — the V-shape must tap a relevant HTF key level","Don't chase the first break or strong-asset extreme — enter the laggard or wait for the SMT fill"] },
 
   { id:"gxt-driver-pairing", mentor:"GxT", mentorKey:"gxt", guideId:"gxt",
     name:"Driver Pairing",
@@ -153,7 +163,8 @@ window.MODELS = [
     tfs:"1H context → 1–5m execution",
     tools:["SMT divergence","CISD","news driver","liquidity sweep","V-shape CSD"],
     verdict:"r",
-    example:"8:30 print spikes NQ into the PDH, NQ fails while ES makes a higher high (SMT), 1m CISD confirms the short." },
+    example:"8:30 print spikes NQ into the PDH, NQ fails while ES makes a higher high (SMT), 1m CISD confirms the short.",
+    donts:["If the driver fails to reverse, that invalidates the whole profile — don't assume a later random time will do the job","Never long the asset that creates the double sweep — long the asset with the double failure swing (extreme strength)","Skip if no clear V-shape CSD forms post-driver — a sluggish or consolidating move is not the setup","Large opposing wick from the open = doesn't support expansion; skip or adjust targets to the daily open"] },
 
   { id:"gxt-lagging-asset-smt", mentor:"GxT", mentorKey:"gxt", guideId:"gxt",
     name:"Lagging-Asset SMT (Asset Synchronization)",
@@ -166,7 +177,8 @@ window.MODELS = [
     tfs:"1H/4H context → 5m/3m execution",
     tools:["Strength Switch PSP","SMT Fill","IRL/ERL","SMT triad","Advanced Premium/Discount"],
     verdict:"r",
-    example:"NQ sweeps the session high and consolidates; YM (lagging) prints a Strength Switch PSP (closes bullish while NQ bearish) inside a 15m FVG; long YM targets the same session high NQ swept." },
+    example:"NQ sweeps the session high and consolidates; YM (lagging) prints a Strength Switch PSP (closes bullish while NQ bearish) inside a 15m FVG; long YM targets the same session high NQ swept.",
+    donts:["Never long the asset that created the double sweep — only trade the lagging asset showing extreme strength via double failure swing","Deep retracement kills the lagging-asset expansion idea — if the lagging asset retraces deeply after the PSP, skip","Skip if the driver fails to establish the leading asset's reversal — no confirmed leader = no valid lag","Don't fight the higher timeframe — a lagging-asset SMT that opposes the HTF cycle direction is a trap"] },
 
   // ─── ICT (4) ───────────────────────────────────────────────────────────────
 
@@ -181,7 +193,8 @@ window.MODELS = [
     tfs:"Daily/4H bias → 5m/1m execution",
     tools:["liquidity sweep","MSS","displacement","FVG","OTE (Fibonacci)"],
     verdict:"s",
-    example:"NQ sweeps the Asia low at 09:35, displaces up through structure, retraces to the 70.5% OTE + FVG, runs to the first opposing swing." },
+    example:"NQ sweeps the Asia low at 09:35, displaces up through structure, retraces to the 70.5% OTE + FVG, runs to the first opposing swing.",
+    donts:["Daily/4H limit and stop-order models are not valid while the candle is still forming — wait for the close","'When it's not obvious assume it's not there' — if the SMT divergence isn't undeniably clear, skip","Don't buy a move that has already gapped too far from its consolidation","Avoid selling daily/weekly premium arrays if the TF just posted a lower low and rejected (bullish breaker — it's invalidated)"] },
 
   { id:"ict-silver-bullet", mentor:"ICT", mentorKey:"ict", guideId:"ict",
     name:"Silver Bullet",
@@ -194,7 +207,8 @@ window.MODELS = [
     tfs:"Daily bias → 5m/1m execution within the timed window",
     tools:["FVG","Silver Bullet window","consequent encroachment","displacement","SD projection"],
     verdict:"a",
-    example:"10:05 displacement leaves a bearish 5m FVG; price retraces to the FVG consequent encroachment at 10:20 inside the Silver Bullet hour; short targets opposing session liquidity." },
+    example:"10:05 displacement leaves a bearish 5m FVG; price retraces to the FVG consequent encroachment at 10:20 inside the Silver Bullet hour; short targets opposing session liquidity.",
+    donts:["Not valid outside the 10:00–11:00 AM or 2:00–3:00 PM ET windows — time is the non-negotiable gate","Daily limit/stop-order models are not valid while the candle is still forming — wait for the bar close","'When it's not obvious assume it's not there' — unclear SMT or displacement = skip","Don't buy a move that has already gapped too far from its consolidation base"] },
 
   { id:"ict-judas-turtle-soup", mentor:"ICT", mentorKey:"ict", guideId:"ict",
     name:"Judas Swing / Turtle Soup",
@@ -207,7 +221,8 @@ window.MODELS = [
     tfs:"Daily/4H bias → 5m/1m execution",
     tools:["BSL/SSL","Judas Swing","Power of 3","liquidity sweep","FVG/OB","turtle soup"],
     verdict:"a",
-    example:"9:30 bell: NQ spikes above pre-market BSL trapping breakout longs; wicks pierce the high but bodies close back inside the range; short entry as the stop hunt completes targets the discount FVG." },
+    example:"9:30 bell: NQ spikes above pre-market BSL trapping breakout longs; wicks pierce the high but bodies close back inside the range; short entry as the stop hunt completes targets the discount FVG.",
+    donts:["CBDR >40 pips (2:00–8:00 PM NY range) — move to the sidelines; ranges >30 pips 'tend to be unfruitful for projections'","'When it's not obvious assume it's not there' — if the liquidity sweep isn't clearly trapping retail stops, skip","Don't fight the higher timeframe — a Judas in the wrong HTF direction is a losing fade","Avoid selling daily/weekly premium arrays if the TF just posted a lower low and rejected (invalidated breaker)"] },
 
   { id:"ict-mss-fvg-2022", mentor:"ICT", mentorKey:"ict", guideId:"ict",
     name:"MSS + FVG Entry (the 2022 model)",
@@ -220,7 +235,8 @@ window.MODELS = [
     tfs:"5m structure → 1m entry",
     tools:["MSS","FVG","liquidity raid","displacement","equilibrium","consequent encroachment"],
     verdict:"a",
-    example:"8:35 liquidity raid sweeps the pre-market low; aggressive MSS prints a bearish 5m FVG above equilibrium; limit short at the FVG anatomy runs to the opposing discount FVG." },
+    example:"8:35 liquidity raid sweeps the pre-market low; aggressive MSS prints a bearish 5m FVG above equilibrium; limit short at the FVG anatomy runs to the opposing discount FVG.",
+    donts:["Not valid while the daily candle is still forming — wait for the bar close before framing limit/stop models","Don't buy a move that has already gapped too far from its consolidation base","'If there is no obvious indication they are moving large funds, pass on the trade' — unclear displacement = skip","Avoid if the FVG prints at/below equilibrium for shorts (or at/above for longs) — placement relative to EQ is the filter"] },
 
   // ─── Dexter (6) ────────────────────────────────────────────────────────────
 
@@ -235,7 +251,8 @@ window.MODELS = [
     tfs:"4H/1H context → 15m/5m execution",
     tools:["Power of Three","standard deviation","SMT divergence","Silver Bullet Zone","order block","FVG"],
     verdict:"a",
-    example:"10:00 AM 4H candle opens; price accumulates then manipulates below the open to 2–2.5 SD; SMT forms (NQ sweeps low, ES doesn't); entry on the OB ending manipulation targets the opposing 4H FVG at 2.5 SD." },
+    example:"10:00 AM 4H candle opens; price accumulates then manipulates below the open to 2–2.5 SD; SMT forms (NQ sweeps low, ES doesn't); entry on the OB ending manipulation targets the opposing 4H FVG at 2.5 SD.",
+    donts:["Don't expect continuation past the 2–2.5 SD target unless there are unmitigated HTF targets above","A directional bias is invalidated once price fully closes beyond the opening price + its overlapping defensive structures (OB/FVG)","Once a candle body cleanly closes past the 4-deviation extreme, re-anchor the SD projection — current anchor is disqualified","Don't take a Smart-Money-Reversal at a 2.5 terminus if it opposes your macro HTF premise"] },
 
   { id:"dexter-mmxm", mentor:"Dexter", mentorKey:"dexter", guideId:"dexter",
     name:"Market Maker Buy/Sell Model (MMXM)",
@@ -248,7 +265,8 @@ window.MODELS = [
     tfs:"Weekly/Daily context → 4H/1H → 15m execution",
     tools:["MMXM","Power of Three","standard deviation","Smart Money Reversal","SMT divergence","Silver Bullet Zone"],
     verdict:"a",
-    example:"Daily PO3 pushes from origin OB; at 2.5 SD terminus an SMT forms (NQ higher high, ES fails); SMR confirmed at 0–0.5 SD entry band; targets the opposing daily PD array." },
+    example:"Daily PO3 pushes from origin OB; at 2.5 SD terminus an SMT forms (NQ higher high, ES fails); SMR confirmed at 0–0.5 SD entry band; targets the opposing daily PD array.",
+    donts:["Don't take a Smart-Money-Reversal at a 2.5 terminus if it opposes your macro HTF premise","Don't expect continuation past the 2–2.5 SD terminus unless there are unmitigated HTF targets beyond it","A directional bias is invalidated once price fully closes beyond the opening price + its overlapping defensive structures","Re-anchor the SD projection if a candle body cleanly closes past the 4-deviation extreme — old anchor is void"] },
 
   { id:"dexter-tuesday-reversal", mentor:"Dexter", mentorKey:"dexter", guideId:"dexter",
     name:"Tuesday Reversal Profile",
@@ -261,7 +279,8 @@ window.MODELS = [
     tfs:"Weekly context → 4H/1H → 30m/5m execution",
     tools:["Tuesday Reversal Profile","Power of Three","standard deviation","SMT divergence","time element"],
     verdict:"a",
-    example:"Weekly chart pushes to 3.5 SD by Tuesday; NQ sweeps weekly high but S&P fails (SMT); 30m candle body closes back below the July Monthly Open; short targets Monday's low." },
+    example:"Weekly chart pushes to 3.5 SD by Tuesday; NQ sweeps weekly high but S&P fails (SMT); 30m candle body closes back below the July Monthly Open; short targets Monday's low.",
+    donts:["Invalidated if price fails to respect the defensive array or time element — e.g. for a bearish continuation, invalidation = price back above the previous daily low","Don't expect continuation past the 2–2.5 SD target unless there are unmitigated HTF targets remaining","A directional bias is invalidated once price fully closes beyond the opening price + its overlapping defensive structures","Don't trade this profile on any day other than Tuesday — the time element is non-negotiable"] },
 
   { id:"dexter-news-nfp-jolts", mentor:"Dexter", mentorKey:"dexter", guideId:"dexter",
     name:"High-Impact News (NFP & JOLTS)",
@@ -274,7 +293,8 @@ window.MODELS = [
     tfs:"HTF context → 15m/5m entry post-30m range break",
     tools:["news open price","FVG","inversion FVG","liquidity sweep","Power of Three","news driver"],
     verdict:"a",
-    example:"JOLTS 10:00 AM; 10:00–10:30 sweeps both BSL and SSL; at 10:30 a 5m candle closes above the news open price; enter long on the retracement FVG; targets the HTF draw above." },
+    example:"JOLTS 10:00 AM; 10:00–10:30 sweeps both BSL and SSL; at 10:30 a 5m candle closes above the news open price; enter long on the retracement FVG; targets the HTF draw above.",
+    donts:["Don't enter before the full 30-minute liquidity-engineering window closes — the first 30 minutes is solely for trapping traders","A directional bias is invalidated once price fully closes beyond the opening price + its overlapping defensive structures","Don't trade if the 5m/15m body does NOT close entirely outside the initial 30-minute range — that body close is the required confirmation","Skip if the macro HTF draw has already been reached — no extension targets left"] },
 
   { id:"dexter-silver-bullet-zone", mentor:"Dexter", mentorKey:"dexter", guideId:"dexter",
     name:"Silver Bullet Zone Continuation",
@@ -287,7 +307,8 @@ window.MODELS = [
     tfs:"4H/1H context → 5m execution",
     tools:["Silver Bullet Zone","standard deviation","FVG","OB","Smart Money Reversal"],
     verdict:"a",
-    example:"Smart Money Reversal confirmed at 0–0.5 SD; price expands then retraces to the 1–1.5 SD Silver Bullet Zone with a 5m FVG; entry targets the 2.5 SD terminus." },
+    example:"Smart Money Reversal confirmed at 0–0.5 SD; price expands then retraces to the 1–1.5 SD Silver Bullet Zone with a 5m FVG; entry targets the 2.5 SD terminus.",
+    donts:["Only valid on internal liquidity (FVG/OB) strictly within the 1–1.5 SD band — entries outside that band are not this setup","If no FVG exists at the 1–1.5 band, wait for a sweep of internal stops before entering — don't force a blind limit","Don't expect continuation past the 2–2.5 SD terminus without unmitigated HTF targets","The SD anchor is disqualified if a candle body cleanly closes past the 4-deviation extreme — re-anchor before continuing"] },
 
   { id:"dexter-devils-mark", mentor:"Dexter", mentorKey:"dexter", guideId:"dexter",
     name:"Devil's Mark Reversal",
@@ -300,7 +321,8 @@ window.MODELS = [
     tfs:"1H/4H context → 5m/15m execution",
     tools:["Devil's Mark","Power of Three","standard deviation","HTF PD array","SMT divergence"],
     verdict:"a",
-    example:"6:00 AM: 4H candle opens and rockets up with no wick to the 2.5 SD terminus at a daily OB; SMT forms; entry on reversal displacement targets the 6:00 AM opening price." },
+    example:"6:00 AM: 4H candle opens and rockets up with no wick to the 2.5 SD terminus at a daily OB; SMT forms; entry on reversal displacement targets the 6:00 AM opening price.",
+    donts:["Do NOT blindly buy a massive immediate breakout with NO initial wick — the no-wick open is the reversal signal, not a continuation entry","Don't take a Smart-Money-Reversal at a 2.5 terminus if it opposes your macro HTF premise","A directional bias is invalidated once price fully closes beyond the opening price + its overlapping defensive structures","Large opposing wick or deep retracement after the open = disqualified; the edge requires the extreme velocity with no initial wick"] },
 
   // ─── XYJ (6) ───────────────────────────────────────────────────────────────
 
@@ -315,7 +337,8 @@ window.MODELS = [
     tfs:"Daily/1H context → 15m entry",
     tools:["IRL/ERL","SMT","MSS","FVG","Lathyrus 5-component","midnight open filter"],
     verdict:"r",
-    example:"Daily PDL engaged; 1H retraces into an IRL gap below the midnight open; 15m SMT + MSS inside the gap; long on 15m FVG retest targets the opposing IRL at 2R." },
+    example:"Daily PDL engaged; 1H retraces into an IRL gap below the midnight open; 15m SMT + MSS inside the gap; long on 15m FVG retest targets the opposing IRL at 2R.",
+    donts:["Must be shorting ABOVE the midnight open and longing BELOW the NY open — wrong side of the daily open = disqualified","Reversals require a V-shaped displacement — if your CISD looks like consolidation, do not trade that fractal","Deep retracement kills expansion — if candle-3 extends far past equilibrium of candle-2, invalidate the expansion idea","Don't place gaps near the candle's high (premium) — gaps must form near the open, in the upper half of the expanding candle's range"] },
 
   { id:"xyj-2stage-cic", mentor:"XYJ", mentorKey:"xyj", guideId:"xyj",
     name:"The 2-Stage CiC True Reversal (Candle 2)",
@@ -328,7 +351,8 @@ window.MODELS = [
     tfs:"4H/Daily context → 15m/5m/3m execution",
     tools:["2-stage CiC","PSP","SMT","CISD","V-shape","IRL/ERL"],
     verdict:"r",
-    example:"9:30 NQ sweeps the daily ERL; two-stage CiC forms (SMT confirms PSP); 5m V-shape CISD leaves a fresh FVG; short on FVG retest targets the opposing daily IRL." },
+    example:"9:30 NQ sweeps the daily ERL; two-stage CiC forms (SMT confirms PSP); 5m V-shape CISD leaves a fresh FVG; short on FVG retest targets the opposing daily IRL.",
+    donts:["Reversals require a V-shaped displacement — if the CISD looks like consolidation, do not trade that fractal","The two-stage CiC is required — a single-stage confirmation is not enough for a true reversal entry","Don't blindly continuation-trade after price hits a HTF relevant swing — let the new phase hold as a new invalidation","Don't fight the higher timeframe — a LTF reversal that opposes the active HTF cycle is a trap"] },
 
   { id:"xyj-mmxm-continuation", mentor:"XYJ", mentorKey:"xyj", guideId:"xyj",
     name:"MMXM Continuation (Type 1 / IRL→ERL)",
@@ -341,7 +365,8 @@ window.MODELS = [
     tfs:"Daily/4H C2 confirmed → 30m/15m C3 gap → 5m/3m execution",
     tools:["MMXM","CiC","CISD","IRL/ERL","continuation gap","equilibrium filter"],
     verdict:"a",
-    example:"Wednesday true reversal (C2) confirmed; Thursday C3 opens and retraces to a 30m FVG at equilibrium; one-stage SMT fill at 9:30; 5m V-shape CISD triggers short; targets the opposing failure swings." },
+    example:"Wednesday true reversal (C2) confirmed; Thursday C3 opens and retraces to a 30m FVG at equilibrium; one-stage SMT fill at 9:30; 5m V-shape CISD triggers short; targets the opposing failure swings.",
+    donts:["Deep retracement kills expansion — if price retraces past the gap equilibrium, the continuation idea is invalidated","Don't blindly continuation-trade if price hits a HTF relevant swing first — let the new phase establish its own invalidation","Gaps must form near the open, not near the candle's high (premium) — wrong gap location = disqualified","Don't enter without an LTF CISD/V-shape inside the gap — the HTF gap alone is not an entry"] },
 
   { id:"xyj-strength-switch", mentor:"XYJ", mentorKey:"xyj", guideId:"xyj",
     name:"Strength-Switch / Lagging-Asset (\"Ideal Sequence\")",
@@ -354,7 +379,8 @@ window.MODELS = [
     tfs:"4H/1H context → 15m/5m execution",
     tools:["Strength Switch PSP","SMT Fill","lagging asset","CISD","IRL/ERL","Liquidity Dispersal Theory"],
     verdict:"r",
-    example:"NQ sweeps the session high but closes as a PSP (Strength Switch); YM (lagging) forms an SMT Fill inside the 15m FVG; long YM CISD targets the same session high NQ tapped." },
+    example:"NQ sweeps the session high but closes as a PSP (Strength Switch); YM (lagging) forms an SMT Fill inside the 15m FVG; long YM CISD targets the same session high NQ tapped.",
+    donts:["Don't trade the leader — only trade the lagging asset after the leader prints the Strength Switch PSP and leaves a gap","Deep retracement kills expansion — if the lagging asset retraces past gap equilibrium after the PSP, skip","Stop must sit in the discount of the expanding candle — don't place it in premium (near the candle's high)","Don't fight the higher timeframe — a strength-switch that opposes the active HTF cycle direction is a trap"] },
 
   { id:"xyj-seek-destroy", mentor:"XYJ", mentorKey:"xyj", guideId:"xyj",
     name:"Seek & Destroy Session",
@@ -367,7 +393,8 @@ window.MODELS = [
     tfs:"1H overnight context → 15m/5m → 2m/1m execution",
     tools:["Seek & Destroy","PSP","sequential SMT","CISD","broadening formation","continuation"],
     verdict:"a",
-    example:"London overnight broadening formation sweeps both BSL and SSL; 10:00 AM HTF open aligns; PSP at the engineered high confirms local top; 1m CISD short targets the overnight lows at 5.5R." },
+    example:"London overnight broadening formation sweeps both BSL and SSL; 10:00 AM HTF open aligns; PSP at the engineered high confirms local top; 1m CISD short targets the overnight lows at 5.5R.",
+    donts:["Do NOT wait for an MSS/CISD on the Seek and Destroy — there is no R:R left by then; turtle-soup the swept lows directly","Reversals require a V-shaped displacement — consolidation signatures after the sweep disqualify the entry","Don't enter without an aligned HTF open (10:00/10:30 AM 90-minute) confirming the local top — timing is the gate","Don't fight the higher timeframe — the overnight direction must align with the daily HTF premise"] },
 
   { id:"xyj-continuation-framework", mentor:"XYJ", mentorKey:"xyj", guideId:"xyj",
     name:"Continuation Framework (qualifying gaps)",
@@ -380,7 +407,8 @@ window.MODELS = [
     tfs:"Daily/4H context → 30m/15m gap → 5m CISD execution",
     tools:["CiC","CISD","SMT Fill","PSP","continuation gap","Premium/Discount Sequence"],
     verdict:"a",
-    example:"True reversal established; C3 retraces to the 15m FVG at equilibrium; SMT Fill (one-stage CiC at the gap) confirms; 5m CISD triggers the short; stop in the discount; targets the opposing dealing range extreme." },
+    example:"True reversal established; C3 retraces to the 15m FVG at equilibrium; SMT Fill (one-stage CiC at the gap) confirms; 5m CISD triggers the short; stop in the discount; targets the opposing dealing range extreme.",
+    donts:["Gaps must form near the open of the candle, not near the high (premium) — wrong gap location = disqualified","Stop must sit in the discount of the expanding candle — not in premium","Deep retracement past gap equilibrium invalidates the continuation — expansion does not offer deep retracements","Don't blindly continuation-trade directly after price hits a HTF relevant swing — let the new phase establish its own invalidation level first"] },
 
   // ─── Daye Mentorship (5) ───────────────────────────────────────────────────
 
@@ -395,7 +423,8 @@ window.MODELS = [
     tfs:"1H HTF setup → 15m confirmation → 5m execution",
     tools:["Sequential SMT","Precision Swing Point","True Open","SMT Fill","SD stop","Fibonacci"],
     verdict:"r",
-    example:"Weekly 1H Sequential SMT (ES takes yesterday's high, NQ fails); 15m PSP confirms below the 7:30 AM True Open; entry on True-Open cross or FVG; 1 SD stop; targets symmetrical highs at minimum 3R." },
+    example:"Weekly 1H Sequential SMT (ES takes yesterday's high, NQ fails); 15m PSP confirms below the 7:30 AM True Open; entry on True-Open cross or FVG; 1 SD stop; targets symmetrical highs at minimum 3R.",
+    donts:["'If there's no sequential SMT you basically should not be doing anything at all' — without it, you're just looking at liquidity","A LTF SMT that opposes an active higher-timeframe cycle SMT is fake — need a larger-range SMT to cancel it","Don't enter on clean symmetrical highs/lows — those are exit/draw targets; enter above UNsymmetrical highs","Order blocks and breakers without imbalances are low-probability — disqualify any OB floating in empty space"] },
 
   { id:"dayement-stage4", mentor:"Daye Mentorship", mentorKey:"dayement", guideId:"dayement",
     name:"The Stage-4 (Advanced 4-Stage) Setup",
@@ -408,7 +437,8 @@ window.MODELS = [
     tfs:"HTF → mid-TF → LTF execution (3-tier confirmation)",
     tools:["Sequential SMT","Precision Swing Point","True Open","Stacked True Opens","3-stage confirmation"],
     verdict:"r",
-    example:"Weekly Sequential SMT aligns; daily mid-cycle shows no SMT (pure trend); 15m PSP confirms below the True Open; enter on SMT Fill; 1 SD stop; targets opposing symmetrical highs at 3R+." },
+    example:"Weekly Sequential SMT aligns; daily mid-cycle shows no SMT (pure trend); 15m PSP confirms below the True Open; enter on SMT Fill; 1 SD stop; targets opposing symmetrical highs at 3R+.",
+    donts:["No Sequential SMT at the HTF level = no trade — without it you're just looking at liquidity","If the mid-TF cycle shows an SMT (instead of no-SMT), the 3-stage confirmation is broken — skip","A LTF SMT that opposes the active higher-timeframe cycle SMT is fake — the higher cycle calls the shots","Don't enter on symmetrical highs/lows — those are draw targets; the entry must be at an UNsymmetrical precision swing"] },
 
   { id:"dayement-monday-expansion", mentor:"Daye Mentorship", mentorKey:"dayement", guideId:"dayement",
     name:"Monday Expansion Model",
@@ -421,7 +451,8 @@ window.MODELS = [
     tfs:"Weekly/Daily context → 1H Monday confirmation → 15m/5m execution",
     tools:["Sequential SMT","True Week Open","Monday Expansion","weekly cycle","Quarterly Theory"],
     verdict:"a",
-    example:"Friday Q4 and Monday Q1 form a Sequential SMT (ES makes Friday's low, NQ doesn't); Monday opens above the True Week Open; explosive bullish expansion targets the weekly high." },
+    example:"Friday Q4 and Monday Q1 form a Sequential SMT (ES makes Friday's low, NQ doesn't); Monday opens above the True Week Open; explosive bullish expansion targets the weekly high.",
+    donts:["No Sequential SMT between Friday's last quarter and Monday's first quarter = no Monday Expansion — it's the non-negotiable trigger","A LTF SMT opposing the active higher-timeframe cycle SMT is fake — need a larger-range SMT to cancel it","Don't enter on symmetrical highs/lows — those are the weekly draw targets, not entry points","Order blocks and breakers without surrounding imbalances are low-probability — disqualify OBs in empty space"] },
 
   { id:"dayement-cpi", mentor:"Daye Mentorship", mentorKey:"dayement", guideId:"dayement",
     name:"CPI Trading Model",
@@ -434,7 +465,8 @@ window.MODELS = [
     tfs:"Weekly/Daily pre-CPI setup → 15m/5m execution on release day",
     tools:["Sequential SMT","CPI driver","True Open","news driver","pre-event setup"],
     verdict:"a",
-    example:"Tue/Wed Sequential SMT (NQ fails its high while ES confirms) sets bearish direction; CPI Thursday release expands bearishly; entry on True-Open break targets the weekly draw established by the SMT." },
+    example:"Tue/Wed Sequential SMT (NQ fails its high while ES confirms) sets bearish direction; CPI Thursday release expands bearishly; entry on True-Open break targets the weekly draw established by the SMT.",
+    donts:["No prior-week Sequential SMT (Tue/Wed) = no CPI trade — the release just expands an already-set direction, it doesn't create one","A LTF SMT that opposes the active higher-timeframe cycle SMT is fake — it will not work","Don't trade the CPI spike direction blindly — wait for the True-Open cross or SMT Fill confirming expansion in the pre-established direction","Don't enter on symmetrical highs/lows — those are the draw targets, not the entry"] },
 
   { id:"dayement-q4-reversal", mentor:"Daye Mentorship", mentorKey:"dayement", guideId:"dayement",
     name:"Q4 Afternoon Reversal (Mentorship)",
@@ -447,6 +479,7 @@ window.MODELS = [
     tfs:"Daily cycle (15m) → 90-minute Q4 cycle (5m)",
     tools:["Revolving True Open","Q3/Q4 Sequential SMT","Quarterly Theory","PSP","FVG"],
     verdict:"a",
-    example:"NY Q3 bullishly expands; at 1:30 PM NASDAQ pushes to new Q3 high but S&P fails (Q4 Sequential SMT); price breaks below the Revolving True Open; short on FVG targets the daily equilibrium." }
+    example:"NY Q3 bullishly expands; at 1:30 PM NASDAQ pushes to new Q3 high but S&P fails (Q4 Sequential SMT); price breaks below the Revolving True Open; short on FVG targets the daily equilibrium.",
+    donts:["No Q3↔Q4 Sequential SMT = no afternoon reversal — without it you're just fading a random Q4 move","A LTF SMT opposing the active higher-timeframe cycle SMT is fake — the higher cycle calls the shots","Don't enter before price breaks back through the 1:30 PM Revolving True Open — that break is the required confirmation","Don't enter on symmetrical highs/lows — those are draw targets; use a PSP or FVG for the actual entry"] }
 
 ];
