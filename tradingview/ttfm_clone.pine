@@ -555,3 +555,59 @@ if earlyCisd and modelEnabled and barstate.isconfirmed and nHtf >= 1
         earlyLn := line.new(bearRunStartB, bearCisdLvl, bar_index, bearCisdLvl,
              color = color.new(cisdSCol, 50), style = line.style_dotted, width = 2, xloc = xloc.bar_index)
 
+// ===== 8. INFO TABLE =====
+tblPos() =>
+    switch tblLoc
+        "Top Left"     => position.top_left
+        "Top Right"    => position.top_right
+        "Bottom Left"  => position.bottom_left
+        => position.bottom_right
+
+tblTxtSize() => tblSize == "Tiny" ? size.tiny : tblSize == "Small" ? size.small : size.normal
+
+fmtCountdown() =>
+    int msLeft = time_close(htfStr) - timenow
+    int s = math.max(msLeft / 1000, 0)
+    str.format("{0,number,00}:{1,number,00}:{2,number,00}", s / 3600, (s % 3600) / 60, s % 60)
+
+var table infoTbl = na
+if barstate.islast
+    if not na(infoTbl)
+        table.delete(infoTbl)
+        infoTbl := na
+    if tblOn
+        array<string> rowK = array.new<string>()
+        array<string> rowV = array.new<string>()
+        if showWarnings and pairUnsupported
+            array.push(rowK, "⚠")
+            array.push(rowV, "No ladder pairing for this chart TF — use Custom")
+        if showWarnings and tfMismatch
+            array.push(rowK, "⚠")
+            array.push(rowV, "Chart TF above model LTF — CISD/projections off")
+        if tblAsset
+            array.push(rowK, "Asset")
+            array.push(rowV, syminfo.ticker)
+        if tblTf
+            array.push(rowK, "Chart TF")
+            array.push(rowV, timeframe.period)
+        if tblPair
+            array.push(rowK, "Pairing")
+            array.push(rowV, str.tostring(htfStr) + " ↔ " + str.tostring(ltfStr))
+        if tblCount and not pairUnsupported
+            array.push(rowK, "HTF close in")
+            array.push(rowV, fmtCountdown())
+        if tblBias
+            array.push(rowK, "Bias")
+            array.push(rowV, biasMode)
+        if tblFilter
+            array.push(rowK, "Time filter")
+            array.push(rowV, tfilterOn ? "ON" : "OFF")
+        if tblSmt
+            array.push(rowK, "SMT")
+            array.push(rowV, smtOn ? "ON" : "OFF")
+        int nRows = array.size(rowK)
+        if nRows > 0
+            infoTbl := table.new(tblPos(), 2, nRows, bgcolor = color.new(color.black, 20), border_width = 1)
+            for i = 0 to nRows - 1
+                table.cell(infoTbl, 0, i, array.get(rowK, i), text_color = color.gray,  text_size = tblTxtSize())
+                table.cell(infoTbl, 1, i, array.get(rowV, i), text_color = color.white, text_size = tblTxtSize())
