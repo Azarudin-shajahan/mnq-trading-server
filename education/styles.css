@@ -197,3 +197,6 @@ tr:last-child td{border-bottom:none}
 #models .mgroup h3{border-bottom:2px solid #eee;padding-bottom:4px}
 #models .mgroup h3 .cnt{color:#999;font-weight:400;font-size:14px}
 #models .card.model .sess{color:#1558b0;font-size:12px;font-weight:600;margin:2px 0 0}
+#models .row.donts .k{color:#c62828;font-weight:700}
+#models .row.donts ul{margin:2px 0 0;padding-left:18px}
+#models .row.donts li{margin:2px 0;font-size:13px}

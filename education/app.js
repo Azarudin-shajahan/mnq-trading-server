@@ -268,6 +268,7 @@ function modelCard(m){
       modelRow('Timeframes', m.tfs)+
       (tools?'<div class="row"><div class="k">Tools</div><div class="v">'+tools+'</div></div>':'')+
       modelRow('Example', m.example)+
+      ((m.donts&&m.donts.length)?'<div class="row donts"><div class="k">Don\'ts / skip</div><div class="v"><ul>'+m.donts.map(d=>'<li>'+esc(d)+'</li>').join('')+'</ul></div></div>':'')+
       '<div class="row"><div class="k">&nbsp;</div><div class="v"><a href="mentors/'+esc(m.guideId)+'.html">Full guide →</a></div></div>'+
     '</div></div>';
 }

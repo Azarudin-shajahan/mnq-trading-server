@@ -97,6 +97,7 @@ function renderModelPlaybook(){
         +'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px"><b style="font-size:14px">'+esc(m.name)+'</b>'+vchip(m.verdict)+'</div>'
         +(m.session?'<div style="font-size:12px;color:#1558b0;font-weight:600;margin:4px 0">'+esc(m.session)+'</div>':'')
         +fld('HTF context',m.htf)+fld('Trigger',m.trigger)+fld('Entry',m.entry)+fld('Stop',m.stop)+fld('Target',m.target)+fld('Timeframes',m.tfs)+fld('Tools',tools)+fld('Example',m.example)
+        +((m.donts&&m.donts.length)?'<div class="fld" style="margin-top:6px"><span class="lab" style="color:#c62828">Avoid / skip:</span><ul style="margin:3px 0 0;padding-left:18px">'+m.donts.map(function(d){return '<li>'+esc(d)+'</li>';}).join('')+'</ul></div>':'')
         +'</div>';
     }).join('');
     return '<details open style="margin:16px 0"><summary style="font-size:16px;font-weight:700;cursor:pointer;padding:6px 0">'+esc(mentor)+' ('+groups[mentor].length+')</summary>'+rows+'</details>';
