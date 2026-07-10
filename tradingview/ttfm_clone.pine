@@ -439,6 +439,19 @@ if newHtfPeriod and modelEnabled and nHtf >= 2
             if showC2
                 setLabel(f, idealFlag ? "C2 ★" : "C2", color.gray)
             array.push(formations, f)
+            // EQ of the closure candle (vital component per corpus)
+            float eqLvl = (cur.h + cur.l) / 2
+            if showEq
+                array<line> eqNew = drawLevel(eqLvl, cur.bStart, cur.bEnd + (cur.bEnd - cur.bStart + 1), eqCol, "dotted", 1)
+                for ln in eqNew
+                    array.push(f.eqLns, ln)
+            // T-Spot: bull = upper half [EQ, C2 high]; bear = lower half [C2 low, EQ];
+            // C3's wick expected to form inside it during the NEXT HTF period
+            if showTspot
+                int spanEnd = cur.bEnd + (cur.bEnd - cur.bStart + 1)
+                f.tspotBx := box.new(cur.bEnd + 1, dir == 1 ? cur.h : eqLvl, spanEnd, dir == 1 ? eqLvl : cur.l,
+                     bgcolor = dir == 1 ? tspotBull : tspotBear, border_color = color.new(color.gray, 60),
+                     xloc = xloc.bar_index)
 
     // 3) history cap: keep current + historyN per direction
     int keep = (historyN + 1) * 2 + 2
