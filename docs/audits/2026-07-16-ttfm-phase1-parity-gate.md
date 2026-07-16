@@ -33,3 +33,19 @@
 
 - Our replay render: `tradingview-mcp-jackson/screenshots/tv_chart_2026-07-15T13-50-08-943Z.png` (MNQ1! 5m @ 2025-12-15 ~06:38 ET)
 - Video frames: f_004 (C3 narration), f_005 (NQ 5m formation), f_006 (pairing dropdown), f_010 (1m model), f_014 (general settings), f_018 (projections/liquidity/time-filter/info-table panel + Nov 24 '25 pin)
+
+---
+
+# Round 2 — Phase-2 QA + parity (Task 14, 2026-07-16)
+
+## Verdict: PASS with one open item (replay-based pixel parity remains user-assisted follow-up)
+
+## What was verified
+
+1. **Full build renders on the live chart** (MNQ1! 5m realtime): after Tasks 8-13 landed, the on-chart study hit a "Can't parse pine" RUNTIME error (stale on-chart instance after many update-on-chart cycles — root-caused via the chart model's study status, not visible in `tv state`). Fixed by remove + fresh add. Post-fix the study computes live: info table reads Asset/TF/Pairing 60↔5/countdown/Bias/Filter via `tv data tables`.
+2. **Phase-2 element vocabulary vs the real TTFM** (video frames f_005/f_010/f_018): STDV dotted projection levels with small labels (ours: dotted, input color, labels -1/-1.5/... = matches video's left-side level stack); projection defaults now Wick + "-1,-1.5,-2,-2.5,-4,-4.5" (panel-confirmed prefix); formation liquidity dotted black (panel-confirmed); time filters 02-05/08-11/13:30-16:15 apply-below-1H (panel-confirmed); Auto Bias 1/2 options + info-table arrow; SMT dashed divergence lines + label (video's SMT module semantics).
+3. **Non-repaint evidence**: (a) 2026-07-15 bar-replay session at 2025-12-15 (5m): formations printed on closed HTF candles during forward stepping and did not move (screenshot tv_chart_2026-07-15T13-50-08-943Z.png); (b) independent reviewer verified the SMT `request.security` idiom is aligned non-repainting ([1]/[2]+lookahead_on, chart-side vs pair-side same periods); (c) all draw calls fire once on HTF closure from confirmed candles (reviewed per task).
+4. **Replay QA limitation (open)**: on 2026-07-16 TV's bar-replay pane would not swap to the replay dataset (quote follows replay, candles stay realtime; "Continue/Start new" session dialog implicated; 4 clean attempts). The full ≥5-formation bar-replay sweep incl. one red/orange/ideal is deferred — run manually or next session (recipe: replay 2025-12-15 5m, autoplay 50ms, watch labels persist).
+
+## Runtime-error lesson (banked)
+After many `tv pine compile` update-on-chart cycles, the on-chart study instance can silently enter a "Can't parse pine" runtime-error state (zero graphics, no legend error via CLI state). Detection: `tv data tables --filter <name>` returns study_count 0 while the study is listed in `tv state`; confirm via chart-model status eval. Fix: `tv indicator remove --id <id>` then recompile → "Add to chart".
