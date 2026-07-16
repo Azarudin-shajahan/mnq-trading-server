@@ -76,7 +76,9 @@ bool   smtInverse = input.bool(false, "Inverse correlation", group = "SMT Diverg
 bool   projOn    = input.bool(true, "Enable projections", group = "Projections")
 bool   projLbls  = input.bool(true, "Labels", group = "Projections")
 string projType  = input.string("Wick", "Type", options = ["Wick", "Body"], group = "Projections")
-string projLvlsS = input.string("-1,-1.5,-2,-2.5,-4,-4.5", "Levels (negative, comma-separated)", group = "Projections")
+color  projCol   = input.color(color.new(color.blue, 30), "Color", group = "Projections")
+string projLvlsS = input.string("-1,-1.5,-2,-2.5,-4,-4.5", "Levels (negative, comma-separated)", group = "Projections",
+     tooltip = "High History values with projections enabled can approach Pine's 500-line budget; reduce levels or History if levels stop rendering.")
 
 // -- Formation Liquidity --
 bool  formLiqOn  = input.bool(false, "Enable formation liquidity", group = "Formation Liquidity")
@@ -400,7 +402,7 @@ biasAllows(int dir) =>
      biasMode == "Bullish" ? dir == 1 :
      biasMode == "Bearish" ? dir == -1 : true   // Auto Bias wired in Task 11
 
-// ===== 9. STDV PROJECTIONS =====
+// ===== 6b. STDV PROJECTIONS =====
 // Parse the comma-separated negative level string into a float array.
 projLevels() =>
     array<float> out = array.new<float>()
@@ -425,12 +427,13 @@ drawProjections(Formation f, HTFCandle cur) =>
         if rng > 0
             for lv in projLevels()
                 float price = f.dir == 1 ? legHi + math.abs(lv) * rng : legLo - math.abs(lv) * rng
-                line pl = line.new(x1, price, x2, price, color = color.new(color.blue, 30),
+                line pl = line.new(x1, price, x2, price, color = projCol,
                      style = line.style_dotted, xloc = xloc.bar_index)
                 array.push(f.projLns, pl)
                 if projLbls
+                    color lblTxtCol = color.rgb(color.r(projCol), color.g(projCol), color.b(projCol))
                     array.push(f.projLbls, label.new(x2, price, str.tostring(lv),
-                         style = label.style_label_left, textcolor = color.blue,
+                         style = label.style_label_left, textcolor = lblTxtCol,
                          color = color.new(color.white, 100), size = size.tiny, xloc = xloc.bar_index))
 
 // --- lifecycle driver: runs once per completed HTF candle ---
