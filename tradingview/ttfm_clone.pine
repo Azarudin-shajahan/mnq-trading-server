@@ -82,7 +82,7 @@ string projLvlsS = input.string("-1,-1.5,-2,-2.5,-4,-4.5", "Levels (negative, co
 
 // -- Formation Liquidity --
 bool  formLiqOn  = input.bool(false, "Enable formation liquidity", group = "Formation Liquidity")
-color formLiqCol = input.color(color.new(color.orange, 30), "Color", group = "Formation Liquidity")
+color formLiqCol = input.color(color.black, "Color", group = "Formation Liquidity")
 
 // -- Time Filter --
 bool   tfilterOn = input.bool(false, "Enable time filter", group = "Time Filter")
@@ -380,10 +380,10 @@ eraseFormation(Formation f, bool full) =>
         line.delete(ln)
     for lb in f.projLbls
         label.delete(lb)
+    for ln in f.liqLns
+        line.delete(ln)
     if full
         for ln in f.cisdLns
-            line.delete(ln)
-        for ln in f.liqLns
             line.delete(ln)
         label.delete(f.lbl)
 
@@ -435,6 +435,22 @@ drawProjections(Formation f, HTFCandle cur) =>
                     array.push(f.projLbls, label.new(x2, price, str.tostring(lv),
                          style = label.style_label_left, textcolor = lblTxtCol,
                          color = color.new(color.white, 100), size = size.tiny, xloc = xloc.bar_index))
+
+// ===== 6c. FORMATION LIQUIDITY =====
+// prior HTF highs (bull) / lows (bear) above/below the closure = resting targets
+drawFormationLiquidity(Formation f, HTFCandle cur) =>
+    if formLiqOn
+        int found = 0
+        int i = nHtf - 3   // skip C1 and C2
+        while i >= 0 and found < 3
+            HTFCandle hc = array.get(htfArr, i)
+            bool isTarget = f.dir == 1 ? hc.h > cur.c : hc.l < cur.c
+            if isTarget
+                float price = f.dir == 1 ? hc.h : hc.l
+                array.push(f.liqLns, line.new(hc.bEnd, price, cur.bEnd + 12, price,
+                     color = formLiqCol, style = line.style_dotted, width = 1, xloc = xloc.bar_index))
+                found += 1
+            i -= 1
 
 // --- lifecycle driver: runs once per completed HTF candle ---
 if newHtfPeriod and modelEnabled and nHtf >= 2
@@ -499,6 +515,7 @@ if newHtfPeriod and modelEnabled and nHtf >= 2
                      bgcolor = dir == 1 ? tspotBull : tspotBear, border_color = color.new(color.gray, 60),
                      xloc = xloc.bar_index)
             drawProjections(f, cur)
+            drawFormationLiquidity(f, cur)
 
     // 3) history cap: keep current + historyN per direction
     int keep = (historyN + 1) * 2 + 2
