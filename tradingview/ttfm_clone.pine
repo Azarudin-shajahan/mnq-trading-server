@@ -585,6 +585,8 @@ if newHtfPeriod and modelEnabled and nHtf >= 2
                     f.state := ST_C3
                     if showC3
                         setLabel(f, f.ideal ? "C3 ★" : "C3", color.gray)
+                    if alertsOn
+                        alert(syminfo.ticker + " TTFM: C3 confirmed (" + htfStr + ")", alert.freq_once_per_bar)
                 else
                     f.state := ST_CONSOL
                     setLabel(f, "C2", color.orange)
@@ -616,6 +618,8 @@ if newHtfPeriod and modelEnabled and nHtf >= 2
             if showC2
                 setLabel(f, idealFlag ? "C2 ★" : "C2", color.gray)
             array.push(formations, f)
+            if alertsOn
+                alert(syminfo.ticker + " TTFM: " + (dir == 1 ? "Bullish" : "Bearish") + " C2 closure (" + htfStr + ")" + (idealFlag ? " *ideal*" : ""), alert.freq_once_per_bar)
             // EQ of the closure candle (vital component per corpus)
             float eqLvl = (cur.h + cur.l) / 2
             if showEq
@@ -642,6 +646,8 @@ if newHtfPeriod and modelEnabled and nHtf >= 2
     bool smtFired1 = smtOn ? checkSmt(pH1, pL1, pH0, pL0, smtSymbol()) : false
     bool smtFired2 = smtOn and smtUse2 ? checkSmt(qH1, qL1, qH0, qL0, smtSym2) : false
     smtFired := smtFired1 or smtFired2
+    if alertsOn and smtAlerts and smtFired
+        alert(syminfo.ticker + " TTFM: SMT divergence", alert.freq_once_per_bar)
 
 // ===== 7. LTF CISD ENGINE =====
 // Tracks, inside the developing HTF candle, the consecutive down-close (up-close) LTF run
@@ -657,6 +663,8 @@ var int   runStartBUp = na
 var float lowestInHtf = na
 var float highestInHtf = na
 
+var bool earlyCisdLatched = false   // transition latch: resets each HTF period
+
 if newHtfPeriod
     bullCisdLvl := na
     bullRunStartB := na
@@ -666,6 +674,7 @@ if newHtfPeriod
     runOpenUp := na
     lowestInHtf := na
     highestInHtf := na
+    earlyCisdLatched := false
 
 if barstate.isconfirmed and modelEnabled
     bool downClose = close < open
@@ -722,6 +731,8 @@ if barstate.isconfirmed and modelEnabled
                     bool crossed = f.dir == 1 ? close > f.cisdLevel : close < f.cisdLevel
                     if crossed
                         f.cisdConfirmed := true
+                        if alertsOn
+                            alert(syminfo.ticker + " TTFM: CISD confirmed " + (f.dir == 1 ? "bullish" : "bearish"), alert.freq_once_per_bar)
             drawCisd(f)
 
 // Early C2 CISD preview: developing HTF candle has swept prev HTF extreme and an LTF close
@@ -738,6 +749,11 @@ if earlyCisd and modelEnabled and barstate.isconfirmed and nHtf >= 1
     else if sweptHi
         earlyLn := line.new(bearRunStartB, bearCisdLvl, bar_index, bearCisdLvl,
              color = color.new(cisdSCol, 50), style = line.style_dotted, width = 2, xloc = xloc.bar_index)
+    bool earlyCisdNow = sweptLo or sweptHi
+    if earlyCisdNow and not earlyCisdLatched
+        earlyCisdLatched := true
+        if alertsOn and earlyCisdAlert
+            alert(syminfo.ticker + " TTFM: EARLY C2 CISD (preview)", alert.freq_once_per_bar)
 
 // ===== 8. INFO TABLE =====
 tblPos() =>
