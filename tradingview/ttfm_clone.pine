@@ -88,12 +88,15 @@ color formLiqCol = input.color(color.black, "Color", group = "Formation Liquidit
 bool   tfilterOn = input.bool(false, "Enable time filter", group = "Time Filter")
 string tfApplyBelow = input.timeframe("60", "Apply below (chart TF <=)", group = "Time Filter")
 bool   tf1On = input.bool(false, "Filter 1", inline = "f1", group = "Time Filter")
-string tf1   = input.session("0930-1100", "", inline = "f1", group = "Time Filter")
+string tf1   = input.session("0200-0500", "", inline = "f1", group = "Time Filter")
 bool   tf2On = input.bool(false, "Filter 2", inline = "f2", group = "Time Filter")
-string tf2   = input.session("1330-1600", "", inline = "f2", group = "Time Filter")
+string tf2   = input.session("0800-1100", "", inline = "f2", group = "Time Filter")
 bool   tf3On = input.bool(false, "Filter 3", inline = "f3", group = "Time Filter")
-string tf3   = input.session("0300-0500", "", inline = "f3", group = "Time Filter")
-string tfTz  = input.string("America/New_York", "Filter timezone", group = "Time Filter")
+string tf3   = input.session("1330-1615", "", inline = "f3", group = "Time Filter")
+bool   tfUseCustomTz = input.bool(false, "Custom timezone", group = "Time Filter",
+     tooltip = "Off = America/New_York. On = use the Timezone string below.")
+string tfTz  = input.string("America/New_York", "Timezone", group = "Time Filter",
+     tooltip = "Used for all three session windows when 'Custom timezone' is enabled. Enter a valid IANA timezone (e.g. 'Europe/London') or a UTC offset string.")
 
 // -- Info Table --
 bool   tblOn   = input.bool(true, "Show info", group = "Info Table")
@@ -452,6 +455,19 @@ drawFormationLiquidity(Formation f, HTFCandle cur) =>
                 found += 1
             i -= 1
 
+// ===== 6d. TIME FILTER =====
+inSession(string sess, string tz) => not na(time(timeframe.period, sess + ":1234567", tz))
+
+timeFilterOk() =>
+    if not tfilterOn
+        true
+    else if timeframe.in_seconds(timeframe.period) > timeframe.in_seconds(tfApplyBelow)
+        true   // Apply Below: filter only at/below the selected TF
+    else
+        bool anyOn = tf1On or tf2On or tf3On
+        string tz = tfUseCustomTz ? tfTz : "America/New_York"
+        not anyOn or (tf1On and inSession(tf1, tz)) or (tf2On and inSession(tf2, tz)) or (tf3On and inSession(tf3, tz))
+
 // --- lifecycle driver: runs once per completed HTF candle ---
 if newHtfPeriod and modelEnabled and nHtf >= 2
     HTFCandle cur = array.get(htfArr, nHtf - 1)   // just closed
@@ -482,7 +498,7 @@ if newHtfPeriod and modelEnabled and nHtf >= 2
     // 2) detect a NEW C2 on the just-closed candle (both directions)
     array<int> dirs = array.from(1, -1)
     for dir in dirs
-        if isC2(pre, cur, dir) and biasAllows(dir) and (showC2 or showC3 or showC4)
+        if isC2(pre, cur, dir) and biasAllows(dir) and timeFilterOk() and (showC2 or showC3 or showC4)
             float seriesOpen = opposingSeriesOpen(nHtf - 2, dir)
             bool idealFlag = not na(seriesOpen) and (dir == 1 ? cur.c > seriesOpen : cur.c < seriesOpen)
             Formation f = Formation.new(
