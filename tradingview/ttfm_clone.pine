@@ -12,10 +12,10 @@ bool showWarnings = input.bool(true, "Show warnings / errors", group = "Warnings
 // -- General --
 bool  alertsOn   = input.bool(false, "Alerts", group = "General",
      tooltip = "Master enable. Individual alert events are toggled in their own sections.")
-int   historyN   = input.int(0, "History", minval = 0, maxval = 40, group = "General",
+int   historyN   = input.int(1, "History", minval = 0, maxval = 40, group = "General",
      tooltip = "How many past formations stay on chart (each = 1 bullish + 1 bearish).")
 string fractalMode = input.string("Automatic", "Fractal", group = "General",
-     options = ["Automatic", "30m - 3m", "1H - 5m", "4H - 15m", "Daily - 1H", "Weekly - 4H", "Monthly - Daily", "Custom"])
+     options = ["Automatic", "1m - 1s", "5m - 15s", "15m - 1m", "30m - 3m", "1H - 5m", "4H - 15m", "Daily - 1H", "Weekly - 4H", "Monthly - Daily", "Custom"])
 bool  showC2 = input.bool(true,  "C2", inline = "cc", group = "General")
 bool  showC3 = input.bool(true,  "C3", inline = "cc", group = "General")
 bool  showC4 = input.bool(true,  "C4", inline = "cc", group = "General")
@@ -123,9 +123,13 @@ type HTFCandle
     int   bEnd     // bar_index of last LTF bar
 
 // ===== 3. PAIRING LADDER =====
-// Canonical ladder (timeframe-alignment article): 3m→30m, 5m→1H, 15m→4H, 1H→D, 4H→W, D→M
+// Canonical ladder (timeframe-alignment article + real TTFM dropdown, parity gate 2026-07-16):
+// 1s→1m, 15s→5m, 1m→15m, 3m→30m, 5m→1H, 15m→4H, 1H→D, 4H→W, D→M
 ladderHtf(string ltf) =>
     switch ltf
+        "1S"  => "1"
+        "15S" => "5"
+        "1"   => "15"
         "3"   => "30"
         "5"   => "60"
         "15"  => "240"
@@ -147,6 +151,9 @@ resolvePair() =>
     else
         // preset strings like "1H - 5m"
         string h = switch fractalMode
+            "1m - 1s"         => "1"
+            "5m - 15s"        => "5"
+            "15m - 1m"        => "15"
             "30m - 3m"        => "30"
             "1H - 5m"         => "60"
             "4H - 15m"        => "240"
@@ -155,6 +162,9 @@ resolvePair() =>
             "Monthly - Daily" => "M"
             => na
         string l = switch fractalMode
+            "1m - 1s"         => "1S"
+            "5m - 15s"        => "15S"
+            "15m - 1m"        => "1"
             "30m - 3m"        => "3"
             "1H - 5m"         => "5"
             "4H - 15m"        => "15"
