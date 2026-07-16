@@ -76,7 +76,7 @@ bool   smtInverse = input.bool(false, "Inverse correlation", group = "SMT Diverg
 bool   projOn    = input.bool(true, "Enable projections", group = "Projections")
 bool   projLbls  = input.bool(true, "Labels", group = "Projections")
 string projType  = input.string("Wick", "Type", options = ["Wick", "Body"], group = "Projections")
-string projLvlsS = input.string("-1,-2,-2.5,-4,-4.5", "Levels (negative, comma-separated)", group = "Projections")
+string projLvlsS = input.string("-1,-1.5,-2,-2.5,-4,-4.5", "Levels (negative, comma-separated)", group = "Projections")
 
 // -- Formation Liquidity --
 bool  formLiqOn  = input.bool(false, "Enable formation liquidity", group = "Formation Liquidity")
@@ -400,6 +400,39 @@ biasAllows(int dir) =>
      biasMode == "Bullish" ? dir == 1 :
      biasMode == "Bearish" ? dir == -1 : true   // Auto Bias wired in Task 11
 
+// ===== 9. STDV PROJECTIONS =====
+// Parse the comma-separated negative level string into a float array.
+projLevels() =>
+    array<float> out = array.new<float>()
+    for s in str.split(projLvlsS, ",")
+        float v = str.tonumber(str.trim(s))
+        if not na(v) and v < 0
+            array.push(out, v)
+    out
+
+// Manipulation leg measured on the C2 HTF candle.
+// Wick mode: legHigh = C2.h, legLow = C2.l (full candle range).
+// Body mode: legHigh = math.max(C2.o, C2.c), legLow = math.min(C2.o, C2.c).
+// Bull (dir==1): projects ABOVE legHi at legHi + abs(lv)*rng.
+// Bear (dir==-1): projects BELOW legLo at legLo - abs(lv)*rng.
+drawProjections(Formation f, HTFCandle cur) =>
+    if projOn
+        float legHi = projType == "Wick" ? cur.h : math.max(cur.o, cur.c)
+        float legLo = projType == "Wick" ? cur.l : math.min(cur.o, cur.c)
+        float rng = legHi - legLo
+        int x1 = cur.bEnd + 1
+        int x2 = cur.bEnd + 2 * (cur.bEnd - cur.bStart + 1)
+        if rng > 0
+            for lv in projLevels()
+                float price = f.dir == 1 ? legHi + math.abs(lv) * rng : legLo - math.abs(lv) * rng
+                line pl = line.new(x1, price, x2, price, color = color.new(color.blue, 30),
+                     style = line.style_dotted, xloc = xloc.bar_index)
+                array.push(f.projLns, pl)
+                if projLbls
+                    array.push(f.projLbls, label.new(x2, price, str.tostring(lv),
+                         style = label.style_label_left, textcolor = color.blue,
+                         color = color.new(color.white, 100), size = size.tiny, xloc = xloc.bar_index))
+
 // --- lifecycle driver: runs once per completed HTF candle ---
 if newHtfPeriod and modelEnabled and nHtf >= 2
     HTFCandle cur = array.get(htfArr, nHtf - 1)   // just closed
@@ -462,6 +495,7 @@ if newHtfPeriod and modelEnabled and nHtf >= 2
                 f.tspotBx := box.new(cur.bEnd + 1, dir == 1 ? cur.h : eqLvl, spanEnd, dir == 1 ? eqLvl : cur.l,
                      bgcolor = dir == 1 ? tspotBull : tspotBear, border_color = color.new(color.gray, 60),
                      xloc = xloc.bar_index)
+            drawProjections(f, cur)
 
     // 3) history cap: keep current + historyN per direction
     int keep = (historyN + 1) * 2 + 2
