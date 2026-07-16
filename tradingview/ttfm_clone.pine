@@ -519,10 +519,58 @@ biasAllows(int dir) =>
         "Auto Bias 2" => ab2.biasDir == 0 or dir == ab2.biasDir
         => true
 
+// ===== 6f. SMT DIVERGENCE =====
+autoPair() =>
+    string root = syminfo.root
+    root == "NQ" or root == "MNQ" ? "CME_MINI:ES1!" :
+     root == "ES" or root == "MES" ? "CME_MINI:NQ1!" :
+     root == "YM" or root == "MYM" ? "CME_MINI:NQ1!" :
+     root == "RTY" or root == "M2K" ? "CME_MINI:ES1!" : "CME_MINI:ES1!"
+
+smtSymbol() => smtMode == "Automatic" ? autoPair() : smtSym1
+
+// last two COMPLETED HTF candles of the pair symbol (non-repainting: [2]/[1] + lookahead_on)
+[pH1, pL1, pH0, pL0] = request.security(smtSymbol(), htfStr,
+     [high[2], low[2], high[1], low[1]], lookahead = barmerge.lookahead_on)
+[qH1, qL1, qH0, qL0] = request.security(smtUse2 ? smtSym2 : smtSymbol(), htfStr,
+     [high[2], low[2], high[1], low[1]], lookahead = barmerge.lookahead_on)
+
+var array<line>  smtLns  = array.new<line>()
+var array<label> smtLbls = array.new<label>()
+
+checkSmt(float oH1, float oL1, float oH0, float oL0, string symName) =>
+    bool fired = false
+    if nHtf >= 2
+        HTFCandle cur = array.get(htfArr, nHtf - 1)
+        HTFCandle pre = array.get(htfArr, nHtf - 2)
+        // bullish SMT: chart sweeps prior low, pair does NOT (inverse flag flips the pair test)
+        bool pairSweptLow  = smtInverse ? oH0 > oH1 : oL0 < oL1
+        bool pairSweptHigh = smtInverse ? oL0 < oL1 : oH0 > oH1
+        bool bullSmt = cur.l < pre.l and not pairSweptLow
+        bool bearSmt = cur.h > pre.h and not pairSweptHigh
+        if bullSmt or bearSmt
+            float y1 = bullSmt ? pre.l : pre.h
+            float y2 = bullSmt ? cur.l : cur.h
+            array.push(smtLns, line.new(pre.bStart, y1, cur.bEnd, y2,
+                 color = bullSmt ? cisdBCol : cisdSCol, width = 2, style = line.style_dashed, xloc = xloc.bar_index))
+            if smtLabels
+                array.push(smtLbls, label.new(cur.bEnd, y2, "SMT " + symName,
+                     style = bullSmt ? label.style_label_up : label.style_label_down,
+                     color = color.new(color.black, 40), textcolor = color.white, size = size.tiny, xloc = xloc.bar_index))
+            if array.size(smtLns) > 20
+                line.delete(array.shift(smtLns))
+            if array.size(smtLbls) > 20
+                label.delete(array.shift(smtLbls))
+            fired := true
+    fired
+
+var bool smtFired = false
+
 // --- lifecycle driver: runs once per completed HTF candle ---
 if newHtfPeriod and modelEnabled and nHtf >= 2
     HTFCandle cur = array.get(htfArr, nHtf - 1)   // just closed
     HTFCandle pre = array.get(htfArr, nHtf - 2)
+    smtFired := false
 
     // 1) advance existing formations
     for f in formations
@@ -589,6 +637,11 @@ if newHtfPeriod and modelEnabled and nHtf >= 2
     while array.size(formations) > keep
         Formation old = array.shift(formations)
         eraseFormation(old, true)
+
+    // SMT divergence check on the just-closed HTF candle
+    bool smtFired1 = smtOn ? checkSmt(pH1, pL1, pH0, pL0, smtSymbol()) : false
+    bool smtFired2 = smtOn and smtUse2 ? checkSmt(qH1, qL1, qH0, qL0, smtSym2) : false
+    smtFired := smtFired1 or smtFired2
 
 // ===== 7. LTF CISD ENGINE =====
 // Tracks, inside the developing HTF candle, the consecutive down-close (up-close) LTF run
@@ -736,7 +789,7 @@ if barstate.islast
             array.push(rowV, tfilterOn ? "ON" : "OFF")
         if tblSmt
             array.push(rowK, "SMT")
-            array.push(rowV, smtOn ? "ON" : "OFF")
+            array.push(rowV, smtOn ? (smtFired ? "DIVERGENCE" : "watching") : "OFF")
         int nRows = array.size(rowK)
         if nRows > 0
             infoTbl := table.new(tblPos(), 2, nRows, bgcolor = color.new(color.black, 20), border_width = 1)
