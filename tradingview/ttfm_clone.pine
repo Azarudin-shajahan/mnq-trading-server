@@ -400,11 +400,6 @@ setLabel(Formation f, string txt, color col) =>
              style = f.dir == 1 ? label.style_label_up : label.style_label_down,
              color = color.new(col, 20), textcolor = color.white, size = lblSizeConst(), xloc = xloc.bar_index)
 
-biasAllows(int dir) =>
-    biasMode == "Neutral" ? true :
-     biasMode == "Bullish" ? dir == 1 :
-     biasMode == "Bearish" ? dir == -1 : true   // Auto Bias wired in Task 11
-
 // ===== 6b. STDV PROJECTIONS =====
 // Parse the comma-separated negative level string into a float array.
 projLevels() =>
@@ -467,6 +462,62 @@ timeFilterOk() =>
         bool anyOn = tf1On or tf2On or tf3On
         string tz = tfUseCustomTz ? tfTz : "America/New_York"
         not anyOn or (tf1On and inSession(tf1, tz)) or (tf2On and inSession(tf2, tz)) or (tf3On and inSession(tf3, tz))
+
+// ===== 6e. AUTO BIAS =====
+string ab1Htf = ladderHtf(htfStr)                      // one rung up (e.g. 1H pair -> 4H)
+string ab2Htf = na(ab1Htf) ? na : ladderHtf(ab1Htf)    // two rungs up (-> D)
+
+// tiny per-rung aggregator + last closure direction
+type RungState
+    float o
+    float h
+    float l
+    float pO
+    float pH
+    float pL
+    float pC
+    int   biasDir   // last closure direction: 1 / -1 / 0 none
+
+var RungState ab1 = RungState.new(na, na, na, na, na, na, na, 0)
+var RungState ab2 = RungState.new(na, na, na, na, na, na, na, 0)
+
+updateRung(RungState st, string tf) =>
+    if not na(tf) and timeframe.change(tf)
+        if not na(st.o)
+            float cC = close[1]
+            if not na(st.pO)
+                // C2 closure at this rung sets bias to the reversal direction
+                if st.l < st.pL and cC > st.pL
+                    st.biasDir := 1
+                else if st.h > st.pH and cC < st.pH
+                    st.biasDir := -1
+                // continuation closure keeps/asserts trend direction
+                else if cC > st.pH
+                    st.biasDir := 1
+                else if cC < st.pL
+                    st.biasDir := -1
+            st.pO := st.o
+            st.pH := st.h
+            st.pL := st.l
+            st.pC := cC
+        st.o := open
+        st.h := high
+        st.l := low
+    else if not na(st.o)
+        st.h := math.max(st.h, high)
+        st.l := math.min(st.l, low)
+
+updateRung(ab1, ab1Htf)
+updateRung(ab2, ab2Htf)
+
+biasAllows(int dir) =>
+    switch biasMode
+        "Neutral"     => true
+        "Bullish"     => dir == 1
+        "Bearish"     => dir == -1
+        "Auto Bias 1" => ab1.biasDir == 0 or dir == ab1.biasDir
+        "Auto Bias 2" => ab2.biasDir == 0 or dir == ab2.biasDir
+        => true
 
 // --- lifecycle driver: runs once per completed HTF candle ---
 if newHtfPeriod and modelEnabled and nHtf >= 2
@@ -678,7 +729,8 @@ if barstate.islast
             array.push(rowV, fmtCountdown())
         if tblBias
             array.push(rowK, "Bias")
-            array.push(rowV, biasMode)
+            string _bArrow = biasMode == "Auto Bias 1" ? (ab1.biasDir == 1 ? " ▲" : ab1.biasDir == -1 ? " ▼" : " –") : biasMode == "Auto Bias 2" ? (ab2.biasDir == 1 ? " ▲" : ab2.biasDir == -1 ? " ▼" : " –") : ""
+            array.push(rowV, biasMode + _bArrow)
         if tblFilter
             array.push(rowK, "Time filter")
             array.push(rowV, tfilterOn ? "ON" : "OFF")
